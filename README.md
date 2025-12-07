@@ -176,9 +176,9 @@ MIT License - Voir [LICENSE](LICENSE)
 
 ## 👨‍💻 Auteur
 
-**[Ton Nom]**
-- GitHub: [@ton-username](https://github.com/ton-username)
-- Email: ton-email@example.com
+**Thierno Ngom**
+- GitHub: [@thierno444](https://github.com/thierno444)
+- Email: tngom1010@gmail.com
 
 ---
 
