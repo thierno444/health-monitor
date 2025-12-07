@@ -1,0 +1,37 @@
+# ==================== NODE ====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# ==================== ENVIRONNEMENT ====================
+.env
+.env.local
+.env.*.local
+
+# ==================== BACKEND ====================
+health-monitor-backend/*.log
+health-monitor-backend/test-*.html
+
+# ==================== FRONTEND ====================
+health-monitor-frontend/dist/
+health-monitor-frontend/.angular/
+health-monitor-frontend/.vscode/
+
+# ==================== SYSTÈME ====================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ==================== IDE ====================
+.vscode/
+.idea/
+*.sublime-*
+
+# ==================== TEMPORAIRE ====================
+*.tmp
+*.temp
+.cache/
