@@ -51,18 +51,34 @@ router.post('/inscription', async (req, res) => {
     const motDePasseHache = await bcrypt.hash(motDePasse, salt);
     
     // Créer le nouvel utilisateur
-    const nouvelUtilisateur = new Utilisateur({
-      prenom: prenom,
-      nom: nom,
-      email: email.toLowerCase(),
-      motDePasse: motDePasseHache,
-      dateDeNaissance: dateDeNaissance || null,
-      genre: genre || null,
-      photoProfil: photoProfil || `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${prenom}+${nom}`,
-      idDispositif: idDispositif || null,
-      role: req.body.role || 'patient',
-      estActif: true
-    });
+    // Générer un idDispositif automatique pour les non-patients
+let deviceId = idDispositif;
+
+if (!deviceId) {
+  const roleUser = req.body.role || 'patient';
+  
+  if (roleUser === 'medecin') {
+    // Médecins : MEDECIN_[timestamp]
+    deviceId = `MEDECIN_${Date.now()}`;
+  } else if (roleUser === 'admin') {
+    // Admins : ADMIN_[timestamp]
+    deviceId = `ADMIN_${Date.now()}`;
+  }
+  // Patients sans deviceId : null (ils doivent en fournir un)
+}
+
+const nouvelUtilisateur = new Utilisateur({
+  prenom: prenom,
+  nom: nom,
+  email: email.toLowerCase(),
+  motDePasse: motDePasseHache,
+  dateDeNaissance: dateDeNaissance || null,
+  genre: genre || null,
+  photoProfil: photoProfil || `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${prenom}+${nom}`,
+  idDispositif: deviceId,
+  role: req.body.role || 'patient',
+  estActif: true
+});
     
     // Sauvegarder en base
     await nouvelUtilisateur.save();

@@ -57,8 +57,9 @@ const SchemaUtilisateur = new mongoose.Schema({
     type: String,
     unique: true, // Un dispositif = un utilisateur
     sparse: true, // Permet plusieurs valeurs null
-    trim: true
-  },
+    required: false,
+    index: true
+   },
   
   // Paramètres d'alertes personnalisés par l'utilisateur
   parametresAlertes: {
