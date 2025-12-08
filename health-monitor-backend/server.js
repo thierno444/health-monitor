@@ -36,11 +36,13 @@ app.use(express.json());
 // ==================== IMPORT DES ROUTES ====================
 const routeMesures = require('./routes/measurements');
 const routeAuth = require('./routes/auth');
+const routeAssignments = require('./routes/assignments');
 
 
 // ==================== UTILISATION DES ROUTES ====================
 app.use('/api/measurements', routeMesures);
 app.use('/api/auth', routeAuth);
+app.use('/api/assignments', routeAssignments);
 
 
 // ==================== ROUTES DE TEST ====================
