@@ -60,7 +60,7 @@ router.post('/inscription', async (req, res) => {
       genre: genre || null,
       photoProfil: photoProfil || `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${prenom}+${nom}`,
       idDispositif: idDispositif || null,
-      role: 'patient',
+      role: req.body.role || 'patient',
       estActif: true
     });
     
