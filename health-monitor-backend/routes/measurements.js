@@ -1,3 +1,4 @@
+const { envoyerEmailAlerte } = require('../services/emailService');
 const express = require('express');
 const router = express.Router();
 const Mesure = require('../models/Measurement');
@@ -47,6 +48,19 @@ router.post('/', async (req, res) => {
     
     // Sauvegarder en base de données
     await nouvelleMesure.save();
+
+    // Envoyer email si statut ATTENTION ou DANGER
+    if (status === 'ATTENTION' || status === 'DANGER') {
+      envoyerEmailAlerte(utilisateur, {
+        bpm: bpm,
+        spo2: spo2,
+        statut: status,
+        idDispositif: deviceId,
+        horodatageMesure: nouvelleMesure.horodatageMesure
+      }).catch(err => {
+        console.error('⚠️ Email alerte non envoyé:', err.message);
+      });
+    }
     
     // ⚡ ÉMETTRE UN ÉVÉNEMENT SOCKET.IO
     const io = req.app.get('io');

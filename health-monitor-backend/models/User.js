@@ -96,10 +96,20 @@ const SchemaUtilisateur = new mongoose.Schema({
   estActif: {
     type: Boolean,
     default: true
-  }
+  },
+
+  // Réinitialisation mot de passe
+  resetPasswordToken: {
+    type: String,
+    required: false
+  },
   
+  resetPasswordExpire: {
+    type: Date,
+    required: false
+  }
 }, {
-  timestamps: true // Ajoute automatiquement dateCreation et dateModification
+  timestamps: true
 });
 
 // Propriété virtuelle : nom complet (ne sera pas sauvegardée en DB)

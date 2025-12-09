@@ -1,3 +1,4 @@
+const { envoyerEmailBienvenue } = require('../services/emailService');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
@@ -83,6 +84,13 @@ const nouvelUtilisateur = new Utilisateur({
     // Sauvegarder en base
     await nouvelUtilisateur.save();
     
+    // Envoyer l'email de bienvenue
+    const motDePasseTemporaire = req.body.sendEmail ? req.body.motDePasse : null;
+    envoyerEmailBienvenue(nouvelUtilisateur, motDePasseTemporaire).catch(err => {
+      console.error('⚠️ Email non envoyé:', err.message);
+      // On ne bloque pas l'inscription si l'email échoue
+    });
+
     // Créer le token JWT
     const token = jwt.sign(
       { 

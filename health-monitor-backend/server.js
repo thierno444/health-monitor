@@ -39,6 +39,8 @@ const routeMesures = require('./routes/measurements');
 const routeAuth = require('./routes/auth');
 const routeAssignments = require('./routes/assignments');
 const routeNotes = require('./routes/notes');
+const routeExport = require('./routes/export');
+const routePassword = require('./routes/password');
 
 
 // ==================== UTILISATION DES ROUTES ====================
@@ -46,6 +48,8 @@ app.use('/api/measurements', routeMesures);
 app.use('/api/auth', routeAuth);
 app.use('/api/assignments', routeAssignments);
 app.use('/api/notes', routeNotes);
+app.use('/api/export', routeExport);
+app.use('/api/password', routePassword);
 
 
 // ==================== ROUTES DE TEST ====================
