@@ -24,7 +24,7 @@ export interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/auth`;
+  private apiUrl = environment.apiUrl; 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -36,7 +36,7 @@ export class AuthService {
   }
 
   login(email: string, motDePasse: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/connexion`, {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/connexion`, {
       email,
       motDePasse
     }).pipe(
@@ -50,7 +50,7 @@ export class AuthService {
   }
 
   loadUserProfile(): void {
-    this.http.get<any>(`${this.apiUrl}/profil`).subscribe({
+    this.http.get<any>(`${this.apiUrl}/auth/profil`).subscribe({
       next: (response) => {
         if (response.success) {
           this.currentUserSubject.next(response.utilisateur);
@@ -81,5 +81,20 @@ export class AuthService {
 
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
+  }
+
+  updateProfile(userId: string, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/auth/utilisateurs/${userId}`, data);
+  }
+
+  changePassword(userId: string, currentPassword: string, newPassword: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/auth/utilisateurs/${userId}/password`, {
+      currentPassword,
+      newPassword
+    });
+  }
+
+  uploadPhoto(userId: string, formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/utilisateurs/${userId}/photo`, formData);
   }
 }

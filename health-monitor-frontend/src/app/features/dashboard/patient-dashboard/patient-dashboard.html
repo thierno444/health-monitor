@@ -1,323 +1,1052 @@
-<!-- Background gradient -->
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+<!-- Container principal avec mode sombre -->
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
   
-  <!-- Navigation -->
-  <nav class="glass border-b border-white/20 backdrop-blur-xl">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
+  
+  <!-- Toast notifications -->
+  <app-toast></app-toast>
+  
+  <!-- Header fixe -->
+  <!-- Header amélioré -->
+  <header class="glass dark:bg-gray-900/95 border-b border-white/10 dark:border-gray-700/50 backdrop-blur-xl sticky top-0 z-50 shadow-lg">
+    <div class="px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
-        <!-- Logo gauche -->
-        <div class="flex items-center space-x-3">
-          <div class="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+        
+        <!-- Logo + Menu burger -->
+        <div class="flex items-center space-x-4">
+          <!-- Burger menu mobile -->
+          <button 
+            (click)="toggleSidebar()" 
+            class="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all lg:hidden shadow-lg"
+          >
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
-          </div>
-          <div>
-            <h1 class="text-xl font-bold text-gray-800">Health Monitor</h1>
-            <p class="text-xs text-gray-500">Surveillance en temps réel</p>
+          </button>
+          
+          <!-- Logo -->
+          <div class="flex items-center space-x-3">
+            <div class="p-2.5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+              </svg>
+            </div>
+            <div class="hidden sm:block">
+              <h1 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                Health Monitor
+              </h1>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Surveillance temps réel</p>
+            </div>
           </div>
         </div>
         
-        <!-- User info + déconnexion -->
-        <div class="flex items-center space-x-4">
-          <!-- Photo de profil -->
-          <img 
-            *ngIf="user?.photoProfil" 
-            [src]="user.photoProfil" 
-            [alt]="user.prenom + ' ' + user.nom"
-            class="w-10 h-10 rounded-full border-2 border-blue-500"
-          />
-          
-          <!-- Info utilisateur -->
-          <div class="text-right">
-            <p class="text-sm font-medium text-gray-800">{{ user?.prenom }} {{ user?.nom }}</p>
-            <p class="text-xs text-gray-500 capitalize">{{ user?.role }}</p>
+        <!-- Actions droite -->
+        <div class="flex items-center space-x-3">
+          <!-- Indicateur temps réel -->
+          <div class="hidden md:flex items-center space-x-2 px-3 py-2 bg-green-500/10 dark:bg-green-500/20 rounded-xl border border-green-500/20">
+            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span class="text-green-600 dark:text-green-400 text-xs font-medium">Temps réel</span>
           </div>
-
-
-          <!-- Bouton Profil -->
-            <button 
-            (click)="goToProfile()" 
-            class="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 rounded-xl transition-all font-medium flex items-center space-x-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-            </svg>
-            <span>Profil</span>
-            </button>
           
-          <!-- Bouton déconnexion -->
-          <button (click)="logout()" class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 rounded-xl transition-all font-medium">
-            Déconnexion
+          <!-- Toggle Dark/Light amélioré -->
+          <button 
+            (click)="toggleTheme()"
+            class="p-2.5 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 dark:from-indigo-500 dark:to-purple-600 hover:scale-110 transition-all shadow-lg"
+            [title]="darkMode ? 'Mode clair' : 'Mode sombre'"
+          >
+            <svg *ngIf="!darkMode" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </svg>
+            <svg *ngIf="darkMode" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+          </button>
+          
+          <!-- Photo profil avec border gradient -->
+          <div class="relative">
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur opacity-75"></div>
+            <img 
+              *ngIf="user?.photoProfil" 
+              [src]="user.photoProfil" 
+              [alt]="user.prenom + ' ' + user.nom"
+              class="relative w-10 h-10 rounded-full border-2 border-white dark:border-gray-800 shadow-lg"
+            />
+          </div>
+          
+          <!-- Info user -->
+          <div class="text-right hidden md:block">
+            <p class="text-sm font-bold text-gray-800 dark:text-white">{{ user?.prenom }} {{ user?.nom }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 capitalize flex items-center space-x-1">
+              <span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+              <span>{{ user?.role }}</span>
+            </p>
+          </div>
+          
+          <!-- Déconnexion amélioré -->
+          <button 
+            (click)="logout()" 
+            class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl transition-all font-medium text-sm border border-red-500/20 hover:border-red-500/40 shadow-sm hover:shadow-md"
+          >
+            <span class="hidden sm:inline">Déconnexion</span>
+            <svg class="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
           </button>
         </div>
       </div>
     </div>
-  </nav>
+  </header>
 
-  <!-- Main content -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Container avec sidebar -->
+  <div class="flex">
     
-    <!-- Loading -->
-    <div *ngIf="loading" class="flex items-center justify-center h-96">
-      <div class="glass rounded-2xl p-8 text-center">
-        <svg class="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p class="text-gray-600">Chargement de vos données...</p>
-      </div>
-    </div>
-
-    <!-- Dashboard content -->
-    <div *ngIf="!loading && latestMeasurement" class="space-y-6">
-      
-      <!-- Header avec statut -->
-      <div class="glass rounded-3xl p-6 border border-white/20 backdrop-blur-xl {{ getStatusBg(latestMeasurement.statut) }}">
-        <div class="flex items-center justify-between">
+    <!-- Sidebar -->
+    <!-- Sidebar amélioré -->
+    <aside 
+      [class.translate-x-0]="sidebarOpen"
+      [class.-translate-x-full]="!sidebarOpen"
+      class="fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] w-72 bg-gradient-to-b from-blue-600 via-purple-600 to-indigo-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border-r border-white/10 shadow-2xl transition-transform duration-300 z-40 overflow-y-auto"
+    >
+      <!-- Header du sidebar -->
+      <div class="p-6 border-b border-white/10">
+        <div class="flex items-center space-x-3 mb-2">
+          <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+          </div>
           <div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-1">Tableau de bord</h2>
-            <p class="text-gray-600">Dernière mesure : {{ latestMeasurement.horodatageMesure | date:'short' }}</p>
+            <h3 class="text-white font-bold text-lg">{{ user?.prenom }} {{ user?.nom }}</h3>
+            <p class="text-white/70 text-sm capitalize">Espace {{ user?.role }}</p>
           </div>
-          <div class="text-center">
-            <div class="text-4xl mb-2">{{ getStatusIcon(latestMeasurement.statut) }}</div>
-            <span class="px-4 py-2 rounded-full font-bold {{ getStatusColor(latestMeasurement.statut) }} {{ getStatusBg(latestMeasurement.statut) }} border-2 border-current">
-              {{ latestMeasurement.statut }}
-            </span>
-          </div>
+        </div>
+        <!-- Badge statut -->
+        <div class="flex items-center space-x-2 mt-3 p-2 bg-white/10 rounded-lg">
+          <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <span class="text-white/90 text-xs font-medium">En ligne</span>
         </div>
       </div>
 
-      <!-- Cartes de mesures -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Navigation -->
+      <nav class="p-4 space-y-1">
         
-        <!-- BPM Card -->
-        <div class="glass rounded-3xl p-6 border border-white/20 backdrop-blur-xl hover:scale-105 transition-transform">
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 {{ getStatusBg(getBpmStatus(latestMeasurement.bpm)) }} rounded-xl">
-              <svg class="w-8 h-8 {{ getStatusColor(getBpmStatus(latestMeasurement.bpm)) }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+        <!-- Section Patient -->
+        <div class="mb-4">
+          <p class="text-white/50 text-xs font-semibold uppercase tracking-wider px-4 mb-2">Dashboard</p>
+          
+          <!-- Vue d'ensemble -->
+          <button
+            (click)="setCurrentTab('overview')"
+            [class.bg-white/20]="currentTab === 'overview'"
+            [class.shadow-lg]="currentTab === 'overview'"
+            [class.scale-105]="currentTab === 'overview'"
+            class="w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all text-white/80 hover:bg-white/10 hover:text-white font-medium group"
+          >
+            <div class="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
               </svg>
             </div>
-            <span class="text-xs font-medium text-gray-500 uppercase">En direct</span>
-          </div>
-          <div class="text-4xl font-bold {{ getStatusColor(getBpmStatus(latestMeasurement.bpm)) }} mb-1">
-            {{ latestMeasurement.bpm }}
-          </div>
-          <div class="text-gray-600 text-sm font-medium">Battements / minute</div>
-          <div class="mt-4 pt-4 border-t border-gray-200">
-            <div class="text-xs text-gray-500">Normal: 60-100 BPM</div>
-          </div>
-        </div>
+            <span>Vue d'ensemble</span>
+            <svg *ngIf="currentTab === 'overview'" class="w-5 h-5 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
 
-        <!-- SpO2 Card -->
-        <div class="glass rounded-3xl p-6 border border-white/20 backdrop-blur-xl hover:scale-105 transition-transform">
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 {{ getStatusBg(getSpo2Status(latestMeasurement.spo2)) }} rounded-xl">
-              <svg class="w-8 h-8 {{ getStatusColor(getSpo2Status(latestMeasurement.spo2)) }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+          <!-- Graphiques -->
+          <button
+            (click)="setCurrentTab('charts')"
+            [class.bg-white/20]="currentTab === 'charts'"
+            [class.shadow-lg]="currentTab === 'charts'"
+            [class.scale-105]="currentTab === 'charts'"
+            class="w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all text-white/80 hover:bg-white/10 hover:text-white font-medium group"
+          >
+            <div class="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
               </svg>
             </div>
-            <span class="text-xs font-medium text-gray-500 uppercase">En direct</span>
-          </div>
-          <div class="text-4xl font-bold {{ getStatusColor(getSpo2Status(latestMeasurement.spo2)) }} mb-1">
-            {{ latestMeasurement.spo2 }}%
-          </div>
-          <div class="text-gray-600 text-sm font-medium">Saturation oxygène</div>
-          <div class="mt-4 pt-4 border-t border-gray-200">
-            <div class="text-xs text-gray-500">Normal: ≥ 95%</div>
-          </div>
+            <span>Graphiques</span>
+            <svg *ngIf="currentTab === 'charts'" class="w-5 h-5 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+
+          <!-- Historique -->
+          <button
+            (click)="setCurrentTab('history')"
+            [class.bg-white/20]="currentTab === 'history'"
+            [class.shadow-lg]="currentTab === 'history'"
+            [class.scale-105]="currentTab === 'history'"
+            class="w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all text-white/80 hover:bg-white/10 hover:text-white font-medium group"
+          >
+            <div class="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <span>Historique</span>
+            <svg *ngIf="currentTab === 'history'" class="w-5 h-5 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
         </div>
 
-        <!-- Batterie Card -->
-        <div class="glass rounded-3xl p-6 border border-white/20 backdrop-blur-xl hover:scale-105 transition-transform">
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 bg-green-500/20 rounded-xl">
-              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Section Paramètres -->
+        <div class="mb-4">
+          <p class="text-white/50 text-xs font-semibold uppercase tracking-wider px-4 mb-2">Paramètres</p>
+          
+          <!-- Paramètres -->
+          <button
+            (click)="setCurrentTab('settings')"
+            [class.bg-white/20]="currentTab === 'settings'"
+            [class.shadow-lg]="currentTab === 'settings'"
+            [class.scale-105]="currentTab === 'settings'"
+            class="w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all text-white/80 hover:bg-white/10 hover:text-white font-medium group"
+          >
+            <div class="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+            <span>Paramètres</span>
+            <svg *ngIf="currentTab === 'settings'" class="w-5 h-5 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+
+          <!-- Export -->
+          <button
+            (click)="setCurrentTab('export')"
+            [class.bg-white/20]="currentTab === 'export'"
+            [class.shadow-lg]="currentTab === 'export'"
+            [class.scale-105]="currentTab === 'export'"
+            class="w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all text-white/80 hover:bg-white/10 hover:text-white font-medium group"
+          >
+            <div class="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+              </svg>
+            </div>
+            <span>Export données</span>
+            <svg *ngIf="currentTab === 'export'" class="w-5 h-5 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+
+          <!-- Profil -->
+          <button
+            (click)="setCurrentTab('profile')"
+            [class.bg-white/20]="currentTab === 'profile'"
+            [class.shadow-lg]="currentTab === 'profile'"
+            [class.scale-105]="currentTab === 'profile'"
+            class="w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all text-white/80 hover:bg-white/10 hover:text-white font-medium group"
+          >
+            <div class="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+            </div>
+            <span>Mon profil</span>
+            <svg *ngIf="currentTab === 'profile'" class="w-5 h-5 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Footer du sidebar -->
+        <div class="mt-8 p-4 bg-white/10 rounded-xl border border-white/20">
+          <div class="flex items-center space-x-3 mb-3">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
               </svg>
             </div>
-            <span class="text-xs font-medium text-gray-500 uppercase">Dispositif</span>
-          </div>
-          <div class="text-4xl font-bold text-green-600 mb-1">
-            {{ latestMeasurement.niveauBatterie || 100 }}%
-          </div>
-          <div class="text-gray-600 text-sm font-medium">Niveau de batterie</div>
-          <div class="mt-4 pt-4 border-t border-gray-200">
-            <div class="text-xs text-gray-500">{{ latestMeasurement.idDispositif }}</div>
-          </div>
-        </div>
-
-        <!-- Qualité Signal Card -->
-        <div class="glass rounded-3xl p-6 border border-white/20 backdrop-blur-xl hover:scale-105 transition-transform">
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 bg-blue-500/20 rounded-xl">
-              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
+            <div>
+              <p class="text-white font-medium text-sm">ESP32 connecté</p>
+              <p class="text-white/70 text-xs">{{ user?.idDispositif }}</p>
             </div>
-            <span class="text-xs font-medium text-gray-500 uppercase">Signal</span>
           </div>
-          <div class="text-4xl font-bold text-blue-600 mb-1">
-            {{ latestMeasurement.qualite }}
-          </div>
-          <div class="text-gray-600 text-sm font-medium">Qualité du signal</div>
-          <div class="mt-4 pt-4 border-t border-gray-200">
-            <div class="text-xs text-gray-500">Connexion stable</div>
+          <div class="flex items-center justify-between text-xs text-white/70">
+            <span>Dernière sync</span>
+            <span>{{ latestMeasurement?.horodatageMesure | date:'shortTime' }}</span>
           </div>
         </div>
 
+      </nav>
+    </aside>
+
+    <!-- Overlay mobile -->
+    <div 
+      *ngIf="sidebarOpen" 
+      (click)="toggleSidebar()"
+      class="fixed inset-0 bg-black/50 z-30 lg:hidden"
+    ></div>
+
+    <!-- Contenu principal -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+      
+      <!-- Loading -->
+      <div *ngIf="loading" class="flex items-center justify-center h-96">
+        <div class="glass dark:bg-gray-800 rounded-2xl p-8 text-center">
+          <svg class="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="text-gray-600 dark:text-gray-300">Chargement de vos données...</p>
+        </div>
       </div>
 
-
-
-      <!-- Graphiques -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- VUE D'ENSEMBLE -->
+      <div *ngIf="!loading && latestMeasurement && currentTab === 'overview'" class="space-y-6 animate-fade-in">
         
-        <!-- Graphique BPM -->
-        <div class="glass rounded-3xl p-6 border border-white/20 backdrop-blur-xl">
-          <div class="flex items-center justify-between mb-4">
+        <!-- Header statut -->
+        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700 backdrop-blur-xl {{ getStatusBg(latestMeasurement.statut) }}">
+          <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-bold text-gray-800">Évolution du rythme cardiaque</h3>
-              <p class="text-sm text-gray-500">20 dernières mesures</p>
+              <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-1">Vue d'ensemble</h2>
+              <p class="text-gray-600 dark:text-gray-400">Dernière mesure : {{ latestMeasurement.horodatageMesure | date:'short' }}</p>
             </div>
-            <div class="p-3 bg-blue-500/20 rounded-xl">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-            </div>
-          </div>
-          <div class="relative h-64">
-            <canvas #bpmChart></canvas>
-          </div>
-          <div class="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between text-sm">
-            <div class="flex items-center space-x-2">
-              <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span class="text-gray-600">Normal: 60-100</span>
-            </div>
-            <div class="flex items-center space-x-2">
-              <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-              <span class="text-gray-600">Attention: 100-120</span>
-            </div>
-            <div class="flex items-center space-x-2">
-              <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-              <span class="text-gray-600">Danger: >120</span>
+            <div class="text-center">
+              <div class="text-4xl mb-2">{{ getStatusIcon(latestMeasurement.statut) }}</div>
+              <span class="px-4 py-2 rounded-full font-bold {{ getStatusColor(latestMeasurement.statut) }} {{ getStatusBg(latestMeasurement.statut) }} border-2 border-current">
+                {{ latestMeasurement.statut }}
+              </span>
             </div>
           </div>
         </div>
 
-        <!-- Graphique SpO2 -->
-        <div class="glass rounded-3xl p-6 border border-white/20 backdrop-blur-xl">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h3 class="text-lg font-bold text-gray-800">Saturation en oxygène</h3>
-              <p class="text-sm text-gray-500">20 dernières mesures</p>
+        <!-- Cartes de mesures -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          <!-- BPM Card -->
+          <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700 backdrop-blur-xl hover:scale-105 transition-transform">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 {{ getStatusBg(getBpmStatus(latestMeasurement.bpm)) }} rounded-xl">
+                <svg class="w-8 h-8 {{ getStatusColor(getBpmStatus(latestMeasurement.bpm)) }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">En direct</span>
             </div>
-            <div class="p-3 bg-purple-500/20 rounded-xl">
-              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-              </svg>
+            <div class="text-4xl font-bold {{ getStatusColor(getBpmStatus(latestMeasurement.bpm)) }} mb-1">
+              {{ latestMeasurement.bpm }}
             </div>
-          </div>
-          <div class="relative h-64">
-            <canvas #spo2Chart></canvas>
-          </div>
-          <div class="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between text-sm">
-            <div class="flex items-center space-x-2">
-              <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span class="text-gray-600">Normal: ≥95%</span>
-            </div>
-            <div class="flex items-center space-x-2">
-              <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-              <span class="text-gray-600">Attention: 90-95%</span>
-            </div>
-            <div class="flex items-center space-x-2">
-              <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-              <span class="text-gray-600">Danger: <90%</span>
+            <div class="text-gray-600 dark:text-gray-400 text-sm font-medium">Battements / minute</div>
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div class="text-xs text-gray-500 dark:text-gray-400">Normal: 60-100 BPM</div>
             </div>
           </div>
+
+          <!-- SpO2 Card -->
+          <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700 backdrop-blur-xl hover:scale-105 transition-transform">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 {{ getStatusBg(getSpo2Status(latestMeasurement.spo2)) }} rounded-xl">
+                <svg class="w-8 h-8 {{ getStatusColor(getSpo2Status(latestMeasurement.spo2)) }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">En direct</span>
+            </div>
+            <div class="text-4xl font-bold {{ getStatusColor(getSpo2Status(latestMeasurement.spo2)) }} mb-1">
+              {{ latestMeasurement.spo2 }}%
+            </div>
+            <div class="text-gray-600 dark:text-gray-400 text-sm font-medium">Saturation oxygène</div>
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div class="text-xs text-gray-500 dark:text-gray-400">Normal: ≥ 95%</div>
+            </div>
+          </div>
+
+          <!-- Batterie Card -->
+          <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700 backdrop-blur-xl hover:scale-105 transition-transform">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 bg-green-500/20 rounded-xl">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Dispositif</span>
+            </div>
+            <div class="text-4xl font-bold text-green-600 mb-1">
+              {{ latestMeasurement.niveauBatterie || 100 }}%
+            </div>
+            <div class="text-gray-600 dark:text-gray-400 text-sm font-medium">Niveau de batterie</div>
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div class="text-xs text-gray-500 dark:text-gray-400">{{ latestMeasurement.idDispositif }}</div>
+            </div>
+          </div>
+
+          <!-- Qualité Signal Card -->
+          <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700 backdrop-blur-xl hover:scale-105 transition-transform">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 bg-blue-500/20 rounded-xl">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Signal</span>
+            </div>
+            <div class="text-4xl font-bold text-blue-600 mb-1">
+              {{ latestMeasurement.qualite }}
+            </div>
+            <div class="text-gray-600 dark:text-gray-400 text-sm font-medium">Qualité du signal</div>
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div class="text-xs text-gray-500 dark:text-gray-400">Connexion stable</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Graphiques -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Graphique BPM -->
+          <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700 backdrop-blur-xl">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white">Évolution BPM</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">20 dernières mesures</p>
+              </div>
+            </div>
+            <div class="relative h-64">
+              <canvas #bpmChart></canvas>
+            </div>
+          </div>
+
+          <!-- Graphique SpO2 -->
+          <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700 backdrop-blur-xl">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white">Saturation oxygène</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">20 dernières mesures</p>
+              </div>
+            </div>
+            <div class="relative h-64">
+              <canvas #spo2Chart></canvas>
+            </div>
+          </div>
+
         </div>
 
       </div>
 
+      <!-- ONGLET HISTORIQUE -->
+      <div *ngIf="!loading && currentTab === 'history'" class="animate-fade-in">
+        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700 backdrop-blur-xl">
+          <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Historique complet</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-gray-200 dark:border-gray-700">
+                  <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Date</th>
+                  <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">BPM</th>
+                  <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">SpO2</th>
+                  <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let m of paginatedMeasurements" class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                  <td class="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">{{ m.horodatageMesure | date:'short' }}</td>
+                  <td class="py-3 px-4 text-sm font-bold {{ getStatusColor(getBpmStatus(m.bpm)) }}">{{ m.bpm }}</td>
+                  <td class="py-3 px-4 text-sm font-bold {{ getStatusColor(getSpo2Status(m.spo2)) }}">{{ m.spo2 }}%</td>
+                  <td class="py-3 px-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold {{ getStatusColor(m.statut) }} {{ getStatusBg(m.statut) }} border border-current">
+                      {{ m.statut }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-      <!-- Historique récent -->
-      <div class="glass rounded-3xl p-6 border border-white/20 backdrop-blur-xl">
-        <h3 class="text-xl font-bold text-gray-800 mb-4">Historique récent</h3>
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="border-b border-gray-200">
-                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">Date</th>
-                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">BPM</th>
-                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">SpO2</th>
-                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600">Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let m of paginatedMeasurements" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                <td class="py-3 px-4 text-sm text-gray-600">{{ m.horodatageMesure | date:'short' }}</td>
-                <td class="py-3 px-4 text-sm font-bold {{ getStatusColor(getBpmStatus(m.bpm)) }}">{{ m.bpm }}</td>
-                <td class="py-3 px-4 text-sm font-bold {{ getStatusColor(getSpo2Status(m.spo2)) }}">{{ m.spo2 }}%</td>
-                <td class="py-3 px-4">
-                  <span class="px-3 py-1 rounded-full text-xs font-bold {{ getStatusColor(m.statut) }} {{ getStatusBg(m.statut) }} border border-current">
-                    {{ m.statut }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- Pagination -->
+          <div *ngIf="measurements.length > itemsPerPage" class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+              Page {{ currentPage }} sur {{ totalPages }} - Total: {{ measurements.length }} mesures
+            </div>
+            
+            <div class="flex items-center space-x-2">
+              <button 
+                (click)="previousPage()" 
+                [disabled]="currentPage === 1"
+                class="px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                ← Précédent
+              </button>
+              
+              <button 
+                *ngFor="let page of pages"
+                (click)="goToPage(page)"
+                [class.bg-blue-600]="page === currentPage"
+                [class.text-white]="page === currentPage"
+                [class.bg-white]="page !== currentPage"
+                [class.dark:bg-gray-700]="page !== currentPage"
+                [class.text-gray-700]="page !== currentPage"
+                [class.dark:text-gray-300]="page !== currentPage"
+                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-blue-50 dark:hover:bg-gray-600 transition-all font-medium"
+                >
+                {{ page }}
+              </button>
+              <button 
+            (click)="nextPage()" 
+            [disabled]="currentPage === totalPages"
+            class="px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            Suivant →
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MESSAGE POUR LES AUTRES ONGLETS (temporaire) -->
+      <!-- ONGLET GRAPHIQUES -->
+      <div *ngIf="!loading && currentTab === 'charts'" class="space-y-6 animate-fade-in">
+        
+        <!-- Header avec sélection période -->
+        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+            <div>
+              <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Graphiques détaillés</h2>
+              <p class="text-gray-600 dark:text-gray-400">Analyse approfondie de vos mesures</p>
+            </div>
+            
+            <!-- Sélecteur de période -->
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-600 dark:text-gray-400 font-medium mr-2">Période :</span>
+              <button 
+                (click)="changePeriod('24h')"
+                [class.bg-blue-600]="selectedPeriod === '24h'"
+                [class.text-white]="selectedPeriod === '24h'"
+                [class.bg-gray-200]="selectedPeriod !== '24h'"
+                [class.dark:bg-gray-700]="selectedPeriod !== '24h'"
+                [class.text-gray-700]="selectedPeriod !== '24h'"
+                [class.dark:text-gray-300]="selectedPeriod !== '24h'"
+                class="px-4 py-2 rounded-lg font-medium transition-all hover:scale-105"
+              >
+                24h
+              </button>
+              <button 
+                (click)="changePeriod('7j')"
+                [class.bg-blue-600]="selectedPeriod === '7j'"
+                [class.text-white]="selectedPeriod === '7j'"
+                [class.bg-gray-200]="selectedPeriod !== '7j'"
+                [class.dark:bg-gray-700]="selectedPeriod !== '7j'"
+                [class.text-gray-700]="selectedPeriod !== '7j'"
+                [class.dark:text-gray-300]="selectedPeriod !== '7j'"
+                class="px-4 py-2 rounded-lg font-medium transition-all hover:scale-105"
+              >
+                7 jours
+              </button>
+              <button 
+                (click)="changePeriod('30j')"
+                [class.bg-blue-600]="selectedPeriod === '30j'"
+                [class.text-white]="selectedPeriod === '30j'"
+                [class.bg-gray-200]="selectedPeriod !== '30j'"
+                [class.dark:bg-gray-700]="selectedPeriod !== '30j'"
+                [class.text-gray-700]="selectedPeriod !== '30j'"
+                [class.dark:text-gray-300]="selectedPeriod !== '30j'"
+                class="px-4 py-2 rounded-lg font-medium transition-all hover:scale-105"
+              >
+                30 jours
+              </button>
+              <button 
+                (click)="changePeriod('all')"
+                [class.bg-blue-600]="selectedPeriod === 'all'"
+                [class.text-white]="selectedPeriod === 'all'"
+                [class.bg-gray-200]="selectedPeriod !== 'all'"
+                [class.dark:bg-gray-700]="selectedPeriod !== 'all'"
+                [class.text-gray-700]="selectedPeriod !== 'all'"
+                [class.dark:text-gray-300]="selectedPeriod !== 'all'"
+                class="px-4 py-2 rounded-lg font-medium transition-all hover:scale-105"
+              >
+                Tout
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- Pagination -->
-        <div *ngIf="measurements.length > itemsPerPage" class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
-          <div class="text-sm text-gray-600">
-            Page {{ currentPage }} sur {{ totalPages }} - Total: {{ measurements.length }} mesures
+        <!-- Graphiques plus grands -->
+        <div class="space-y-6">
+          
+          <!-- Graphique BPM grand format -->
+          <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Évolution du rythme cardiaque</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Période : {{ selectedPeriod }}</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="px-3 py-1 bg-green-500/20 text-green-600 dark:text-green-400 rounded-lg text-sm font-medium">
+                  Normal: 60-100 BPM
+                </span>
+              </div>
+            </div>
+            <div class="relative h-96">
+              <canvas #bpmChartDetailed></canvas>
+            </div>
+            <!-- Statistiques BPM -->
+            <div class="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <div class="text-center">
+                <p class="text-2xl font-bold text-blue-600">{{ stats?.bpm?.moyenne || 0 | number:'1.0-0' }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Moyenne</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-green-600">{{ stats?.bpm?.min || 0 }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Minimum</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-red-600">{{ stats?.bpm?.max || 0 }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Maximum</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Graphique SpO2 grand format -->
+          <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Saturation en oxygène</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Période : {{ selectedPeriod }}</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="px-3 py-1 bg-green-500/20 text-green-600 dark:text-green-400 rounded-lg text-sm font-medium">
+                  Normal: ≥ 95%
+                </span>
+              </div>
+            </div>
+            <div class="relative h-96">
+              <canvas #spo2ChartDetailed></canvas>
+            </div>
+            <!-- Statistiques SpO2 -->
+            <div class="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <div class="text-center">
+                <p class="text-2xl font-bold text-purple-600">{{ stats?.spo2?.moyenne || 0 | number:'1.0-0' }}%</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Moyenne</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-green-600">{{ stats?.spo2?.max || 0 }}%</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Maximum</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-red-600">{{ stats?.spo2?.min || 0 }}%</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Minimum</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Répartition des statuts -->
+          <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Répartition des mesures</h3>
+            <div class="grid grid-cols-3 gap-4">
+              <div class="p-4 bg-green-500/10 rounded-xl border border-green-500/20">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-green-600 dark:text-green-400 font-bold text-2xl">{{ stats?.statuts?.normal || 0 }}</span>
+                  <div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+                    <span class="text-2xl">✅</span>
+                  </div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Mesures normales</p>
+              </div>
+              <div class="p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-yellow-600 dark:text-yellow-400 font-bold text-2xl">{{ stats?.statuts?.attention || 0 }}</span>
+                  <div class="w-10 h-10 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                    <span class="text-2xl">⚠️</span>
+                  </div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Attention</p>
+              </div>
+              <div class="p-4 bg-red-500/10 rounded-xl border border-red-500/20">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-red-600 dark:text-red-400 font-bold text-2xl">{{ stats?.statuts?.danger || 0 }}</span>
+                  <div class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
+                    <span class="text-2xl">🚨</span>
+                  </div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Danger</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ONGLET PARAMÈTRES -->
+      <div *ngIf="!loading && currentTab === 'settings'" class="space-y-6 animate-fade-in">
+        
+        <!-- Header -->
+        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700">
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Paramètres</h2>
+          <p class="text-gray-600 dark:text-gray-400">Configurez vos seuils d'alertes personnalisés</p>
+        </div>
+
+        <!-- Seuils BPM -->
+        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="p-3 bg-red-500/20 rounded-xl">
+              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-gray-800 dark:text-white">Seuils BPM</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Définissez vos seuils de rythme cardiaque</p>
+            </div>
           </div>
           
-          <div class="flex items-center space-x-2">
-            <!-- Bouton Précédent -->
-            <button 
-              (click)="previousPage()" 
-              [disabled]="currentPage === 1"
-              class="px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              ← Précédent
-            </button>
-            
-            <!-- Numéros de page -->
-            <button 
-              *ngFor="let page of pages"
-              (click)="goToPage(page)"
-              [class.bg-blue-600]="page === currentPage"
-              [class.text-white]="page === currentPage"
-              [class.bg-white]="page !== currentPage"
-              [class.text-gray-700]="page !== currentPage"
-              class="px-3 py-2 rounded-lg border border-gray-300 hover:bg-blue-50 transition-all font-medium"
-            >
-              {{ page }}
-            </button>
-            
-            <!-- Bouton Suivant -->
-            <button 
-              (click)="nextPage()" 
-              [disabled]="currentPage === totalPages"
-              class="px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              Suivant →
-            </button>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">BPM Minimum</label>
+              <input 
+                type="number" 
+                [(ngModel)]="settingsForm.bpmMin"
+                class="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+              />
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">En dessous de cette valeur → Alerte</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">BPM Maximum</label>
+              <input 
+                type="number" 
+                [(ngModel)]="settingsForm.bpmMax"
+                class="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+              />
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Au dessus de cette valeur → Alerte</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seuils SpO2 -->
+        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="p-3 bg-purple-500/20 rounded-xl">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-gray-800 dark:text-white">Seuils SpO2</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Définissez votre seuil de saturation en oxygène</p>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">SpO2 Minimum</label>
+            <input 
+              type="number" 
+              [(ngModel)]="settingsForm.spo2Min"
+              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+            />
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">En dessous de cette valeur → Alerte</p>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="p-3 bg-blue-500/20 rounded-xl">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-gray-800 dark:text-white">Notifications email</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Recevez des alertes par email</p>
+            </div>
+          </div>
+          
+          <label class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-all">
+            <span class="text-gray-800 dark:text-white font-medium">Activer les notifications email</span>
+            <input type="checkbox" [(ngModel)]="settingsForm.emailNotifications" class="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500">
+          </label>
+        </div>
+
+        <!-- Bouton sauvegarder -->
+        <div class="flex justify-end">
+          <button 
+            (click)="saveSettings()"
+            [disabled]="savingSettings"
+            class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ savingSettings ? '💾 Enregistrement...' : '💾 Enregistrer les paramètres' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ONGLET EXPORT -->
+      <div *ngIf="!loading && currentTab === 'export'" class="space-y-6 animate-fade-in">
+        
+        <!-- Header -->
+        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700">
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Export de données</h2>
+          <p class="text-gray-600 dark:text-gray-400">Téléchargez vos mesures au format PDF ou CSV</p>
+        </div>
+
+        <!-- Export PDF -->
+        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700 hover:border-red-500/50 transition-all group">
+          <div class="flex items-start space-x-4">
+            <div class="p-4 bg-red-500/20 rounded-xl group-hover:scale-110 transition-transform">
+              <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Export PDF</h3>
+              <p class="text-gray-600 dark:text-gray-400 mb-4">Rapport complet de vos mesures avec graphiques et statistiques</p>
+              <ul class="space-y-2 mb-4">
+                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                  </svg>
+                  Graphiques en couleur
+                </li>
+                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                  </svg>
+                  Statistiques détaillées
+                </li>
+                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                  </svg>
+                  Prêt à imprimer
+                </li>
+              </ul>
+              <button 
+                (click)="exportToPDF()"
+                [disabled]="exportingPDF"
+                class="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                <svg *ngIf="!exportingPDF" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <svg *ngIf="exportingPDF" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ exportingPDF ? 'Téléchargement...' : 'Télécharger PDF' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export CSV -->
+        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700 hover:border-green-500/50 transition-all group">
+          <div class="flex items-start space-x-4">
+            <div class="p-4 bg-green-500/20 rounded-xl group-hover:scale-110 transition-transform">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Export CSV</h3>
+              <p class="text-gray-600 dark:text-gray-400 mb-4">Données brutes pour Excel, Google Sheets ou analyse personnalisée</p>
+              <ul class="space-y-2 mb-4">
+                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                  </svg>
+                  Compatible Excel
+                </li>
+                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                  </svg>
+                  Données complètes
+                </li>
+                <li class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                  </svg>
+                  Facile à analyser
+                </li>
+              </ul>
+              <button 
+                (click)="exportToCSV()"
+                [disabled]="exportingCSV"
+                class="px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                <svg *ngIf="!exportingCSV" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <svg *ngIf="exportingCSV" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ exportingCSV ? 'Téléchargement...' : 'Télécharger CSV' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-blue-500/20 dark:border-blue-500/30 bg-blue-500/5">
+          <div class="flex items-start space-x-3">
+            <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+            </svg>
+            <div>
+              <h4 class="font-bold text-gray-800 dark:text-white mb-1">Information</h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Les exports contiennent toutes vos mesures enregistrées. Vos données sont sécurisées et restent privées.
+              </p>
+            </div>
           </div>
         </div>
 
       </div>
 
+      <!-- ONGLET PROFIL -->
+      <div *ngIf="!loading && currentTab === 'profile'" class="space-y-6 animate-fade-in">
+        
+        <!-- Header -->
+        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700">
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Mon profil</h2>
+          <p class="text-gray-600 dark:text-gray-400">Gérez vos informations personnelles</p>
+        </div>
+
+        <!-- Photo de profil -->
+        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700">
+          <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Photo de profil</h3>
+            <div class="flex items-center space-x-6">
+            <div class="relative">
+              <img 
+                [src]="user?.photoProfil" 
+                [alt]="user?.prenom + ' ' + user?.nom"
+                class="w-24 h-24 rounded-full border-4 border-blue-500 shadow-lg"
+              />
+              <div 
+                (click)="fileInput.click()"
+                class="absolute inset-0 bg-black/50 rounded-full opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+              >
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </div>
+            </div>
+            <div>
+              <input 
+                #fileInput
+                type="file" 
+                accept="image/*"
+                (change)="uploadPhoto($event)"
+                class="hidden"
+              />
+              <button 
+                (click)="fileInput.click()"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all mb-2"
+              >
+                📸 Changer la photo
+              </button>
+              <p class="text-sm text-gray-500 dark:text-gray-400">JPG, PNG ou GIF. Max 2MB.</p>
+            </div>
+          </div>
+        </div>
+        <!-- Informations personnelles -->
+    <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700">
+      <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Informations personnelles</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prénom</label>
+          <input 
+                type="text" 
+                [(ngModel)]="profileForm.prenom"
+                class="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+            />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nom</label>
+          <input 
+                type="text" 
+                [(ngModel)]="profileForm.nom"
+                class="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+          />
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+          <input 
+                type="email" 
+                [(ngModel)]="profileForm.email"
+                class="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+            />
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ID Dispositif ESP32</label>
+          <input 
+            type="text" 
+            [value]="user?.idDispositif"
+            class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-400"
+            disabled
+          />
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Contactez un administrateur pour modifier</p>
+        </div>
+      </div>
+      <div class="flex justify-end mt-6">
+        <button 
+              (click)="saveProfile()"
+              [disabled]="savingProfile"
+              class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {{ savingProfile ? '💾 Enregistrement...' : '💾 Enregistrer les modifications' }}
+        </button>
+      </div>
     </div>
 
-    <!-- Pas de données -->
-    <div *ngIf="!loading && !latestMeasurement" class="glass rounded-3xl p-12 text-center">
-      <div class="text-6xl mb-4">📊</div>
-      <h3 class="text-2xl font-bold text-gray-800 mb-2">Aucune mesure disponible</h3>
-      <p class="text-gray-600">Connectez votre dispositif ESP32 pour commencer la surveillance.</p>
+    <!-- Changer mot de passe -->
+    <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700">
+      <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Changer le mot de passe</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mot de passe actuel</label>
+          <input 
+                type="password" 
+                [(ngModel)]="passwordForm.currentPassword"
+                placeholder="••••••••"
+                class="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nouveau mot de passe</label>
+          <input 
+                type="password" 
+                [(ngModel)]="passwordForm.newPassword"
+                placeholder="••••••••"
+                class="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Confirmer le nouveau mot de passe</label>
+          <input 
+                type="password" 
+                [(ngModel)]="passwordForm.confirmPassword"
+                placeholder="••••••••"
+                class="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+          />
+        </div>
+      </div>
+      <div class="flex justify-end mt-6">
+        <button 
+              (click)="changePassword()"
+              [disabled]="changingPassword"
+              class="px-6 py-3 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {{ changingPassword ? '🔐 Modification...' : '🔐 Changer le mot de passe' }}
+        </button>
+      </div>
     </div>
 
-  </main>
-</div>
+  </div>
+
+  <!-- Pas de données -->
+  <div *ngIf="!loading && !latestMeasurement" class="glass dark:bg-gray-800/80 rounded-3xl p-12 text-center border border-white/20 dark:border-gray-700">
+    <div class="text-6xl mb-4">📊</div>
+    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Aucune mesure disponible</h3>
+    <p class="text-gray-600 dark:text-gray-400">Connectez votre dispositif ESP32 pour commencer la surveillance.</p>
+  </div>
+
+</main>
