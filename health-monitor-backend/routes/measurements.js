@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Mesure = require('../models/Measurement');
 const Utilisateur = require('../models/User');
+const verifierToken = require('../middleware/auth'); 
 
 // ==================== ROUTES MESURES ====================
 
@@ -248,6 +249,112 @@ router.delete('/:id', async (req, res) => {
       message: '❌ Erreur serveur',
       error: error.message
     });
+  }
+});
+
+// Export PDF
+router.get('/export/pdf/:userId', verifierToken, async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    
+    // Vérifier que l'utilisateur peut accéder à ces données
+    if (req.utilisateur.id !== userId && req.utilisateur.role !== 'medecin' && req.utilisateur.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Accès refusé' });
+    }
+
+    const mesures = await Mesure.find({ idUtilisateur: userId })
+      .sort({ horodatageMesure: -1 })
+      .limit(100);
+
+    const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument();
+
+    // Headers pour le téléchargement
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=health-report-${Date.now()}.pdf`);
+
+    doc.pipe(res);
+
+    // Titre
+    doc.fontSize(20).text('Rapport de Santé', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(12).text(`Date: ${new Date().toLocaleDateString('fr-FR')}`, { align: 'center' });
+    doc.moveDown(2);
+
+    // Statistiques
+    const bpmValues = mesures.map(m => m.bpm);
+    const spo2Values = mesures.map(m => m.spo2);
+    
+    doc.fontSize(16).text('Statistiques Globales', { underline: true });
+    doc.moveDown();
+    doc.fontSize(12);
+    doc.text(`Nombre de mesures: ${mesures.length}`);
+    doc.text(`BPM Moyen: ${(bpmValues.reduce((a,b) => a+b, 0) / bpmValues.length).toFixed(1)}`);
+    doc.text(`BPM Min: ${Math.min(...bpmValues)}`);
+    doc.text(`BPM Max: ${Math.max(...bpmValues)}`);
+    doc.moveDown();
+    doc.text(`SpO2 Moyen: ${(spo2Values.reduce((a,b) => a+b, 0) / spo2Values.length).toFixed(1)}%`);
+    doc.text(`SpO2 Min: ${Math.min(...spo2Values)}%`);
+    doc.text(`SpO2 Max: ${Math.max(...spo2Values)}%`);
+    doc.moveDown(2);
+
+    // Tableau des mesures récentes
+    doc.fontSize(16).text('Mesures Récentes (20 dernières)', { underline: true });
+    doc.moveDown();
+    doc.fontSize(10);
+
+    mesures.slice(0, 20).forEach((mesure, index) => {
+      const date = new Date(mesure.horodatageMesure).toLocaleString('fr-FR');
+      doc.text(`${index + 1}. ${date} | BPM: ${mesure.bpm} | SpO2: ${mesure.spo2}% | Status: ${mesure.statut}`);
+    });
+
+    doc.end();
+
+  } catch (error) {
+    console.error('Erreur export PDF:', error);
+    res.status(500).json({ success: false, message: 'Erreur lors de la génération du PDF' });
+  }
+});
+
+// Export CSV
+router.get('/export/csv/:userId', verifierToken, async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    
+    // Vérifier que l'utilisateur peut accéder à ces données
+    if (req.utilisateur.id !== userId && req.utilisateur.role !== 'medecin' && req.utilisateur.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Accès refusé' });
+    }
+
+    const mesures = await Mesure.find({ idUtilisateur: userId })
+      .sort({ horodatageMesure: -1 });
+
+    // Créer le CSV avec point-virgule (format européen pour LibreOffice)
+    // En-tête avec métadonnées
+    let csv = '# Rapport de santé - Health Monitor\n';
+    csv += `# Généré le: ${new Date().toLocaleString('fr-FR')}\n`;
+    csv += `# Nombre de mesures: ${mesures.length}\n`;
+    csv += '\n';
+    csv += 'Date;Heure;BPM;SpO2;Statut;Batterie;Qualité Signal;Dispositif\n';
+    
+    mesures.forEach(mesure => {
+      const date = new Date(mesure.horodatageMesure);
+      const dateStr = date.toLocaleDateString('fr-FR');
+      const timeStr = date.toLocaleTimeString('fr-FR');
+      csv += `${dateStr};${timeStr};${mesure.bpm};${mesure.spo2};${mesure.statut};${mesure.niveauBatterie || 'N/A'};${mesure.qualite || 'N/A'};${mesure.idDispositif}\n`;
+    });
+
+    // Headers pour le téléchargement avec encoding UTF-8 avec BOM
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename=health-data-${Date.now()}.csv`);
+    
+    // Ajouter BOM UTF-8 pour LibreOffice
+    const BOM = '\uFEFF';
+    res.send(BOM + csv);
+
+  } catch (error) {
+    console.error('Erreur export CSV:', error);
+    res.status(500).json({ success: false, message: 'Erreur lors de la génération du CSV' });
   }
 });
 

@@ -283,4 +283,158 @@ router.get('/profil', async (req, res) => {
   }
 });
 
+
+// Mettre à jour le profil utilisateur
+// Mettre à jour le profil utilisateur
+router.put('/utilisateurs/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { prenom, nom, email, photoProfil } = req.body;
+
+    console.log('📝 Mise à jour profil pour:', userId);
+    console.log('Données reçues:', { 
+      prenom, 
+      nom, 
+      email, 
+      photoProfil: photoProfil ? 'oui (longueur: ' + photoProfil.length + ')' : 'non' 
+    });
+
+    const utilisateur = await Utilisateur.findById(userId);
+    if (!utilisateur) {
+      return res.status(404).json({
+        success: false,
+        message: 'Utilisateur non trouvé'
+      });
+    }
+
+    // Mettre à jour UNIQUEMENT les champs fournis
+    if (prenom !== undefined) utilisateur.prenom = prenom;
+    if (nom !== undefined) utilisateur.nom = nom;
+    if (email !== undefined) utilisateur.email = email;
+    
+    // Ne mettre à jour la photo QUE si elle est fournie
+    if (photoProfil !== undefined) {
+      utilisateur.photoProfil = photoProfil;
+      console.log('✅ Photo mise à jour, taille:', photoProfil.length);
+    }
+
+    await utilisateur.save();
+
+    console.log('✅ Profil mis à jour');
+
+    res.json({
+      success: true,
+      message: 'Profil mis à jour avec succès',
+      utilisateur: {
+        id: utilisateur._id,
+        prenom: utilisateur.prenom,
+        nom: utilisateur.nom,
+        email: utilisateur.email,
+        role: utilisateur.role,
+        photoProfil: utilisateur.photoProfil,
+        idDispositif: utilisateur.idDispositif
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur mise à jour profil:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la mise à jour du profil'
+    });
+  }
+});
+
+// Changer le mot de passe
+// Changer le mot de passe
+router.put('/utilisateurs/:userId/password', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    console.log('🔐 Changement mot de passe pour:', userId);
+    console.log('Données reçues:', { currentPassword: '***', newPassword: '***' });
+
+    // IMPORTANT: Récupérer l'utilisateur AVEC le mot de passe (select: false par défaut)
+    const utilisateur = await Utilisateur.findById(userId).select('+motDePasse');
+    
+    if (!utilisateur) {
+      console.log('❌ Utilisateur non trouvé');
+      return res.status(404).json({
+        success: false,
+        message: 'Utilisateur non trouvé'
+      });
+    }
+
+    console.log('✅ Utilisateur trouvé:', utilisateur.email);
+    console.log('Hash mot de passe existe ?', !!utilisateur.motDePasse);
+    console.log('Longueur du hash:', utilisateur.motDePasse?.length);
+
+    // Vérifier que le mot de passe existe
+    if (!utilisateur.motDePasse) {
+      console.log('❌ Pas de mot de passe dans la DB !');
+      return res.status(500).json({
+        success: false,
+        message: 'Mot de passe non défini dans la base de données. Contactez un administrateur.'
+      });
+    }
+
+    // Vérifier le mot de passe actuel
+    console.log('Comparaison avec bcrypt...');
+    const estValide = await bcrypt.compare(currentPassword, utilisateur.motDePasse);
+    console.log('Résultat comparaison:', estValide);
+
+    if (!estValide) {
+      return res.status(401).json({
+        success: false,
+        message: 'Mot de passe actuel incorrect'
+      });
+    }
+
+    // Hasher le nouveau mot de passe
+    console.log('Création du nouveau hash...');
+    const nouveauHash = await bcrypt.hash(newPassword, 10);
+    console.log('Nouveau hash créé, longueur:', nouveauHash.length);
+    
+    utilisateur.motDePasse = nouveauHash;
+    await utilisateur.save();
+
+    console.log('✅ Mot de passe modifié avec succès');
+
+    res.json({
+      success: true,
+      message: 'Mot de passe modifié avec succès'
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur changement mot de passe:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors du changement de mot de passe',
+      error: error.message
+    });
+  }
+});
+
+// Upload photo de profil
+router.post('/utilisateurs/:userId/photo', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    // TODO: Implémenter l'upload réel avec multer + cloudinary
+    
+    res.json({
+      success: true,
+      message: 'Photo mise à jour avec succès',
+      photoUrl: 'https://ui-avatars.com/api/?name=Updated&size=200'
+    });
+
+  } catch (error) {
+    console.error('Erreur upload photo:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de l\'upload de la photo'
+    });
+  }
+});
+
 module.exports = router;
