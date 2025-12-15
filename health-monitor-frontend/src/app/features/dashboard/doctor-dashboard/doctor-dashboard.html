@@ -1,0 +1,1135 @@
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20 transition-colors duration-300">
+  
+  <!-- Toast notifications -->
+  <app-toast></app-toast>
+
+  <!-- Navbar époustouflant -->
+  <nav class="glass-nav border-b border-white/20 dark:border-purple-500/30 sticky top-0 z-40 backdrop-blur-xl bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10">
+    <div class="container mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        
+        <!-- Logo avec gradient -->
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <!-- Glow effect -->
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur-lg opacity-50"></div>
+            <!-- Logo -->
+            <div class="relative p-3 bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 rounded-2xl shadow-2xl">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+              </svg>
+            </div>
+          </div>
+          
+          <div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Dashboard Médecin
+            </h1>
+            <p class="text-sm text-gray-600 dark:text-gray-300 font-medium">Suivi patients en temps réel</p>
+          </div>
+        </div>
+
+        <!-- Actions avec effets -->
+        <div class="flex items-center space-x-4">
+          
+          <!-- Notifications -->
+          <button class="relative p-3 rounded-xl hover:bg-white/50 dark:hover:bg-purple-500/20 transition-all group">
+            <svg class="w-6 h-6 text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+          </button>
+
+          <!-- Toggle thème avec transition -->
+          <button
+            (click)="toggleTheme()"
+            class="p-3 rounded-xl hover:bg-white/50 dark:hover:bg-purple-500/20 transition-all group"
+          >
+            <svg *ngIf="!darkMode" class="w-6 h-6 text-gray-700 group-hover:text-purple-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </svg>
+            <svg *ngIf="darkMode" class="w-6 h-6 text-yellow-400 group-hover:text-yellow-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+          </button>
+
+          <!-- Profil avec hover effect -->
+          <div class="flex items-center space-x-3 px-4 py-2 rounded-xl hover:bg-white/50 dark:hover:bg-purple-500/20 transition-all cursor-pointer group">
+            <div class="relative">
+              <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
+              <img
+                [src]="user?.photoProfil || 'https://ui-avatars.com/api/?name=' + (user?.prenom || 'M') + '+' + (user?.nom || 'D') + '&background=8B5CF6&color=fff'"
+                class="relative w-12 h-12 rounded-full border-2 border-purple-500 shadow-lg"
+                [alt]="user?.prenom + ' ' + user?.nom"
+              >
+            </div>
+            <div class="hidden md:block">
+              <p class="text-sm font-bold text-gray-900 dark:text-white">Dr. {{ user?.prenom }} {{ user?.nom }}</p>
+              <p class="text-xs text-purple-600 dark:text-purple-400 font-medium">Médecin</p>
+            </div>
+          </div>
+
+          <!-- Déconnexion avec gradient -->
+          <button
+            (click)="logout()"
+            class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
+          >
+            Déconnexion
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Tabs navigation MAGNIFIQUES -->
+  <!-- Tabs navigation MAGNIFIQUES - STICKY -->
+  <div class="sticky top-[73px] z-30 bg-gradient-to-br from-indigo-50/95 via-purple-50/95 to-pink-50/95 dark:from-gray-900/95 dark:via-purple-900/20 dark:to-indigo-900/20 backdrop-blur-xl border-b border-purple-500/20">
+    <div class="container mx-auto px-6 py-4">
+      <div class="glass-tabs rounded-2xl p-2 inline-flex space-x-2 shadow-xl backdrop-blur-xl bg-white/60 dark:bg-gray-800/60">
+      <button
+        *ngFor="let tab of [
+          { id: 'overview', label: 'Vue d\'ensemble', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z', gradient: 'from-blue-500 to-cyan-500' },
+          { id: 'patients', label: 'Patients', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z', gradient: 'from-purple-500 to-pink-500' },
+          { id: 'alerts', label: 'Alertes', icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z', gradient: 'from-yellow-500 to-orange-500' },
+          { id: 'reports', label: 'Rapports', icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', gradient: 'from-green-500 to-teal-500' },
+          { id: 'profile', label: 'Mon Profil', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', gradient: 'from-indigo-500 to-purple-500' }
+        ]"
+        (click)="switchTab(tab.id)"
+        [class]="activeTab === tab.id ? 'bg-gradient-to-r ' + tab.gradient + ' text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
+        class="relative px-8 py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-3 group"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="tab.icon"></path>
+        </svg>
+        <span class="text-base">{{ tab.label }}</span>
+        
+        <!-- Effet glow pour l'onglet actif -->
+        <div *ngIf="activeTab === tab.id" class="absolute inset-0 bg-gradient-to-r rounded-xl blur-xl opacity-50 -z-10" [class]="tab.gradient"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="container mx-auto px-4 pb-12">
+    <!-- ========== ONGLET VUE D'ENSEMBLE ========== -->
+    <div *ngIf="activeTab === 'overview'" class="space-y-6">
+      
+      <!-- Statistiques en cartes -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total patients -->
+        <div class="glass rounded-xl p-6 hover:shadow-xl transition-all">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Total Patients</p>
+              <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                {{ statistiques?.totalPatients || 0 }}
+              </p>
+            </div>
+            <div class="p-4 bg-blue-500/20 rounded-xl">
+              <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Patients actifs -->
+        <div class="glass rounded-xl p-6 hover:shadow-xl transition-all">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Actifs</p>
+              <p class="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">
+                {{ statistiques?.patientsActifs || 0 }}
+              </p>
+            </div>
+            <div class="p-4 bg-green-500/20 rounded-xl">
+              <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Patients à risque -->
+        <div class="glass rounded-xl p-6 hover:shadow-xl transition-all">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">À Risque</p>
+              <p class="text-3xl font-bold text-red-600 dark:text-red-400 mt-2">
+                {{ statistiques?.patientsARisque || 0 }}
+              </p>
+            </div>
+            <div class="p-4 bg-red-500/20 rounded-xl">
+              <svg class="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Archivés -->
+        <div class="glass rounded-xl p-6 hover:shadow-xl transition-all">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Archivés</p>
+              <p class="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">
+                {{ statistiques?.patientsArchives || 0 }}
+              </p>
+            </div>
+            <div class="p-4 bg-purple-500/20 rounded-xl">
+              <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aperçu patients récents -->
+      <div class="glass rounded-xl p-6">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Patients récents</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-gray-200 dark:border-gray-700">
+                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Patient</th>
+                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Dernière mesure</th>
+                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Statut</th>
+                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let patient of patientsAffiches.slice(0, 5)" class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                <td class="py-3 px-4">
+                  <div class="flex items-center space-x-3">
+                    <img
+                      [src]="patient.photoProfil || 'https://ui-avatars.com/api/?name=' + patient.prenom + '+' + patient.nom"
+                      class="w-10 h-10 rounded-full"
+                      [alt]="patient.prenom + ' ' + patient.nom"
+                    >
+                    <div>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.prenom }} {{ patient.nom }}</p>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">{{ patient.email }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3 px-4">
+                  <p class="text-sm text-gray-900 dark:text-white">
+                    {{ patient.derniereMesure ? formatDate(patient.derniereMesure.horodatageMesure) : 'Aucune' }}
+                  </p>
+                </td>
+                <td class="py-3 px-4">
+                  <span
+                    *ngIf="patient.derniereMesure"
+                    [class]="getStatusBg(patient.derniereMesure.statut)"
+                    class="px-3 py-1 rounded-full text-sm font-medium"
+                    [class.text-green-700]="patient.derniereMesure.statut === 'NORMAL'"
+                    [class.text-yellow-700]="patient.derniereMesure.statut === 'ATTENTION'"
+                    [class.text-red-700]="patient.derniereMesure.statut === 'DANGER'"
+                  >
+                    {{ patient.derniereMesure.statut }}
+                  </span>
+                  <span *ngIf="!patient.derniereMesure" class="text-sm text-gray-500">-</span>
+                </td>
+                <td class="py-3 px-4">
+                <button
+                    (click)="voirDetailsPatient(patient)"
+                    class="group relative px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    <span>Voir</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== ONGLET PATIENTS ========== -->
+    <div *ngIf="activeTab === 'patients'" class="space-y-6">
+      
+      <!-- Barre de recherche et filtres -->
+      <div class="glass rounded-xl p-6">
+        <div class="flex flex-col lg:flex-row gap-4 items-center justify-between">
+          <!-- Recherche -->
+          <div class="flex-1 w-full lg:w-auto">
+            <div class="relative">
+              <input
+                type="text"
+                [(ngModel)]="searchQuery"
+                (ngModelChange)="onSearchChange()"
+                placeholder="Rechercher un patient..."
+                class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              >
+              <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Filtres -->
+          <div class="flex gap-2 flex-wrap">
+            <button
+              *ngFor="let filter of [
+                { id: 'all', label: 'Tous', color: 'blue' },
+                { id: 'normal', label: 'Normal', color: 'green' },
+                { id: 'attention', label: 'Attention', color: 'yellow' },
+                { id: 'danger', label: 'Danger', color: 'red' }
+              ]"
+              (click)="setFilterStatus(filter.id)"
+              [class.bg-blue-500]="filterStatus === filter.id && filter.color === 'blue'"
+              [class.bg-green-500]="filterStatus === filter.id && filter.color === 'green'"
+              [class.bg-yellow-500]="filterStatus === filter.id && filter.color === 'yellow'"
+              [class.bg-red-500]="filterStatus === filter.id && filter.color === 'red'"
+              [class.text-white]="filterStatus === filter.id"
+              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+            >
+              {{ filter.label }}
+            </button>
+
+            <!-- Toggle archivés -->
+            <button
+              (click)="toggleArchived()"
+              [class.bg-purple-500]="showArchived"
+              [class.text-white]="showArchived"
+              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center space-x-2"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+              </svg>
+              <span>{{ showArchived ? 'Masquer' : 'Afficher' }} archivés</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Liste des patients -->
+      <div *ngIf="loadingPatients" class="glass rounded-xl p-12 text-center">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <p class="mt-4 text-gray-600 dark:text-gray-400">Chargement des patients...</p>
+      </div>
+
+      <div *ngIf="!loadingPatients && patientsAffiches.length === 0" class="glass rounded-xl p-12 text-center">
+        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+        </svg>
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Aucun patient trouvé</h3>
+        <p class="text-gray-600 dark:text-gray-400">Modifiez vos filtres ou votre recherche</p>
+      </div>
+
+      <div *ngIf="!loadingPatients && patientsAffiches.length > 0" class="space-y-6">
+        <!-- Grille patients -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div *ngFor="let patient of patientsPagees" class="glass rounded-xl p-6 hover:shadow-xl transition-all">
+          <!-- Header carte patient -->
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center space-x-4">
+              <img
+                [src]="patient.photoProfil || 'https://ui-avatars.com/api/?name=' + patient.prenom + '+' + patient.nom"
+                class="w-16 h-16 rounded-full border-2 border-blue-500"
+                [alt]="patient.prenom + ' ' + patient.nom"
+              >
+              <div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                  {{ patient.prenom }} {{ patient.nom }}
+                </h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ patient.email }}</p>
+                <p *ngIf="patient.idDispositif" class="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                  📟 {{ patient.idDispositif }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Badge archivé -->
+            <span
+              *ngIf="patient.estArchive"
+              class="px-3 py-1 bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 rounded-full text-sm font-medium"
+            >
+              Archivé
+            </span>
+          </div>
+
+          <!-- Infos patient -->
+          <div class="space-y-2 mb-4">
+            <div *ngIf="patient.derniereMesure" class="flex items-center justify-between">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Dernière mesure:</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ formatDate(patient.derniereMesure.horodatageMesure) }}
+              </span>
+            </div>
+
+            <div *ngIf="patient.derniereMesure" class="flex items-center justify-between">
+              <span class="text-sm text-gray-600 dark:text-gray-400">BPM / SpO2:</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ patient.derniereMesure.bpm }} / {{ patient.derniereMesure.spo2 }}%
+              </span>
+            </div>
+
+            <div *ngIf="patient.derniereMesure" class="flex items-center justify-between">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Statut:</span>
+              <span
+                [class]="getStatusBg(patient.derniereMesure.statut)"
+                class="px-3 py-1 rounded-full text-xs font-medium"
+                [class.text-green-700]="patient.derniereMesure.statut === 'NORMAL'"
+                [class.text-yellow-700]="patient.derniereMesure.statut === 'ATTENTION'"
+                [class.text-red-700]="patient.derniereMesure.statut === 'DANGER'"
+              >
+                {{ patient.derniereMesure.statut }}
+              </span>
+            </div>
+
+            <div *ngIf="patient.estArchive" class="flex items-center justify-between">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Raison:</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ getRaisonLabel(patient.raisonArchivage) }}
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Mesures:</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ patient.nombreMesures || 0 }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-2">
+            <button
+              (click)="voirDetailsPatient(patient)"
+              class="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all font-medium"
+            >
+              Voir détails
+            </button>
+
+            <button
+              *ngIf="!patient.estArchive"
+              (click)="openArchiveModal(patient)"
+              class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-all"
+              title="Archiver"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+              </svg>
+            </button>
+
+            <button
+              *ngIf="patient.estArchive"
+              (click)="desarchiverPatient(patient)"
+              class="px-4 py-2 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white rounded-lg transition-all font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+              title="Désarchiver"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      </div>
+
+        <!-- Pagination fixe -->
+        <div class="glass rounded-xl p-6 sticky bottom-6 shadow-2xl border-2 border-purple-500/30">
+          <div class="flex items-center justify-between">
+            <!-- Info pagination -->
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+              Page <span class="font-bold text-purple-600 dark:text-purple-400">{{ currentPage }}</span> 
+              sur <span class="font-bold">{{ totalPages }}</span>
+              <span class="ml-4">
+                ({{ patientsAffiches.length }} patient{{ patientsAffiches.length > 1 ? 's' : '' }})
+              </span>
+            </div>
+
+            <!-- Boutons pagination -->
+            <div class="flex items-center space-x-2">
+              <!-- Précédent -->
+              <button
+                (click)="previousPage()"
+                [disabled]="currentPage === 1"
+                class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+              </button>
+
+              <!-- Numéros de page -->
+              <div class="flex space-x-1">
+                <button
+                  *ngFor="let page of pageNumbers"
+                  (click)="goToPage(page)"
+                  [class.bg-gradient-to-r]="currentPage === page"
+                  [class.from-blue-500]="currentPage === page"
+                  [class.to-purple-600]="currentPage === page"
+                  [class.text-white]="currentPage === page"
+                  [class.shadow-lg]="currentPage === page"
+                  [class.scale-110]="currentPage === page"
+                  class="w-10 h-10 rounded-lg font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all transform hover:scale-105"
+                >
+                  {{ page }}
+                </button>
+              </div>
+
+              <!-- Suivant -->
+              <button
+                (click)="nextPage()"
+                [disabled]="currentPage === totalPages"
+                class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== ONGLET ALERTES ========== -->
+    <div *ngIf="activeTab === 'alerts'" class="space-y-6">
+      <div class="glass rounded-xl p-12 text-center">
+        <svg class="w-16 h-16 text-yellow-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Alertes en temps réel</h3>
+        <p class="text-gray-600 dark:text-gray-400">Fonctionnalité à venir...</p>
+      </div>
+    </div>
+
+    <!-- ========== ONGLET RAPPORTS ========== -->
+    <div *ngIf="activeTab === 'reports'" class="space-y-6">
+      <div class="glass rounded-xl p-12 text-center">
+        <svg class="w-16 h-16 text-blue-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Rapports médicaux</h3>
+        <p class="text-gray-600 dark:text-gray-400">Fonctionnalité à venir...</p>
+      </div>
+    </div>
+    <!-- ========== ONGLET PROFIL ========== -->
+    <div *ngIf="activeTab === 'profile'" class="space-y-6">
+      
+      <!-- Carte profil -->
+      <div class="glass rounded-2xl p-8">
+        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6">
+          Mon Profil Médecin
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <!-- Photo de profil -->
+          <div class="lg:col-span-1">
+            <div class="text-center">
+              <div class="relative inline-block mb-4">
+                <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur-xl opacity-50"></div>
+                <img
+                  [src]="user?.photoProfil || 'https://ui-avatars.com/api/?name=' + (user?.prenom || 'M') + '+' + (user?.nom || 'D') + '&background=8B5CF6&color=fff&size=200'"
+                  class="relative w-40 h-40 rounded-full border-4 border-purple-500 shadow-2xl mx-auto"
+                  [alt]="user?.prenom + ' ' + user?.nom"
+                >
+              </div>
+              
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                Dr. {{ user?.prenom }} {{ user?.nom }}
+              </h3>
+              <p class="text-purple-600 dark:text-purple-400 font-medium mb-4">Médecin</p>
+              
+              <!-- Upload photo -->
+              <label class="cursor-pointer inline-block">
+                <input
+                  type="file"
+                  accept="image/*"
+                  (change)="uploadPhoto($event)"
+                  class="hidden"
+                >
+                <span class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg inline-flex items-center space-x-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  <span>Changer la photo</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Informations personnelles -->
+          <div class="lg:col-span-2">
+            <form (ngSubmit)="saveProfile()" class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Prénom -->
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                    Prénom
+                  </label>
+                  <input
+                    type="text"
+                    [(ngModel)]="profileForm.prenom"
+                    name="prenom"
+                    required
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  >
+                </div>
+
+                <!-- Nom -->
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                    Nom
+                  </label>
+                  <input
+                    type="text"
+                    [(ngModel)]="profileForm.nom"
+                    name="nom"
+                    required
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  >
+                </div>
+              </div>
+
+              <!-- Email -->
+              <div>
+                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  [(ngModel)]="profileForm.email"
+                  name="email"
+                  required
+                  class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                >
+              </div>
+
+              <!-- Bouton sauvegarder -->
+              <button
+                type="submit"
+                [disabled]="savingProfile"
+                class="w-full px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+              >
+                <span *ngIf="!savingProfile">💾 Enregistrer les modifications</span>
+                <span *ngIf="savingProfile" class="flex items-center justify-center">
+                  <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Sauvegarde...
+                </span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Changer mot de passe -->
+      <div class="glass rounded-2xl p-8">
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center space-x-2">
+          <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+          <span>Changer le mot de passe</span>
+        </h3>
+
+        <form (ngSubmit)="changePassword()" class="space-y-6 max-w-2xl">
+          
+          <!-- Mot de passe actuel -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+              Mot de passe actuel
+            </label>
+            <input
+              type="password"
+              [(ngModel)]="passwordForm.currentPassword"
+              name="currentPassword"
+              required
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+            >
+          </div>
+
+          <!-- Nouveau mot de passe -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+              Nouveau mot de passe
+            </label>
+            <input
+              type="password"
+              [(ngModel)]="passwordForm.newPassword"
+              name="newPassword"
+              required
+              minlength="6"
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+            >
+          </div>
+
+          <!-- Confirmer mot de passe -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+              Confirmer le nouveau mot de passe
+            </label>
+            <input
+              type="password"
+              [(ngModel)]="passwordForm.confirmPassword"
+              name="confirmPassword"
+              required
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+            >
+          </div>
+
+          <!-- Bouton -->
+          <button
+            type="submit"
+            [disabled]="changingPassword"
+            class="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            <span *ngIf="!changingPassword">🔐 Modifier le mot de passe</span>
+            <span *ngIf="changingPassword" class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Modification...
+            </span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MODAL ARCHIVAGE ========== -->
+  <div
+    *ngIf="showArchiveModal"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    (click)="closeArchiveModal()"
+  >
+    <div
+      class="glass rounded-2xl p-8 max-w-md w-full"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header modal -->
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Archiver le patient</h3>
+        <button
+          (click)="closeArchiveModal()"
+          class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all"
+        >
+          <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Infos patient -->
+      <div *ngIf="patientAArchiver" class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+        <div class="flex items-center space-x-3">
+          <img
+            [src]="patientAArchiver.photoProfil || 'https://ui-avatars.com/api/?name=' + patientAArchiver.prenom + '+' + patientAArchiver.nom"
+            class="w-12 h-12 rounded-full"
+            [alt]="patientAArchiver.prenom + ' ' + patientAArchiver.nom"
+          >
+          <div>
+            <p class="font-semibold text-gray-900 dark:text-white">
+              {{ patientAArchiver.prenom }} {{ patientAArchiver.nom }}
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ patientAArchiver.email }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulaire -->
+      <form (ngSubmit)="confirmArchive()" class="space-y-4">
+        <!-- Raison -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Raison de l'archivage *
+          </label>
+          <select
+            [(ngModel)]="archiveForm.raison"
+            name="raison"
+            required
+            class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="gueri">Guéri</option>
+            <option value="transfere">Transféré</option>
+            <option value="decede">Décédé</option>
+            <option value="traitement_termine">Traitement terminé</option>
+            <option value="inactif">Inactif</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+
+        <!-- Commentaire -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Commentaire (optionnel)
+          </label>
+          <textarea
+            [(ngModel)]="archiveForm.commentaire"
+            name="commentaire"
+            rows="3"
+            maxlength="500"
+            placeholder="Ajoutez des détails si nécessaire..."
+            class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+          ></textarea>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            {{ archiveForm.commentaire.length }}/500 caractères
+          </p>
+        </div>
+
+        <!-- Avertissement -->
+        <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+          <div class="flex items-start space-x-3">
+            <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div>
+              <p class="text-sm font-medium text-yellow-800 dark:text-yellow-300">Attention</p>
+              <p class="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
+                Le patient sera archivé et retiré de la liste active. Vous pourrez le désarchiver à tout moment.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Boutons -->
+        <div class="flex gap-3 pt-4">
+          <button
+            type="button"
+            (click)="closeArchiveModal()"
+            class="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            [disabled]="archiving"
+            class="flex-1 px-6 py-3 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-all flex items-center justify-center"
+          >
+            <span *ngIf="!archiving">Archiver</span>
+            <span *ngIf="archiving" class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Archivage...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== MODAL DÉSARCHIVAGE PROFESSIONNEL ========== -->
+  <div
+    *ngIf="showDesarchiveModal"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    (click)="closeDesarchiveModal()"
+  >
+    <div
+      class="glass rounded-2xl p-8 max-w-md w-full border-2 border-green-500/30"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-3">
+          <div class="p-3 bg-green-500/20 rounded-xl">
+            <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
+            Réactiver le patient
+          </h3>
+        </div>
+        <button
+          (click)="closeDesarchiveModal()"
+          class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all"
+        >
+          <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Patient info -->
+      <div *ngIf="patientADesarchiver" class="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border-2 border-green-500/30">
+        <div class="flex items-center space-x-3">
+          <img
+            [src]="patientADesarchiver.photoProfil || 'https://ui-avatars.com/api/?name=' + patientADesarchiver.prenom + '+' + patientADesarchiver.nom"
+            class="w-14 h-14 rounded-full border-2 border-green-500"
+            [alt]="patientADesarchiver.prenom + ' ' + patientADesarchiver.nom"
+          >
+          <div>
+            <p class="font-bold text-gray-900 dark:text-white text-lg">
+              {{ patientADesarchiver.prenom }} {{ patientADesarchiver.nom }}
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ patientADesarchiver.email }}</p>
+            <p class="text-xs text-purple-600 dark:text-purple-400 mt-1">
+              Archivé : {{ getRaisonLabel(patientADesarchiver.raisonArchivage) }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message -->
+      <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-500/30">
+        <div class="flex items-start space-x-3">
+          <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div>
+            <p class="text-sm font-medium text-blue-800 dark:text-blue-300">Information</p>
+            <p class="text-xs text-blue-700 dark:text-blue-400 mt-1">
+              Le patient sera réactivé et ajouté à votre liste de suivi actif. Vous pourrez consulter son historique complet.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Boutons -->
+      <div class="flex gap-3">
+        <button
+          type="button"
+          (click)="closeDesarchiveModal()"
+          class="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+        >
+          Annuler
+        </button>
+        <button
+          (click)="confirmDesarchive()"
+          [disabled]="desarchiving"
+          class="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 disabled:opacity-50 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
+        >
+          <span *ngIf="!desarchiving">Réactiver</span>
+          <span *ngIf="desarchiving" class="flex items-center">
+            <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Réactivation...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MODAL DÉTAILS PATIENT ========== -->
+  <div
+    *ngIf="showPatientDetailModal"
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+    (click)="closePatientDetailModal()"
+  >
+    <div
+      class="glass rounded-2xl max-w-6xl w-full my-8 border-2 border-blue-500/30"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <div class="relative">
+              <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-lg opacity-50"></div>
+              <img
+                *ngIf="patientDetails"
+                [src]="patientDetails.photoProfil || 'https://ui-avatars.com/api/?name=' + patientDetails.prenom + '+' + patientDetails.nom"
+                class="relative w-16 h-16 rounded-full border-2 border-blue-500"
+                [alt]="patientDetails.prenom + ' ' + patientDetails.nom"
+              >
+            </div>
+            <div>
+              <h3 *ngIf="patientDetails" class="text-2xl font-bold text-gray-900 dark:text-white">
+                {{ patientDetails.prenom }} {{ patientDetails.nom }}
+              </h3>
+              <p *ngIf="patientDetails" class="text-sm text-gray-600 dark:text-gray-400">
+                {{ patientDetails.email }}
+              </p>
+              <p *ngIf="patientDetails?.idDispositif" class="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                📟 {{ patientDetails.idDispositif }}
+              </p>
+            </div>
+          </div>
+          
+          <button
+            (click)="closePatientDetailModal()"
+            class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all"
+          >
+            <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenu -->
+      <div class="p-6">
+        
+        <!-- Loading -->
+        <div *ngIf="loadingDetails" class="text-center py-12">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p class="mt-4 text-gray-600 dark:text-gray-400">Chargement des détails...</p>
+        </div>
+
+        <!-- Données chargées -->
+        <div *ngIf="!loadingDetails && patientDetails" class="space-y-6">
+          
+          <!-- Statistiques -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Total mesures -->
+            <div class="glass rounded-xl p-4 text-center">
+              <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                {{ patientStats?.total || 0 }}
+              </div>
+              <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Total mesures</div>
+            </div>
+
+            <!-- Normal -->
+            <div class="glass rounded-xl p-4 text-center bg-green-50 dark:bg-green-900/20">
+              <div class="text-3xl font-bold text-green-600 dark:text-green-400">
+                {{ patientStats?.normal || 0 }}
+              </div>
+              <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Normal</div>
+            </div>
+
+            <!-- Attention -->
+            <div class="glass rounded-xl p-4 text-center bg-yellow-50 dark:bg-yellow-900/20">
+              <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                {{ patientStats?.attention || 0 }}
+              </div>
+              <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Attention</div>
+            </div>
+
+            <!-- Danger -->
+            <div class="glass rounded-xl p-4 text-center bg-red-50 dark:bg-red-900/20">
+              <div class="text-3xl font-bold text-red-600 dark:text-red-400">
+                {{ patientStats?.danger || 0 }}
+              </div>
+              <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">Danger</div>
+            </div>
+          </div>
+
+          <!-- Informations patient -->
+          <div class="glass rounded-xl p-6">
+            <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Informations</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Genre</p>
+                <p class="font-medium text-gray-900 dark:text-white">
+                  {{ patientDetails.genre === 'homme' ? 'Homme' : patientDetails.genre === 'femme' ? 'Femme' : 'Autre' }}
+                </p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Date de naissance</p>
+                <p class="font-medium text-gray-900 dark:text-white">
+                  {{ patientDetails.dateDeNaissance ? formatDate(patientDetails.dateDeNaissance) : 'Non renseignée' }}
+                </p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Dispositif</p>
+                <p class="font-medium text-gray-900 dark:text-white">
+                  {{ patientDetails.idDispositif || 'Non assigné' }}
+                </p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Statut</p>
+                <span
+                  [class]="patientDetails.estArchive ? 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400' : 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'"
+                  class="px-3 py-1 rounded-full text-sm font-medium"
+                >
+                  {{ patientDetails.estArchive ? 'Archivé' : 'Actif' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Historique des mesures -->
+          <div class="glass rounded-xl p-6">
+            <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
+              Historique des mesures ({{ patientMeasurements.length }} dernières)
+            </h4>
+            
+            <div *ngIf="patientMeasurements.length === 0" class="text-center py-8 text-gray-500">
+              Aucune mesure disponible
+            </div>
+
+            <div *ngIf="patientMeasurements.length > 0" class="overflow-x-auto max-h-96 overflow-y-auto">
+              <table class="w-full">
+                <thead class="sticky top-0 bg-gray-100 dark:bg-gray-800">
+                  <tr>
+                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Date</th>
+                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">BPM</th>
+                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">SpO2</th>
+                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Statut</th>
+                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Batterie</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let mesure of patientMeasurements" class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    <td class="py-3 px-4 text-sm text-gray-900 dark:text-white">
+                      {{ formatDate(mesure.horodatageMesure) }}
+                    </td>
+                    <td class="py-3 px-4 text-sm font-medium text-gray-900 dark:text-white">
+                      {{ mesure.bpm }}
+                    </td>
+                    <td class="py-3 px-4 text-sm font-medium text-gray-900 dark:text-white">
+                      {{ mesure.spo2 }}%
+                    </td>
+                    <td class="py-3 px-4">
+                      <span
+                        [class]="getStatusBg(mesure.statut)"
+                        class="px-2 py-1 rounded-full text-xs font-medium"
+                        [class.text-green-700]="mesure.statut === 'NORMAL'"
+                        [class.text-yellow-700]="mesure.statut === 'ATTENTION'"
+                        [class.text-red-700]="mesure.statut === 'DANGER'"
+                      >
+                        {{ mesure.statut }}
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
+                      {{ mesure.niveauBatterie || 'N/A' }}%
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button
+              *ngIf="!patientDetails.estArchive"
+              (click)="openArchiveModal(patientDetails); closePatientDetailModal()"
+              class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              📦 Archiver ce patient
+            </button>
+            
+            <button
+              *ngIf="patientDetails.estArchive"
+              (click)="desarchiverPatient(patientDetails); closePatientDetailModal()"
+              class="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              ♻️ Réactiver ce patient
+            </button>
+
+            <button
+              (click)="closePatientDetailModal()"
+              class="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+  
+
+ 

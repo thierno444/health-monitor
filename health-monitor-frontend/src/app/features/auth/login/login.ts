@@ -33,9 +33,18 @@ export class LoginComponent {
     this.error = '';
 
     this.authService.login(this.email, this.password).subscribe({
-      next: (response: AuthResponse) => {
-        console.log('✅ Connexion réussie', response);
+      next: (response) => {
+      console.log('✅ Connexion réussie:', response);
+      this.loading = false;
+      
+      // Redirection selon le rôle
+      if (response.utilisateur.role === 'medecin') {
+        this.router.navigate(['/doctor-dashboard']);
+      } else if (response.utilisateur.role === 'admin') {
+        this.router.navigate(['/admin-dashboard']); // À créer
+      } else {
         this.router.navigate(['/dashboard']);
+      }
       },
       error: (err: any) => {
         console.error('❌ Erreur connexion', err);
