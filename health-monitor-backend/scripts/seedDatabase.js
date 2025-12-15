@@ -28,15 +28,15 @@ const seedUsers = async () => {
     // Créer les utilisateurs
     const users = [
       {
-        prenom: 'Test',
-        nom: 'Patient',
-        email: 'test.patient@example.com',
+        prenom: 'Alice',
+        nom: 'Durand',
+        email: 'alice.durand@example.com',
         motDePasse: passwordHash,
         role: 'patient',
-        photoProfil: 'https://ui-avatars.com/api/?name=Test+Patient&background=0D8ABC&color=fff&size=200',
-        idDispositif: 'ESP32_TEST_001',
-        dateDeNaissance: new Date('1990-01-15'),
-        genre: 'homme',
+        photoProfil: 'https://ui-avatars.com/api/?name=Alice+Durand&background=0D8ABC&color=fff&size=200',
+        idDispositif: 'ESP32_TEST_004',
+        dateDeNaissance: new Date('1995-02-10'),
+        genre: 'femme',
         parametresAlertes: {
           bpmMin: 60,
           bpmMax: 100,
@@ -47,59 +47,68 @@ const seedUsers = async () => {
         estActif: true
       },
       {
-        prenom: 'Dr. Marie',
-        nom: 'Dupont',
-        email: 'dr.dupont@example.com',
+        prenom: 'François',
+        nom: 'Moreau',
+        email: 'francois.moreau@example.com',
         motDePasse: passwordHash,
         role: 'medecin',
-        photoProfil: 'https://ui-avatars.com/api/?name=Dr+Marie+Dupont&background=10B981&color=fff&size=200',
-        dateDeNaissance: new Date('1980-05-20'),
-        genre: 'femme',
-        estActif: true
-      },
-      {
-        prenom: 'Admin',
-        nom: 'Système',
-        email: 'admin@example.com',
-        motDePasse: passwordHash,
-        role: 'admin',
-        photoProfil: 'https://ui-avatars.com/api/?name=Admin+Systeme&background=EF4444&color=fff&size=200',
+        photoProfil: 'https://ui-avatars.com/api/?name=François+Moreau&background=10B981&color=fff&size=200',
+        dateDeNaissance: new Date('1975-04-25'),
         genre: 'homme',
         estActif: true
       },
       {
-        prenom: 'Jean',
-        nom: 'Martin',
-        email: 'jean.martin@example.com',
+        prenom: 'Lucie',
+        nom: 'Lefèvre',
+        email: 'lucie.lefevre@example.com',
         motDePasse: passwordHash,
         role: 'patient',
-        photoProfil: 'https://ui-avatars.com/api/?name=Jean+Martin&background=8B5CF6&color=fff&size=200',
-        idDispositif: 'ESP32_TEST_002',
-        dateDeNaissance: new Date('1985-08-10'),
-        genre: 'homme',
+        photoProfil: 'https://ui-avatars.com/api/?name=Lucie+Lefèvre&background=F59E0B&color=fff&size=200',
+        idDispositif: 'ESP32_TEST_005',
+        dateDeNaissance: new Date('1998-07-30'),
+        genre: 'femme',
         parametresAlertes: {
           bpmMin: 55,
-          bpmMax: 110,
-          spo2Min: 94,
+          bpmMax: 105,
+          spo2Min: 93,
           notificationsEmail: true,
           alertesSonores: false
         },
         estActif: true
       },
       {
-        prenom: 'Sophie',
-        nom: 'Bernard',
-        email: 'sophie.bernard@example.com',
+        prenom: 'Marc',
+        nom: 'Simon',
+        email: 'marc.simon@example.com',
         motDePasse: passwordHash,
         role: 'patient',
-        photoProfil: 'https://ui-avatars.com/api/?name=Sophie+Bernard&background=F59E0B&color=fff&size=200',
-        idDispositif: 'ESP32_TEST_003',
-        dateDeNaissance: new Date('1992-03-25'),
+        photoProfil: 'https://ui-avatars.com/api/?name=Marc+Simon&background=8B5CF6&color=fff&size=200',
+        idDispositif: 'ESP32_TEST_006',
+        dateDeNaissance: new Date('1989-09-12'),
+        genre: 'homme',
+        parametresAlertes: {
+          bpmMin: 58,
+          bpmMax: 110,
+          spo2Min: 94,
+          notificationsEmail: false,
+          alertesSonores: true
+        },
+        estActif: true
+      },
+      {
+        prenom: 'Emma',
+        nom: 'Bourgoin',
+        email: 'emma.bourgoin@example.com',
+        motDePasse: passwordHash,
+        role: 'patient',
+        photoProfil: 'https://ui-avatars.com/api/?name=Emma+Bourgoin&background=EF4444&color=fff&size=200',
+        idDispositif: 'ESP32_TEST_007',
+        dateDeNaissance: new Date('1993-12-19'),
         genre: 'femme',
         parametresAlertes: {
-          bpmMin: 60,
-          bpmMax: 100,
-          spo2Min: 95,
+          bpmMin: 62,
+          bpmMax: 102,
+          spo2Min: 92,
           notificationsEmail: true,
           alertesSonores: true
         },
@@ -194,33 +203,17 @@ const seedDatabase = async () => {
     console.log('\n✅ Seed terminé avec succès !');
     console.log('\n📋 Utilisateurs créés :');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('👤 Patient 1:');
-    console.log('   Nom: Test Patient');
-    console.log('   Email: test.patient@example.com');
-    console.log('   Mot de passe: password123');
-    console.log('   Dispositif: ESP32_TEST_001');
-    console.log('');
-    console.log('👤 Patient 2:');
-    console.log('   Nom: Jean Martin');
-    console.log('   Email: jean.martin@example.com');
-    console.log('   Mot de passe: password123');
-    console.log('   Dispositif: ESP32_TEST_002');
-    console.log('');
-    console.log('👤 Patient 3:');
-    console.log('   Nom: Sophie Bernard');
-    console.log('   Email: sophie.bernard@example.com');
-    console.log('   Mot de passe: password123');
-    console.log('   Dispositif: ESP32_TEST_003');
-    console.log('');
-    console.log('👨‍⚕️ Médecin:');
-    console.log('   Nom: Dr. Marie Dupont');
-    console.log('   Email: dr.dupont@example.com');
-    console.log('   Mot de passe: password123');
-    console.log('');
-    console.log('⚙️  Admin:');
-    console.log('   Nom: Admin Système');
-    console.log('   Email: admin@example.com');
-    console.log('   Mot de passe: password123');
+
+    // Afficher les utilisateurs créés
+    users.forEach(user => {
+      console.log(`👤 ${user.role === 'patient' ? 'Patient' : user.role === 'medecin' ? 'Médecin' : 'Admin'}:`);
+      console.log(`   Nom: ${user.prenom} ${user.nom}`);
+      console.log(`   Email: ${user.email}`);
+      console.log(`   Mot de passe: password123`);
+      console.log(`   Dispositif: ${user.idDispositif}`);
+      console.log('');
+    });
+
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('\n💡 Utilisez ces identifiants pour vous connecter !');
 

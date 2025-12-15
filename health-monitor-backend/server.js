@@ -43,6 +43,8 @@ const routeAssignments = require('./routes/assignments');
 const routeNotes = require('./routes/notes');
 const routeExport = require('./routes/export');
 const routePassword = require('./routes/password');
+const archivageRoutes = require('./routes/archivage');
+const medecinRoutes = require('./routes/medecin');
 
 
 
@@ -53,6 +55,10 @@ app.use('/api/assignments', routeAssignments);
 app.use('/api/notes', routeNotes);
 app.use('/api/export', routeExport);
 app.use('/api/password', routePassword);
+app.use('/api/archivage', archivageRoutes);
+app.use('/api/medecin', medecinRoutes);
+
+
 
 
 // ==================== ROUTES DE TEST ====================

@@ -107,6 +107,56 @@ const SchemaUtilisateur = new mongoose.Schema({
   resetPasswordExpire: {
     type: Date,
     required: false
+  },
+
+  // Système d'archivage (pour patients et utilisateurs)
+  estArchive: {
+    type: Boolean,
+    default: false,
+    index: true // Index pour recherche rapide
+  },
+  
+  dateArchivage: {
+    type: Date,
+    required: false
+  },
+  
+  raisonArchivage: {
+    type: String,
+    enum: [
+      'gueri',
+      'transfere',
+      'decede',
+      'traitement_termine',
+      'inactif',
+      'demission',
+      'autre'
+    ],
+    required: false
+  },
+  
+  commentaireArchivage: {
+    type: String,
+    maxlength: 500,
+    required: false
+  },
+  
+  archivePar: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Utilisateur',
+    required: false
+  },
+  
+  // Pour suppression RGPD
+  suppressionPrevue: {
+    type: Date,
+    required: false
+  },
+  
+  // Snapshot des données avant archivage (pour admin)
+  dataArchivee: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false
   }
 }, {
   timestamps: true
