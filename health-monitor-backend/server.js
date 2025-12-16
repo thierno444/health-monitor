@@ -45,6 +45,9 @@ const routeExport = require('./routes/export');
 const routePassword = require('./routes/password');
 const archivageRoutes = require('./routes/archivage');
 const medecinRoutes = require('./routes/medecin');
+const alertesRoutes = require('./routes/alertes');
+const notesRoutes = require('./routes/notes');
+
 
 
 
@@ -57,6 +60,8 @@ app.use('/api/export', routeExport);
 app.use('/api/password', routePassword);
 app.use('/api/archivage', archivageRoutes);
 app.use('/api/medecin', medecinRoutes);
+app.use('/api/alertes', alertesRoutes);
+app.use('/api/notes', notesRoutes);
 
 
 

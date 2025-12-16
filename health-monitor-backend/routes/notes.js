@@ -1,216 +1,158 @@
 const express = require('express');
 const router = express.Router();
+const verifierToken = require('../middleware/auth');
 const Note = require('../models/Note');
-const Utilisateur = require('../models/User');
-const Assignment = require('../models/Assignment');
+const User = require('../models/User');
 
-// ==================== ROUTES NOTES MÉDICALES ====================
+// Middleware médecin
+const verifierMedecin = (req, res, next) => {
+  if (req.utilisateur.role !== 'medecin' && req.utilisateur.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Accès médecin requis' });
+  }
+  next();
+};
 
-// 📝 POST /api/notes - Créer une nouvelle note
-router.post('/', async (req, res) => {
+// Liste notes d'un patient
+router.get('/patient/:patientId', verifierToken, verifierMedecin, async (req, res) => {
   try {
-    console.log('\n📝 Nouvelle note médicale');
+    const notes = await Note.findByPatient(req.params.patientId, true)
+      .populate('medecinId', 'prenom nom photoProfil');
     
-    const { patientId, medecinId, contenu, type, prive, priorite, tags } = req.body;
+    console.log(`📝 ${notes.length} notes pour patient ${req.params.patientId}`);
     
-    // Validation
-    if (!patientId || !medecinId || !contenu) {
-      return res.status(400).json({
-        success: false,
-        message: '❌ patientId, medecinId et contenu requis'
-      });
-    }
-    
-    // Vérifier que le médecin existe
-    const medecin = await Utilisateur.findById(medecinId);
-    if (!medecin || (medecin.role !== 'medecin' && medecin.role !== 'admin')) {
-      return res.status(403).json({
-        success: false,
-        message: '❌ Seuls les médecins peuvent créer des notes'
-      });
-    }
-    
-    // Vérifier que le patient existe
-    const patient = await Utilisateur.findById(patientId);
-    if (!patient) {
-      return res.status(404).json({
-        success: false,
-        message: '❌ Patient non trouvé'
-      });
-    }
-    
-    // Vérifier que le médecin est assigné au patient
-    const assignation = await Assignment.findOne({
-      medecinId: medecinId,
-      patientId: patientId,
-      actif: true
+    res.json({
+      success: true,
+      notes,
+      total: notes.length
     });
+  } catch (error) {
+    console.error('Erreur récupération notes:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+});
+
+// Toutes les notes du médecin
+router.get('/medecin', verifierToken, verifierMedecin, async (req, res) => {
+  try {
+    const notes = await Note.findByMedecin(req.utilisateur.id);
     
-    if (!assignation && medecin.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: '❌ Vous devez être assigné à ce patient pour ajouter une note'
+    res.json({
+      success: true,
+      notes,
+      total: notes.length
+    });
+  } catch (error) {
+    console.error('Erreur récupération notes médecin:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+});
+
+// Créer une note
+router.post('/', verifierToken, verifierMedecin, async (req, res) => {
+  try {
+    const { patientId, contenu, type, priorite, prive, tags } = req.body;
+    
+    if (!patientId || !contenu) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Patient et contenu requis' 
       });
     }
     
-    // Créer la note
-    const nouvelleNote = new Note({
-      patientId: patientId,
-      medecinId: medecinId,
-      contenu: contenu,
+    const note = await Note.create({
+      patientId,
+      medecinId: req.utilisateur.id,
+      contenu,
       type: type || 'observation',
-      prive: prive || false,
       priorite: priorite || 'normale',
-      tags: tags || []
+      prive: prive || false,
+      tags: tags || [],
+      visible: true
     });
     
-    await nouvelleNote.save();
+    const notePopulee = await Note.findById(note._id)
+      .populate('medecinId', 'prenom nom photoProfil')
+      .populate('patientId', 'prenom nom');
     
-    // Peupler les références
-    await nouvelleNote.populate('medecinId', 'prenom nom photoProfil');
-    await nouvelleNote.populate('patientId', 'prenom nom photoProfil');
-    
-    console.log(`✅ Note créée par Dr. ${medecin.nomComplet} pour ${patient.nomComplet}`);
-    
-    res.status(201).json({
-      success: true,
-      message: '✅ Note médicale créée avec succès',
-      data: nouvelleNote
-    });
-    
-  } catch (error) {
-    console.error('❌ Erreur création note:', error.message);
-    res.status(500).json({
-      success: false,
-      message: '❌ Erreur serveur',
-      error: error.message
-    });
-  }
-});
-
-// 📋 GET /api/notes/patient/:patientId - Récupérer les notes d'un patient
-router.get('/patient/:patientId', async (req, res) => {
-  try {
-    const { patientId } = req.params;
-    const { includePrivate } = req.query;
-    
-    const notes = await Note.findByPatient(patientId, includePrivate === 'true');
-    
-    console.log(`📋 ${notes.length} note(s) récupérée(s) pour le patient ${patientId}`);
+    console.log(`✅ Note créée pour patient ${patientId} par Dr. ${req.utilisateur.id}`);
     
     res.json({
       success: true,
-      count: notes.length,
-      notes: notes
+      message: 'Note créée',
+      note: notePopulee
     });
-    
   } catch (error) {
-    console.error('❌ Erreur récupération notes:', error.message);
-    res.status(500).json({
-      success: false,
-      message: '❌ Erreur serveur',
-      error: error.message
-    });
+    console.error('Erreur création note:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 });
 
-// 📋 GET /api/notes/medecin/:medecinId - Récupérer les notes d'un médecin
-router.get('/medecin/:medecinId', async (req, res) => {
+// Modifier une note
+router.put('/:noteId', verifierToken, verifierMedecin, async (req, res) => {
   try {
-    const { medecinId } = req.params;
+    const { contenu, type, priorite, prive, tags } = req.body;
     
-    const notes = await Note.findByMedecin(medecinId);
-    
-    console.log(`📋 ${notes.length} note(s) récupérée(s) du médecin ${medecinId}`);
-    
-    res.json({
-      success: true,
-      count: notes.length,
-      notes: notes
-    });
-    
-  } catch (error) {
-    console.error('❌ Erreur récupération notes:', error.message);
-    res.status(500).json({
-      success: false,
-      message: '❌ Erreur serveur',
-      error: error.message
-    });
-  }
-});
-
-// ✏️ PUT /api/notes/:id - Modifier une note
-router.put('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { contenu, type, priorite, tags, prive } = req.body;
-    
-    const note = await Note.findById(id);
-    
+    const note = await Note.findById(req.params.noteId);
     if (!note) {
-      return res.status(404).json({
-        success: false,
-        message: '❌ Note non trouvée'
+      return res.status(404).json({ success: false, message: 'Note non trouvée' });
+    }
+    
+    // Vérifier que c'est le médecin auteur
+    if (note.medecinId.toString() !== req.utilisateur.id && req.utilisateur.role !== 'admin') {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Vous ne pouvez modifier que vos propres notes' 
       });
     }
     
-    // Mise à jour
     if (contenu) note.contenu = contenu;
     if (type) note.type = type;
     if (priorite) note.priorite = priorite;
+    if (prive !== undefined) note.prive = prive;
     if (tags) note.tags = tags;
-    if (typeof prive !== 'undefined') note.prive = prive;
     
     await note.save();
     
-    console.log(`✏️ Note ${id} modifiée`);
+    const notePopulee = await Note.findById(note._id)
+      .populate('medecinId', 'prenom nom photoProfil');
     
     res.json({
       success: true,
-      message: '✅ Note mise à jour',
-      data: note
+      message: 'Note modifiée',
+      note: notePopulee
     });
-    
   } catch (error) {
-    console.error('❌ Erreur modification note:', error.message);
-    res.status(500).json({
-      success: false,
-      message: '❌ Erreur serveur',
-      error: error.message
-    });
+    console.error('Erreur modification note:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 });
 
-// 🗑️ DELETE /api/notes/:id - Archiver une note
-router.delete('/:id', async (req, res) => {
+// Supprimer/Archiver une note
+router.delete('/:noteId', verifierToken, verifierMedecin, async (req, res) => {
   try {
-    const { id } = req.params;
-    
-    const note = await Note.findById(id);
-    
+    const note = await Note.findById(req.params.noteId);
     if (!note) {
-      return res.status(404).json({
-        success: false,
-        message: '❌ Note non trouvée'
+      return res.status(404).json({ success: false, message: 'Note non trouvée' });
+    }
+    
+    // Vérifier que c'est le médecin auteur
+    if (note.medecinId.toString() !== req.utilisateur.id && req.utilisateur.role !== 'admin') {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Vous ne pouvez supprimer que vos propres notes' 
       });
     }
     
+    // Archiver au lieu de supprimer
     await note.archiver();
-    
-    console.log(`🗑️ Note ${id} archivée`);
     
     res.json({
       success: true,
-      message: '✅ Note archivée'
+      message: 'Note archivée'
     });
-    
   } catch (error) {
-    console.error('❌ Erreur suppression note:', error.message);
-    res.status(500).json({
-      success: false,
-      message: '❌ Erreur serveur',
-      error: error.message
-    });
+    console.error('Erreur suppression note:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 });
 
