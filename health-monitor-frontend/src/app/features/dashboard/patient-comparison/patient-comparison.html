@@ -1,0 +1,265 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-blue-900/20 p-6">
+  
+  <!-- Header -->
+  <div class="glass rounded-2xl p-6 mb-6 border-2 border-purple-500/30">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <button
+          (click)="retour()"
+          class="p-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-xl transition-all"
+        >
+          <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+        </button>
+        
+        <div class="p-4 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl">
+          <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+        </div>
+        
+        <div>
+          <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent">
+            Comparaison Multi-Patients
+          </h1>
+          <p class="text-gray-600 dark:text-gray-400 mt-1">
+            Analyse comparative de {{ patients.length }} patients sur 30 jours
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="glass rounded-2xl p-12 text-center">
+    <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mb-4"></div>
+    <p class="text-xl text-gray-600 dark:text-gray-400">Chargement des données de comparaison...</p>
+  </div>
+
+  <!-- Contenu -->
+  <div *ngIf="!loading" class="space-y-6">
+    
+    <!-- Cartes patients -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+      <div
+        *ngFor="let patient of patients; let i = index"
+        class="glass rounded-2xl p-6 hover:shadow-2xl transition-all border-2"
+        [style.border-color]="getPatientColor(i)"
+      >
+        <div class="flex items-center space-x-3 mb-4">
+          <div
+            class="w-16 h-16 rounded-full border-4 flex items-center justify-center overflow-hidden"
+            [style.border-color]="getPatientColor(i)"
+          >
+            <img
+              [src]="patient.photoProfil || 'https://ui-avatars.com/api/?name=' + patient.prenom + '+' + patient.nom"
+              [alt]="patient.prenom + ' ' + patient.nom"
+              class="w-full h-full object-cover"
+            >
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-lg text-gray-900 dark:text-white truncate">
+              {{ patient.prenom }} {{ patient.nom }}
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
+              {{ patient.email }}
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Mesures</span>
+            <span class="font-bold text-gray-900 dark:text-white">
+              {{ statistiques[patient._id]?.total || 0 }}
+            </span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">BPM moyen</span>
+            <span class="font-bold" [style.color]="getPatientColor(i)">
+              {{ statistiques[patient._id]?.bpmMoyen || 0 }}
+            </span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">SpO2 moyen</span>
+            <span class="font-bold" [style.color]="getPatientColor(i)">
+              {{ statistiques[patient._id]?.spo2Moyen || 0 }}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tableau comparatif -->
+    <div class="glass rounded-2xl p-6 border-2 border-purple-500/30">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        📊 Statistiques comparatives
+      </h2>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b-2 border-gray-300 dark:border-gray-600">
+              <th class="text-left py-4 px-4 font-bold text-gray-900 dark:text-white">Métrique</th>
+              <th
+                *ngFor="let patient of patients; let i = index"
+                class="text-center py-4 px-4 font-bold"
+                [style.color]="getPatientColor(i)"
+              >
+                {{ patient.prenom }} {{ patient.nom }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Total mesures -->
+            <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+              <td class="py-4 px-4 font-medium text-gray-900 dark:text-white">
+                📈 Total mesures
+              </td>
+              <td
+                *ngFor="let patient of patients"
+                class="text-center py-4 px-4 font-bold text-gray-900 dark:text-white"
+              >
+                {{ statistiques[patient._id]?.total || 0 }}
+              </td>
+            </tr>
+
+            <!-- BPM Moyen -->
+            <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+              <td class="py-4 px-4 font-medium text-gray-900 dark:text-white">
+                💓 BPM moyen
+              </td>
+              <td
+                *ngFor="let patient of patients; let i = index"
+                class="text-center py-4 px-4 font-bold"
+                [style.color]="getPatientColor(i)"
+              >
+                {{ statistiques[patient._id]?.bpmMoyen || 0 }} bpm
+              </td>
+            </tr>
+
+            <!-- BPM Min/Max -->
+            <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+              <td class="py-4 px-4 font-medium text-gray-900 dark:text-white">
+                📉 BPM min / max
+              </td>
+              <td
+                *ngFor="let patient of patients"
+                class="text-center py-4 px-4 text-gray-900 dark:text-white"
+              >
+                {{ statistiques[patient._id]?.bpmMin || 0 }} / 
+                {{ statistiques[patient._id]?.bpmMax || 0 }}
+              </td>
+            </tr>
+
+            <!-- SpO2 Moyen -->
+            <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+              <td class="py-4 px-4 font-medium text-gray-900 dark:text-white">
+                🫁 SpO2 moyen
+              </td>
+              <td
+                *ngFor="let patient of patients; let i = index"
+                class="text-center py-4 px-4 font-bold"
+                [style.color]="getPatientColor(i)"
+              >
+                {{ statistiques[patient._id]?.spo2Moyen || 0 }}%
+              </td>
+            </tr>
+
+            <!-- SpO2 Min/Max -->
+            <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+              <td class="py-4 px-4 font-medium text-gray-900 dark:text-white">
+                📉 SpO2 min / max
+              </td>
+              <td
+                *ngFor="let patient of patients"
+                class="text-center py-4 px-4 text-gray-900 dark:text-white"
+              >
+                {{ statistiques[patient._id]?.spo2Min || 0 }}% / 
+                {{ statistiques[patient._id]?.spo2Max || 0 }}%
+              </td>
+            </tr>
+
+            <!-- Statut Normal -->
+            <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 bg-green-50 dark:bg-green-900/20">
+              <td class="py-4 px-4 font-medium text-green-700 dark:text-green-400">
+                ✅ Mesures normales
+              </td>
+              <td
+                *ngFor="let patient of patients"
+                class="text-center py-4 px-4 font-bold text-green-700 dark:text-green-400"
+              >
+                {{ statistiques[patient._id]?.normal || 0 }}
+                <span class="text-xs ml-1">
+                  ({{ statistiques[patient._id]?.total > 0 ? ((statistiques[patient._id]?.normal / statistiques[patient._id]?.total) * 100).toFixed(0) : 0 }}%)
+                </span>
+              </td>
+            </tr>
+
+            <!-- Statut Attention -->
+            <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 bg-yellow-50 dark:bg-yellow-900/20">
+              <td class="py-4 px-4 font-medium text-yellow-700 dark:text-yellow-400">
+                ⚠️ Mesures attention
+              </td>
+              <td
+                *ngFor="let patient of patients"
+                class="text-center py-4 px-4 font-bold text-yellow-700 dark:text-yellow-400"
+              >
+                {{ statistiques[patient._id]?.attention || 0 }}
+                <span class="text-xs ml-1">
+                  ({{ statistiques[patient._id]?.total > 0 ? ((statistiques[patient._id]?.attention / statistiques[patient._id]?.total) * 100).toFixed(0) : 0 }}%)
+                </span>
+              </td>
+            </tr>
+
+            <!-- Statut Danger -->
+            <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 bg-red-50 dark:bg-red-900/20">
+              <td class="py-4 px-4 font-medium text-red-700 dark:text-red-400">
+                🚨 Mesures danger
+              </td>
+              <td
+                *ngFor="let patient of patients"
+                class="text-center py-4 px-4 font-bold text-red-700 dark:text-red-400"
+              >
+                {{ statistiques[patient._id]?.danger || 0 }}
+                <span class="text-xs ml-1">
+                  ({{ statistiques[patient._id]?.total > 0 ? ((statistiques[patient._id]?.danger / statistiques[patient._id]?.total) * 100).toFixed(0) : 0 }}%)
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Graphiques (placeholder pour l'instant) -->
+    <!-- Graphiques BPM et SpO2 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- Graphique BPM -->
+      <div class="glass rounded-2xl p-6 border-2 border-blue-500/30">
+        <div style="height: 400px;">
+          <canvas #bpmChart></canvas>
+        </div>
+      </div>
+
+      <!-- Graphique SpO2 -->
+      <div class="glass rounded-2xl p-6 border-2 border-green-500/30">
+        <div style="height: 400px;">
+          <canvas #spo2Chart></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bouton retour -->
+    <div class="flex justify-center">
+      <button
+        (click)="retour()"
+        class="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+      >
+        ← Retour aux rapports
+      </button>
+    </div>
+  </div>
+</div>

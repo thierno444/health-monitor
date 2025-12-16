@@ -31,4 +31,18 @@ export class ExportService {
     link.click();
     window.URL.revokeObjectURL(url);
   }
+
+  // Export rapport médecin patient
+  exportRapportPatient(patientId: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/medecin/rapport-patient/${patientId}`, {
+      responseType: 'blob'
+    });
+  }
+
+  // Export CSV global médecin
+  exportCSVGlobal(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/medecin/export-csv-global`, {
+      responseType: 'blob'
+    });
+  }
 }
