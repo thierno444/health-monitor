@@ -47,6 +47,8 @@ const archivageRoutes = require('./routes/archivage');
 const medecinRoutes = require('./routes/medecin');
 const alertesRoutes = require('./routes/alertes');
 const notesRoutes = require('./routes/notes');
+const questionsRoutes = require('./routes/questions');
+
 
 
 
@@ -62,6 +64,8 @@ app.use('/api/archivage', archivageRoutes);
 app.use('/api/medecin', medecinRoutes);
 app.use('/api/alertes', alertesRoutes);
 app.use('/api/notes', notesRoutes);
+app.use('/api/questions', questionsRoutes);
+
 
 
 

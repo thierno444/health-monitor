@@ -12,7 +12,38 @@ const verifierMedecin = (req, res, next) => {
   next();
 };
 
-// Liste notes d'un patient
+// ========== ROUTES PATIENT (EN PREMIER !) ==========
+
+// Notes visibles par le patient connecté
+router.get('/patient/mes-notes', verifierToken, async (req, res) => {
+  try {
+    console.log('🔍 Patient demande ses notes:', req.utilisateur.id, req.utilisateur.role);
+    
+    // Récupérer uniquement les notes NON privées du patient connecté
+    const notes = await Note.find({ 
+      patientId: req.utilisateur.id,
+      visible: true,
+      prive: false
+    })
+      .populate('medecinId', 'prenom nom photoProfil')
+      .sort({ createdAt: -1 });
+    
+    console.log(`✅ ${notes.length} notes trouvées pour patient ${req.utilisateur.id}`);
+    
+    res.json({
+      success: true,
+      notes,
+      total: notes.length
+    });
+  } catch (error) {
+    console.error('❌ Erreur récupération notes patient:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+});
+
+// ========== ROUTES MÉDECIN ==========
+
+// Liste notes d'un patient (médecin)
 router.get('/patient/:patientId', verifierToken, verifierMedecin, async (req, res) => {
   try {
     const notes = await Note.findByPatient(req.params.patientId, true)
