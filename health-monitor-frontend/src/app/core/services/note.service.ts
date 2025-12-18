@@ -57,4 +57,10 @@ export class NoteService {
   supprimerNote(noteId: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/notes/${noteId}`);
   }
+
+  // Notes du patient connecté (visibles uniquement)
+  getMesNotes(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/notes/patient/mes-notes`);
+  }
+  
 }

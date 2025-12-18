@@ -29,8 +29,16 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) {
+    // Charger l'utilisateur depuis localStorage au démarrage
+    const storedUser = this.getUserFromStorage();
+    if (storedUser) {
+      console.log('👤 Utilisateur chargé depuis localStorage:', storedUser);
+      this.currentUserSubject.next(storedUser);
+    }
+    
+    // Si on a un token, recharger le profil depuis le serveur
     const token = this.getToken();
-    if (token) {
+    if (token && storedUser) {
       this.loadUserProfile();
     }
   }
@@ -42,7 +50,15 @@ export class AuthService {
     }).pipe(
       tap(response => {
         if (response.success) {
+          console.log('✅ Connexion réussie');
+          
+          // Sauvegarder le token
           this.setToken(response.token);
+          
+          // Sauvegarder l'utilisateur dans localStorage
+          this.setUserInStorage(response.utilisateur);
+          
+          // Émettre l'utilisateur
           this.currentUserSubject.next(response.utilisateur);
         }
       })
@@ -53,17 +69,29 @@ export class AuthService {
     this.http.get<any>(`${this.apiUrl}/auth/profil`).subscribe({
       next: (response) => {
         if (response.success) {
+          console.log('🔄 Profil rechargé depuis serveur');
+          
+          // Mettre à jour localStorage
+          this.setUserInStorage(response.utilisateur);
+          
+          // Émettre l'utilisateur
           this.currentUserSubject.next(response.utilisateur);
         }
       },
-      error: () => {
-        this.logout();
+      error: (err) => {
+        console.error('❌ Erreur chargement profil:', err);
+        // Si le token est invalide, déconnecter
+        if (err.status === 401) {
+          this.logout();
+        }
       }
     });
   }
 
   logout(): void {
+    console.log('👋 Déconnexion');
     localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
   }
 
@@ -80,11 +108,47 @@ export class AuthService {
   }
 
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    // D'abord essayer de récupérer depuis le BehaviorSubject
+    const user = this.currentUserSubject.value;
+    if (user) {
+      return user;
+    }
+    
+    // Sinon, récupérer depuis localStorage
+    return this.getUserFromStorage();
+  }
+
+  // Nouvelle méthode : Sauvegarder l'utilisateur dans localStorage
+  private setUserInStorage(user: User): void {
+    localStorage.setItem('currentUser', JSON.stringify(user));
+  }
+
+  // Nouvelle méthode : Récupérer l'utilisateur depuis localStorage
+  private getUserFromStorage(): User | null {
+    const userStr = localStorage.getItem('currentUser');
+    if (userStr) {
+      try {
+        return JSON.parse(userStr);
+      } catch (e) {
+        console.error('❌ Erreur parsing user:', e);
+        return null;
+      }
+    }
+    return null;
   }
 
   updateProfile(userId: string, data: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/auth/utilisateurs/${userId}`, data);
+    return this.http.put(`${this.apiUrl}/auth/utilisateurs/${userId}`, data).pipe(
+      tap((response: any) => {
+        if (response.success && response.utilisateur) {
+          // Mettre à jour localStorage
+          this.setUserInStorage(response.utilisateur);
+          
+          // Émettre l'utilisateur mis à jour
+          this.currentUserSubject.next(response.utilisateur);
+        }
+      })
+    );
   }
 
   changePassword(userId: string, currentPassword: string, newPassword: string): Observable<any> {
@@ -95,6 +159,16 @@ export class AuthService {
   }
 
   uploadPhoto(userId: string, formData: FormData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/utilisateurs/${userId}/photo`, formData);
+    return this.http.post(`${this.apiUrl}/auth/utilisateurs/${userId}/photo`, formData).pipe(
+      tap((response: any) => {
+        if (response.success && response.utilisateur) {
+          // Mettre à jour localStorage avec la nouvelle photo
+          this.setUserInStorage(response.utilisateur);
+          
+          // Émettre l'utilisateur mis à jour
+          this.currentUserSubject.next(response.utilisateur);
+        }
+      })
+    );
   }
 }

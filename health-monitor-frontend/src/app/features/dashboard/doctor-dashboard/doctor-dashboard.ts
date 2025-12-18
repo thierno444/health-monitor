@@ -10,6 +10,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { ExportService } from '../../../core/services/export.service';
 import { AlerteService, Alerte, StatistiquesAlertes } from '../../../core/services/alerte.service';
 import { NoteService, Note } from '../../../core/services/note.service';
+import { QuestionService, Question } from '../../../core/services/question.service';
 import { ToastComponent } from '../../../shared/components/toast/toast.component';
 import { Subscription } from 'rxjs';
 
@@ -34,8 +35,7 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   loading = true;
   loadingPatients = false;
   darkMode = false;
-  activeTab: 'overview' | 'patients' | 'alerts' | 'reports' | 'profile' = 'overview';
-
+  activeTab: 'overview' | 'patients' | 'alerts' | 'reports' | 'profile' | 'questions' = 'overview';
   // Filtres
   searchQuery = '';
   showArchived = false;
@@ -126,6 +126,63 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   showComparaisonModal = false;
   patientsComparaison: string[] = [];
   maxPatientsComparaison = 5;
+
+  // Questions patients
+  questionsRecues: Question[] = [];
+  loadingQuestions = false;
+  showReponseModal = false;
+  selectedQuestion: Question | null = null;
+  reponseText = '';
+  sendingReponse = false;
+  filterQuestionStatut: 'toutes' | 'en_attente' | 'repondu' = 'en_attente';
+
+  // Pagination questions
+  questionsParPage = 5;
+  pageQuestionActuelle = 1;
+
+  // Getters pour les compteurs
+  get nombreQuestionsEnAttente(): number {
+    return this.questionsRecues.filter(q => q.statut === 'en_attente').length;
+  }
+
+  get nombreQuestionsRepondues(): number {
+    return this.questionsRecues.filter(q => q.statut === 'repondu').length;
+  }
+
+   // Pagination questions
+  get questionsPaginees(): Question[] {
+    const debut = (this.pageQuestionActuelle - 1) * this.questionsParPage;
+    const fin = debut + this.questionsParPage;
+    return this.questionsFiltrees.slice(debut, fin);
+  }
+
+  get nombrePagesQuestions(): number {
+    return Math.ceil(this.questionsFiltrees.length / this.questionsParPage);
+  }
+
+  get pagesQuestions(): number[] {
+    return Array.from({ length: this.nombrePagesQuestions }, (_, i) => i + 1);
+  }
+
+  changerPageQuestion(page: number): void {
+    if (page >= 1 && page <= this.nombrePagesQuestions) {
+      this.pageQuestionActuelle = page;
+      window.scrollTo({ top: 300, behavior: 'smooth' });
+    }
+  }
+
+  pagePrecedenteQuestion(): void {
+    if (this.pageQuestionActuelle > 1) {
+      this.changerPageQuestion(this.pageQuestionActuelle - 1);
+    }
+  }
+
+  pageSuivanteQuestion(): void {
+    if (this.pageQuestionActuelle < this.nombrePagesQuestions) {
+      this.changerPageQuestion(this.pageQuestionActuelle + 1);
+    }
+  }
+
   
   // Subscriptions
   private subscriptions: Subscription[] = [];
@@ -139,7 +196,9 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     private router: Router,
     private alerteService: AlerteService,
     private noteService: NoteService,
-    private exportService: ExportService
+    private exportService: ExportService,
+    private questionService: QuestionService 
+
 
   ) {}
 
@@ -180,7 +239,8 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     this.loadStatistiques();
     this.loadPatients();
     this.loadAlertes(); 
-    this.loadStatsAlertes(); 
+    this.loadStatsAlertes();
+    this.loadQuestionsRecues();
   }
 
   loadStatistiques(): void {
@@ -420,8 +480,16 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     this.patientStats = null;
   }
 
-  switchTab(tab: string): void {
-    this.activeTab = tab as 'overview' | 'patients' | 'alerts' | 'reports';
+  switchTab(tab: 'overview' | 'patients' | 'alerts' | 'reports' | 'profile' | 'questions'): void {
+    this.activeTab = tab;
+    
+    // Charger les données selon l'onglet
+    if (tab === 'questions') {
+      this.loadQuestionsRecues();
+    }
+    
+    // Scroll smooth vers le haut
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   // ========== UTILITAIRES ==========
@@ -1024,6 +1092,81 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     });
     
     this.closeComparaisonModal();
+  }
+
+  // ========== QUESTIONS PATIENTS ==========
+
+  loadQuestionsRecues(): void {
+    this.loadingQuestions = true;
+    this.questionService.getQuestionsRecues().subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.questionsRecues = response.questions;
+          console.log('💬', this.questionsRecues.length, 'questions reçues');
+          this.pageQuestionActuelle = 1;
+        }
+        this.loadingQuestions = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement questions:', err);
+        this.toastService.error('Erreur', 'Impossible de charger les questions');
+        this.loadingQuestions = false;
+      }
+    });
+  }
+
+  get questionsFiltrees(): Question[] {
+    if (this.filterQuestionStatut === 'toutes') {
+      return this.questionsRecues;
+    }
+    return this.questionsRecues.filter(q => q.statut === this.filterQuestionStatut);
+  }
+
+  openReponseModal(question: Question): void {
+    this.selectedQuestion = question;
+    this.reponseText = question.reponse || '';
+    this.showReponseModal = true;
+  }
+
+  closeReponseModal(): void {
+    this.showReponseModal = false;
+    this.selectedQuestion = null;
+    this.reponseText = '';
+  }
+
+  envoyerReponse(): void {
+    if (!this.reponseText.trim() || !this.selectedQuestion) {
+      this.toastService.warning('Réponse vide', 'Veuillez saisir votre réponse');
+      return;
+    }
+
+    this.sendingReponse = true;
+
+    this.questionService.repondre(this.selectedQuestion._id, this.reponseText).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastService.success('Réponse envoyée', 'Le patient recevra une notification');
+          this.closeReponseModal();
+          this.loadQuestionsRecues();
+        }
+        this.sendingReponse = false;
+      },
+      error: (err) => {
+        console.error('Erreur envoi réponse:', err);
+        this.toastService.error('Erreur', 'Impossible d\'envoyer la réponse');
+        this.sendingReponse = false;
+      }
+    });
+  }
+
+  getQuestionBg(statut: string): string {
+    return statut === 'en_attente' 
+      ? 'bg-orange-100 dark:bg-orange-900/20 border-orange-500'
+      : 'bg-green-100 dark:bg-green-900/20 border-green-500';
+  }
+
+  getQuestionIcon(statut: string): string {
+    return statut === 'en_attente' ? '⏳' : '✅';
   }
 
 }

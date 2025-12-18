@@ -11,7 +11,9 @@ import { ThemeService } from '../../../core/services/theme.service';
 import { ExportService } from '../../../core/services/export.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ToastComponent } from '../../../shared/components/toast/toast.component';
-import { take } from 'rxjs/operators'; // ← AJOUTER
+import { NoteService, Note } from '../../../core/services/note.service';
+import { QuestionService, Question } from '../../../core/services/question.service';
+import { take } from 'rxjs/operators'; 
 
 
 
@@ -75,6 +77,82 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
     confirmPassword: ''
   };
 
+  // Notes
+  mesNotes: Note[] = [];
+  loadingNotes = false;
+  showNoteDetailModal = false;
+  selectedNote: Note | null = null;
+  notesVues: boolean = false;
+
+  // Questions
+  showQuestionForm = false;
+  questionText = '';
+  sendingQuestion = false;
+  questionsNote: Question[] = [];
+  loadingQuestions = false;
+
+  // Pagination notes
+  notesParPage = 6;
+  pageNoteActuelle = 1;
+  
+  // Récupérer les IDs des notes déjà vues
+  private getNotesVues(): string[] {
+    const stored = localStorage.getItem('notesVuesIds');
+    return stored ? JSON.parse(stored) : [];
+  }
+  
+  // Sauvegarder les IDs des notes vues
+  private setNotesVues(noteIds: string[]): void {
+    localStorage.setItem('notesVuesIds', JSON.stringify(noteIds));
+  }
+
+  // Getter pour notes paginées
+  get notesPaginees(): Note[] {
+    const debut = (this.pageNoteActuelle - 1) * this.notesParPage;
+    const fin = debut + this.notesParPage;
+    return this.mesNotes.slice(debut, fin);
+  }
+
+  get nombrePagesNotes(): number {
+    return Math.ceil(this.mesNotes.length / this.notesParPage);
+  }
+
+  get pagesNotes(): number[] {
+    return Array.from({ length: this.nombrePagesNotes }, (_, i) => i + 1);
+  }
+
+  changerPageNote(page: number): void {
+    if (page >= 1 && page <= this.nombrePagesNotes) {
+      this.pageNoteActuelle = page;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  pagePrecedenteNote(): void {
+    if (this.pageNoteActuelle > 1) {
+      this.changerPageNote(this.pageNoteActuelle - 1);
+    }
+  }
+
+  pageSuivanteNote(): void {
+    if (this.pageNoteActuelle < this.nombrePagesNotes) {
+      this.changerPageNote(this.pageNoteActuelle + 1);
+    }
+  }
+
+  // Nombre de notes non lues
+  get nombreNotesNonLues(): number {
+    const notesVuesIds = this.getNotesVues();
+    return this.mesNotes.filter(note => !notesVuesIds.includes(note._id)).length;
+  }
+
+  // Pour utiliser Math dans le template
+  Math = Math;
+
+  // Navigation
+  currentView: 'overview' | 'history' | 'profile' | 'settings' | 'export' | 'notes' = 'overview';
+  activeTab: 'overview' | 'history' | 'profile' | 'settings' | 'export' | 'notes' = 'overview'; 
+
   // Sidebar et navigation
   currentTab: string = 'overview';
   sidebarOpen: boolean = true;
@@ -89,37 +167,54 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
     private router: Router,
     private themeService: ThemeService,
     private exportService: ExportService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private noteService: NoteService ,
+    private questionService: QuestionService
 
 
   ) {}
 
 ngOnInit(): void {
-  console.log('🚀 Dashboard initialisé');
-  
-  // S'abonner au thème
-  this.themeService.darkMode$.subscribe(isDark => {
-    this.darkMode = isDark;
-  });
-  
-  // Charger le profil utilisateur UNE SEULE FOIS
-  this.authService.currentUser$.pipe(
-    take(1) // ← PRENDRE SEULEMENT LA PREMIÈRE VALEUR !
-  ).subscribe(user => {
-    console.log('👤 Utilisateur reçu:', user);
-    this.user = user;
+    console.log('🚀 Dashboard initialisé');
     
-    if (user?.id) {
-      console.log('📊 Chargement des données pour:', user.id);
-      this.loadDashboardData(user.id);
-      this.setupSocketConnection(user.id);
-      this.initForms();
-    } else {
-      console.error('❌ Pas d\'ID utilisateur !');
-      this.loading = false;
-    }
-  });
-}
+    // S'abonner au thème
+    this.themeService.darkMode$.subscribe(isDark => {
+      this.darkMode = isDark;
+    });
+    
+    // Charger le profil utilisateur UNE SEULE FOIS
+    this.authService.currentUser$.pipe(
+      take(1)  
+    ).subscribe(user => {
+      console.log('👤 Utilisateur reçu:', user);
+      this.user = user;
+      
+      if (user?.id) {
+        console.log('📊 Chargement des données pour:', user.id);
+        this.loadDashboardData(user.id);
+        this.setupSocketConnection(user.id);
+        this.initForms();
+        this.loadMesNotes(); 
+      } else {
+        console.error('❌ Pas d\'ID utilisateur !');
+        this.loading = false;
+      }
+
+      // Recharger depuis le localStorage
+        const storedUser = this.authService.getCurrentUser();
+        if (storedUser?.id) {
+          console.log('🔄 Rechargement depuis localStorage');
+          this.user = storedUser;
+          this.loadDashboardData(storedUser.id);
+          this.setupSocketConnection(storedUser.id);
+          this.initForms();
+          this.loadMesNotes();
+        } else {
+          this.loading = false;
+          this.router.navigate(['/login']);
+        }
+    });
+  }
 
   ngAfterViewInit(): void {
   // Attendre que les données soient chargées ET que l'onglet overview soit actif
@@ -131,52 +226,55 @@ ngOnInit(): void {
 }
 
  loadDashboardData(userId: string): void {
-  console.log('📥 Chargement des mesures pour:', userId);
-  this.loading = true;
+    console.log('📥 Chargement des mesures pour:', userId);
+    this.loading = true;
 
-  // Charger les mesures
-  this.measurementService.getMeasurements(userId, 50).subscribe({
-    next: (response) => {
-      console.log('📊 Réponse mesures:', response);
-      if (response.success && response.data) {
-        this.measurements = response.data;
-        this.latestMeasurement = this.measurements[0] || null;
-        console.log('✅ Mesures chargées:', this.measurements.length);
-        
-        // Créer les graphiques après chargement des données
-        setTimeout(() => {
-          if (this.currentTab === 'overview') {
-            this.createCharts();
-          }
-        }, 500);
-      } else {
-        console.log('⚠️ Pas de mesures trouvées');
+    // Charger les mesures
+    this.measurementService.getMeasurements(userId, 50).subscribe({
+      next: (response) => {
+        console.log('📊 Réponse mesures:', response);
+        if (response.success && response.data) {
+          this.measurements = response.data;
+          this.latestMeasurement = this.measurements[0] || null;
+          console.log('✅ Mesures chargées:', this.measurements.length);
+          
+          // Créer les graphiques selon l'onglet actif
+          setTimeout(() => {
+            if (this.currentTab === 'overview' && this.measurements.length > 0) {
+              this.createCharts();
+            } else if (this.currentTab === 'charts' && this.measurements.length > 0) {
+              this.createDetailedCharts();
+            }
+          }, 500);
+        } else {
+          console.log('⚠️ Pas de mesures trouvées');
+          this.measurements = [];
+          this.latestMeasurement = null;
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('❌ Erreur chargement mesures:', err);
         this.measurements = [];
         this.latestMeasurement = null;
+        this.loading = false;
       }
-      this.loading = false;
-    },
-    error: (err) => {
-      console.error('❌ Erreur chargement mesures:', err);
-      this.measurements = [];
-      this.latestMeasurement = null;
-      this.loading = false;
-    }
-  });
+    });
 
-  // Charger les stats
-  this.measurementService.getStats(userId).subscribe({
-    next: (response) => {
-      console.log('📈 Stats:', response);
-      if (response.success) {
-        this.stats = response.stats;
+    // Charger les stats
+    this.measurementService.getStats(userId).subscribe({
+      next: (response) => {
+        console.log('📈 Stats reçues:', response);
+        if (response.success) {
+          this.stats = response.stats;
+          console.log('✅ Stats chargées');
+        }
+      },
+      error: (err) => {
+        console.error('❌ Erreur chargement stats:', err);
       }
-    },
-    error: (err) => {
-      console.error('❌ Erreur chargement stats:', err);
-    }
-  });
-}
+    });
+  }
 
   setupSocketConnection(userId: string): void {
     console.log('⚡ Configuration Socket.IO pour:', userId);
@@ -247,10 +345,7 @@ ngOnInit(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
-
-  // goToProfile(): void {
-  // this.router.navigate(['/profile']);
-  // }
+ 
 
   get paginatedMeasurements(): any[] {
   const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -728,26 +823,43 @@ updateCharts(): void {
   }
 }
 
-
 // Navigation sidebar
 setCurrentTab(tab: string): void {
-  this.currentTab = tab;
-  
-  // Recréer les graphiques selon l'onglet
-  if (tab === 'overview') {
-    setTimeout(() => {
-      if (this.measurements.length > 0) {
-        this.createCharts();
-      }
-    }, 100);
-  } else if (tab === 'charts') {
-    setTimeout(() => {
-      if (this.measurements.length > 0) {
-        this.createDetailedCharts();
-      }
-    }, 100);
+    this.currentTab = tab;
+    
+    // Recréer les graphiques selon l'onglet
+    if (tab === 'overview') {
+      setTimeout(() => {
+        if (this.measurements.length > 0) {
+          this.createCharts();
+        }
+      }, 100);
+    } else if (tab === 'charts') {
+      setTimeout(() => {
+        if (this.measurements.length > 0) {
+          this.createDetailedCharts();
+        }
+      }, 100);
+    } else if (tab === 'notes') {
+      // Charger les notes médicales
+      this.loadMesNotes();
+      
+      // Marquer toutes les notes comme lues après 2 secondes
+      setTimeout(() => {
+        if (this.mesNotes.length > 0) {
+          const noteIds = this.mesNotes.map(n => n._id);
+          this.setNotesVues(noteIds);
+          this.notesVues = true;
+          console.log('✅ Toutes les notes marquées comme lues');
+        }
+      }, 2000);
+    }
+    
+    // Fermer la sidebar sur mobile
+    if (window.innerWidth < 1024) {
+      this.sidebarOpen = false;
+    }
   }
-}
 
 toggleSidebar(): void {
   this.sidebarOpen = !this.sidebarOpen;
@@ -970,6 +1082,147 @@ uploadPhoto(event: any): void {
   };
   reader.readAsDataURL(file);
 }
+
+
+// ========== NOTES MÉDICALES ==========
+
+  loadMesNotes(): void {
+    this.loadingNotes = true;
+    this.noteService.getMesNotes().subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.mesNotes = response.notes;
+          console.log('📝', this.mesNotes.length, 'notes reçues');
+          
+          // Vérifier s'il y a des notes non lues
+          const notesVuesIds = this.getNotesVues();
+          const notesNonLues = this.mesNotes.filter(note => !notesVuesIds.includes(note._id));
+          
+          this.notesVues = notesNonLues.length === 0;
+          
+          console.log('🔔', notesNonLues.length, 'notes non lues');
+        }
+        this.loadingNotes = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement notes:', err);
+        this.toastService.error('Erreur', 'Impossible de charger vos notes médicales');
+        this.loadingNotes = false;
+      }
+    });
+  }
+
+  openNoteDetail(note: Note): void {
+    this.selectedNote = note;
+    this.showNoteDetailModal = true;
+    // Charger les questions de cette note
+    this.loadQuestionsNote(note._id);
+  }
+
+  closeNoteDetailModal(): void {
+    this.showNoteDetailModal = false;
+    this.selectedNote = null;
+  }
+
+  getTypeLabel(type: string): string {
+    const labels: any = {
+      'observation': '📊 Observation',
+      'diagnostic': '🔬 Diagnostic',
+      'prescription': '💊 Prescription',
+      'conseil': '💡 Conseil',
+      'suivi': '📅 Suivi',
+      'autre': '📝 Autre'
+    };
+    return labels[type] || type;
+  }
+
+  getPrioriteColor(priorite: string): string {
+    switch (priorite) {
+      case 'urgente': return 'text-red-600 dark:text-red-400';
+      case 'haute': return 'text-orange-600 dark:text-orange-400';
+      case 'normale': return 'text-blue-600 dark:text-blue-400';
+      case 'basse': return 'text-green-600 dark:text-green-400';
+      default: return 'text-gray-600 dark:text-gray-400';
+    }
+  }
+
+  getPrioriteBg(priorite: string): string {
+    switch (priorite) {
+      case 'urgente': return 'bg-red-100 dark:bg-red-900/20 border-red-500';
+      case 'haute': return 'bg-orange-100 dark:bg-orange-900/20 border-orange-500';
+      case 'normale': return 'bg-blue-100 dark:bg-blue-900/20 border-blue-500';
+      case 'basse': return 'bg-green-100 dark:bg-green-900/20 border-green-500';
+      default: return 'bg-gray-100 dark:bg-gray-900/20 border-gray-500';
+    }
+  }
+
+  formatDate(date: any): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  // ========== QUESTIONS SUR NOTES ==========
+
+  openQuestionForm(): void {
+    this.showQuestionForm = true;
+    this.questionText = '';
+  }
+
+  closeQuestionForm(): void {
+    this.showQuestionForm = false;
+    this.questionText = '';
+  }
+
+  loadQuestionsNote(noteId: string): void {
+    this.loadingQuestions = true;
+    this.questionService.getQuestionsNote(noteId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.questionsNote = response.questions;
+          console.log('💬', this.questionsNote.length, 'questions chargées');
+        }
+        this.loadingQuestions = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement questions:', err);
+        this.loadingQuestions = false;
+      }
+    });
+  }
+
+  envoyerQuestion(): void {
+    if (!this.questionText.trim() || !this.selectedNote) {
+      this.toastService.warning('Question vide', 'Veuillez saisir votre question');
+      return;
+    }
+
+    this.sendingQuestion = true;
+
+    this.questionService.poserQuestion(this.selectedNote._id, this.questionText).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastService.success('Question envoyée', 'Votre médecin recevra une notification');
+          this.questionText = '';
+          this.showQuestionForm = false;
+          
+          // Recharger les questions
+          this.loadQuestionsNote(this.selectedNote!._id);
+        }
+        this.sendingQuestion = false;
+      },
+      error: (err) => {
+        console.error('Erreur envoi question:', err);
+        this.toastService.error('Erreur', 'Impossible d\'envoyer la question');
+        this.sendingQuestion = false;
+      }
+    });
+  }
 
 
  ngOnDestroy(): void {
