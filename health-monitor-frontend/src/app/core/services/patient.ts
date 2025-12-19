@@ -8,6 +8,7 @@ export interface Patient {
   prenom: string;
   nom: string;
   email: string;
+  telephone: string;
   dateDeNaissance?: Date;
   genre?: 'homme' | 'femme' | 'autre';
   photoProfil?: string;

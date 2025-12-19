@@ -9,6 +9,7 @@ export interface User {
   prenom: string;
   nom: string;
   email: string;
+  telephone: string;
   role: 'patient' | 'medecin' | 'admin';
   photoProfil?: string;
   idDispositif?: string;
@@ -37,10 +38,10 @@ export class AuthService {
     }
     
     // Si on a un token, recharger le profil depuis le serveur
-    const token = this.getToken();
-    if (token && storedUser) {
-      this.loadUserProfile();
-    }
+    // const token = this.getToken();
+    // if (token && storedUser) {
+    //   this.loadUserProfile();
+    // }
   }
 
   login(email: string, motDePasse: string): Observable<AuthResponse> {
@@ -158,15 +159,24 @@ export class AuthService {
     });
   }
 
-  uploadPhoto(userId: string, formData: FormData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/utilisateurs/${userId}/photo`, formData).pipe(
+  uploadPhoto(userId: string, photoBase64: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/utilisateurs/${userId}/photo`, { 
+      photo: photoBase64 
+    }).pipe(
       tap((response: any) => {
+        console.log('📸 Réponse upload photo:', response);
+        
         if (response.success && response.utilisateur) {
-          // Mettre à jour localStorage avec la nouvelle photo
+          console.log('✅ Photo sauvegardée en DB');
+          console.log('📸 Nouvelle photo URL:', response.utilisateur.photoProfil?.substring(0, 100));
+          
+          // Mettre à jour localStorage IMMÉDIATEMENT
           this.setUserInStorage(response.utilisateur);
           
           // Émettre l'utilisateur mis à jour
           this.currentUserSubject.next(response.utilisateur);
+          
+          console.log('✅ localStorage mis à jour');
         }
       })
     );

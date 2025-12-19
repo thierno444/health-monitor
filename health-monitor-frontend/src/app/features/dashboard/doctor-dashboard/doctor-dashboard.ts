@@ -110,7 +110,8 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   profileForm = {
     prenom: '',
     nom: '',
-    email: ''
+    email: '',
+    telephone: ''
   };
   
   passwordForm = {
@@ -638,7 +639,8 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
       this.profileForm = {
         prenom: this.user.prenom,
         nom: this.user.nom,
-        email: this.user.email
+        email: this.user.email,
+        telephone: this.user.telephone || ''
       };
     }
   }
@@ -653,7 +655,10 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     const profileData = {
       prenom: this.profileForm.prenom,
       nom: this.profileForm.nom,
-      email: this.profileForm.email
+      email: this.profileForm.email,
+      telephone: this.profileForm.telephone
+      
+
     };
     
     this.authService.updateProfile(this.user.id, profileData).subscribe({
@@ -664,6 +669,9 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
           this.user.prenom = response.utilisateur.prenom;
           this.user.nom = response.utilisateur.nom;
           this.user.email = response.utilisateur.email;
+          this.user.telephone = response.utilisateur.telephone;
+
+          
           
           if (response.utilisateur.photoProfil) {
             this.user.photoProfil = response.utilisateur.photoProfil;
@@ -722,48 +730,58 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  uploadPhoto(event: any): void {
+uploadPhoto(event: any): void {
     const file = event.target.files[0];
     if (!file) return;
-    
-    if (!file.type.startsWith('image/')) {
-      this.toastService.error('Erreur', 'Veuillez sélectionner une image');
-      return;
-    }
-    
+
     if (file.size > 2 * 1024 * 1024) {
-      this.toastService.error('Erreur', 'L\'image doit faire moins de 2MB');
+      this.toastService.error('Fichier trop volumineux', 'Taille maximum : 2MB');
       return;
     }
-    
-    if (!this.user?.id) return;
-    
+
+    if (!file.type.startsWith('image/')) {
+      this.toastService.error('Format invalide', 'Veuillez choisir une image');
+      return;
+    }
+
     const reader = new FileReader();
-    reader.onload = (e: any) => {
-      const photoBase64 = e.target.result;
+    reader.onload = () => {
+      const base64 = reader.result as string;
       
-      console.log('📸 Upload photo médecin');
+      console.log('📸 Upload photo médecin, taille:', base64.length);
       
-      if (this.user) {
-        this.user.photoProfil = photoBase64;
+      if (!this.user?.id) {
+        console.error('❌ Pas d\'ID utilisateur');
+        return;
       }
       
-      this.authService.updateProfile(this.user!.id, {
-        photoProfil: photoBase64
-      }).subscribe({
+      this.authService.uploadPhoto(this.user.id, base64).subscribe({
         next: (response) => {
-          if (response.success) {
+          console.log('✅ Réponse serveur médecin:', response);
+          
+          if (response.success && response.utilisateur) {
             console.log('✅ Photo sauvegardée');
-            this.toastService.success('Photo mise à jour !', 'Votre photo a été sauvegardée');
-            this.authService.loadUserProfile();
+            
+            this.toastService.success('Photo mise à jour', 'Votre photo a été modifiée');
+            
+            // Mettre à jour user
+            this.user = response.utilisateur;
+            
+            // Forcer localStorage
+            localStorage.setItem('currentUser', JSON.stringify(response.utilisateur));
+            
+            if (this.user?.photoProfil) {
+              console.log('✅ Photo médecin mise à jour, nouvelle URL:', this.user.photoProfil.substring(0, 100));
+            }
           }
         },
         error: (err) => {
-          console.error('Erreur sauvegarde photo:', err);
-          this.toastService.error('Erreur', 'Impossible de sauvegarder la photo');
+          console.error('❌ Erreur upload photo médecin:', err);
+          this.toastService.error('Erreur', 'Impossible de modifier la photo');
         }
       });
     };
+
     reader.readAsDataURL(file);
   }
 

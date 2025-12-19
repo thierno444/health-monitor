@@ -1140,6 +1140,17 @@
                 class="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
             />
         </div>
+        <!-- Téléphone -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"> Téléphone</label>
+          <input 
+            type="tel" 
+            name="telephone"
+            [(ngModel)]="profileForm.telephone"
+            placeholder="+221 XX XXX XX XX"
+            class="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+          />
+        </div>
         <div class="md:col-span-2">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ID Dispositif ESP32</label>
           <input 

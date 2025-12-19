@@ -68,7 +68,8 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
   profileForm = {
     prenom: '',
     nom: '',
-    email: ''
+    email: '',
+    telephone: ''
   };
 
   passwordForm = {
@@ -939,8 +940,9 @@ initForms(): void {
     this.profileForm = {
       prenom: this.user.prenom || '',
       nom: this.user.nom || '',
-      email: this.user.email || ''
-    };
+      email: this.user.email || '',
+      telephone: this.user.telephone || '' 
+     };
   }
 }
  
@@ -957,7 +959,8 @@ saveProfile(): void {
   const profileData = {
     prenom: this.profileForm.prenom,
     nom: this.profileForm.nom,
-    email: this.profileForm.email
+    email: this.profileForm.email,
+    telephone: this.profileForm.telephone
     // NE PAS INCLURE photoProfil ici
   };
   
@@ -973,6 +976,7 @@ saveProfile(): void {
         this.user.prenom = response.utilisateur.prenom;
         this.user.nom = response.utilisateur.nom;
         this.user.email = response.utilisateur.email;
+        this.user.telephone = this.profileForm.telephone;
         
         // Garder la photo locale si le backend n'en renvoie pas
         if (response.utilisateur.photoProfil) {
@@ -1033,56 +1037,58 @@ changePassword(): void {
 }
 
 // Upload photo
-// Upload photo
 uploadPhoto(event: any): void {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  if (!file.type.startsWith('image/')) {
-    this.toastService.error('Erreur', 'Veuillez sélectionner une image');
-    return;
-  }
-  
-  if (file.size > 2 * 1024 * 1024) {
-    this.toastService.error('Erreur', 'L\'image doit faire moins de 2MB');
-    return;
-  }
-  
-  if (!this.user?.id) return;
-  
-  // Convertir en base64
-  const reader = new FileReader();
-  reader.onload = (e: any) => {
-    const photoBase64 = e.target.result;
-    
-    console.log('📸 Upload photo, taille base64:', photoBase64.length);
-    
-    // Mise à jour locale immédiate
-    if (this.user) {
-      this.user.photoProfil = photoBase64;
-    }
-    
-    // Sauvegarder SEULEMENT la photo dans la DB
-    this.authService.updateProfile(this.user!.id, {
-      photoProfil: photoBase64
-    }).subscribe({
-      next: (response) => {
-        if (response.success) {
-          console.log('✅ Photo sauvegardée en DB');
-          this.toastService.success('Photo mise à jour !', 'Votre photo a été sauvegardée');
-          // Recharger le profil
-          this.authService.loadUserProfile();
-        }
-      },
-      error: (err) => {
-        console.error('Erreur sauvegarde photo:', err);
-        this.toastService.error('Erreur', 'Impossible de sauvegarder la photo. Image trop grande ?');
-      }
-    });
-  };
-  reader.readAsDataURL(file);
-}
+    const file = event.target.files[0];
+    if (!file) return;
 
+    if (file.size > 2 * 1024 * 1024) {
+      this.toastService.error('Fichier trop volumineux', 'Taille maximum : 2MB');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      this.toastService.error('Format invalide', 'Veuillez choisir une image');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      
+      console.log('📸 Upload photo, taille base64:', base64.length);
+      
+      if (!this.user?.id) {
+        console.error('❌ Pas d\'ID utilisateur');
+        return;
+      }
+      
+      this.authService.uploadPhoto(this.user.id, base64).subscribe({
+        next: (response) => {
+          console.log('✅ Réponse serveur:', response);
+          
+          if (response.success && response.utilisateur) {
+            console.log('✅ Photo sauvegardée en DB');
+            
+            this.toastService.success('Photo mise à jour', 'Votre photo a été modifiée');
+            
+            // Mettre à jour IMMÉDIATEMENT
+            this.user = response.utilisateur;
+            
+            // FORCER la mise à jour du localStorage
+            localStorage.setItem('currentUser', JSON.stringify(response.utilisateur));
+            
+            console.log('✅ User local mis à jour avec nouvelle photo');
+          }
+        },
+        error: (err) => {
+          console.error('❌ Erreur upload photo:', err);
+          this.toastService.error('Erreur', err.error?.message || 'Impossible de modifier la photo');
+        }
+      });
+    };
+
+    reader.readAsDataURL(file);
+  }
 
 // ========== NOTES MÉDICALES ==========
 
