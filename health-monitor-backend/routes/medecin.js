@@ -39,6 +39,7 @@ router.get('/patients', verifierToken, verifierMedecin, async (req, res) => {
           prenom: patient.prenom,
           nom: patient.nom,
           email: patient.email,
+          telephone: patient.telephone,
           dateDeNaissance: patient.dateDeNaissance,
           genre: patient.genre,
           photoProfil: patient.photoProfil,
@@ -430,4 +431,3 @@ router.post('/comparaison', verifierToken, verifierMedecin, async (req, res) => 
 
 module.exports = router;
 
-module.exports = router;

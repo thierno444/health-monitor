@@ -25,6 +25,21 @@ const SchemaUtilisateur = new mongoose.Schema({
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Format email invalide']
   },
+  telephone: {  
+    type: String,
+    required: [false, 'Le téléphone est requis'],
+    trim: true,
+    default: null,
+    validate: {
+      validator: function(v) {
+        // Si vide, accepter
+        if (!v) return true;
+        // Sinon, valider le format
+        return /^(\+?221|0)?[0-9]{9}$/.test(v.replace(/\s/g, ''));
+      },
+      message: 'Numéro de téléphone invalide (format: +221XXXXXXXXX ou 0XXXXXXXXX)'
+    }
+  },
   
   motDePasse: {
     type: String,

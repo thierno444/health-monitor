@@ -3,21 +3,20 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Utilisateur = require('../models/User');
+const User = require('../models/User'); // ← SEULEMENT User
+const verifierToken = require('../middleware/auth'); 
 
-// Clé secrète JWT (sera dans .env plus tard)
 const JWT_SECRET = process.env.JWT_SECRET || 'cle_secrete_temporaire_a_changer';
 
 // ==================== ROUTES AUTHENTIFICATION ====================
 
-// 📝 POST /api/auth/inscription - Créer un nouveau compte
+// 📝 POST /api/auth/inscription
 router.post('/inscription', async (req, res) => {
   try {
     console.log('\n📝 Nouvelle inscription');
     
-    const { prenom, nom, email, motDePasse, dateDeNaissance, genre, idDispositif, photoProfil } = req.body;
+    const { prenom, nom, email, telephone, motDePasse, dateDeNaissance, genre, idDispositif, photoProfil } = req.body;
     
-    // Validation des données obligatoires
     if (!prenom || !nom || !email || !motDePasse) {
       return res.status(400).json({
         success: false,
@@ -25,8 +24,7 @@ router.post('/inscription', async (req, res) => {
       });
     }
     
-    // Vérifier si l'email existe déjà
-    const utilisateurExistant = await Utilisateur.findOne({ email: email.toLowerCase() });
+    const utilisateurExistant = await User.findOne({ email: email.toLowerCase() });
     
     if (utilisateurExistant) {
       return res.status(400).json({
@@ -35,9 +33,8 @@ router.post('/inscription', async (req, res) => {
       });
     }
     
-    // Vérifier si le deviceId existe déjà (si fourni)
     if (idDispositif) {
-      const dispositifExistant = await Utilisateur.findOne({ idDispositif: idDispositif });
+      const dispositifExistant = await User.findOne({ idDispositif: idDispositif });
       
       if (dispositifExistant) {
         return res.status(400).json({
@@ -47,63 +44,54 @@ router.post('/inscription', async (req, res) => {
       }
     }
     
-    // Hasher le mot de passe
     const salt = await bcrypt.genSalt(10);
     const motDePasseHache = await bcrypt.hash(motDePasse, salt);
     
-    // Créer le nouvel utilisateur
-    // Générer un idDispositif automatique pour les non-patients
-let deviceId = idDispositif;
+    let deviceId = idDispositif;
 
-if (!deviceId) {
-  const roleUser = req.body.role || 'patient';
-  
-  if (roleUser === 'medecin') {
-    // Médecins : MEDECIN_[timestamp]
-    deviceId = `MEDECIN_${Date.now()}`;
-  } else if (roleUser === 'admin') {
-    // Admins : ADMIN_[timestamp]
-    deviceId = `ADMIN_${Date.now()}`;
-  }
-  // Patients sans deviceId : null (ils doivent en fournir un)
-}
+    if (!deviceId) {
+      const roleUser = req.body.role || 'patient';
+      
+      if (roleUser === 'medecin') {
+        deviceId = `MEDECIN_${Date.now()}`;
+      } else if (roleUser === 'admin') {
+        deviceId = `ADMIN_${Date.now()}`;
+      }
+    }
 
-const nouvelUtilisateur = new Utilisateur({
-  prenom: prenom,
-  nom: nom,
-  email: email.toLowerCase(),
-  motDePasse: motDePasseHache,
-  dateDeNaissance: dateDeNaissance || null,
-  genre: genre || null,
-  photoProfil: photoProfil || `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${prenom}+${nom}`,
-  idDispositif: deviceId,
-  role: req.body.role || 'patient',
-  estActif: true
-});
+    const nouvelUtilisateur = new User({
+      prenom: prenom,
+      nom: nom,
+      email: email.toLowerCase(),
+      telephone: telephone || null,
+      motDePasse: motDePasseHache,
+      dateDeNaissance: dateDeNaissance || null,
+      genre: genre || null,
+      photoProfil: photoProfil || `https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=${prenom}+${nom}`,
+      idDispositif: deviceId,
+      role: req.body.role || 'patient',
+      estActif: true
+    });
     
-    // Sauvegarder en base
     await nouvelUtilisateur.save();
     
-    // Envoyer l'email de bienvenue
     const motDePasseTemporaire = req.body.sendEmail ? req.body.motDePasse : null;
     envoyerEmailBienvenue(nouvelUtilisateur, motDePasseTemporaire).catch(err => {
       console.error('⚠️ Email non envoyé:', err.message);
-      // On ne bloque pas l'inscription si l'email échoue
     });
 
-    // Créer le token JWT
     const token = jwt.sign(
       { 
         id: nouvelUtilisateur._id,
         email: nouvelUtilisateur.email,
+        telephone: nouvelUtilisateur.telephone, 
         role: nouvelUtilisateur.role
       },
       JWT_SECRET,
-      { expiresIn: '7d' } // Token valide 7 jours
+      { expiresIn: '7d' }
     );
     
     console.log('✅ Utilisateur créé:', email);
-    console.log(`   ID: ${nouvelUtilisateur._id}\n`);
     
     res.status(201).json({
       success: true,
@@ -114,6 +102,7 @@ const nouvelUtilisateur = new Utilisateur({
         prenom: nouvelUtilisateur.prenom,
         nom: nouvelUtilisateur.nom,
         email: nouvelUtilisateur.email,
+        telephone: nouvelUtilisateur.telephone, 
         photoProfil: nouvelUtilisateur.photoProfil,
         role: nouvelUtilisateur.role,
         idDispositif: nouvelUtilisateur.idDispositif
@@ -130,14 +119,13 @@ const nouvelUtilisateur = new Utilisateur({
   }
 });
 
-// 🔐 POST /api/auth/connexion - Se connecter
+// 🔐 POST /api/auth/connexion
 router.post('/connexion', async (req, res) => {
   try {
     console.log('\n🔐 Tentative de connexion');
     
     const { email, motDePasse } = req.body;
     
-    // Validation
     if (!email || !motDePasse) {
       return res.status(400).json({
         success: false,
@@ -145,8 +133,7 @@ router.post('/connexion', async (req, res) => {
       });
     }
     
-    // Trouver l'utilisateur (avec le mot de passe cette fois)
-    const utilisateur = await Utilisateur.findOne({ email: email.toLowerCase() }).select('+motDePasse');
+    const utilisateur = await User.findOne({ email: email.toLowerCase() }).select('+motDePasse');
     
     if (!utilisateur) {
       return res.status(401).json({
@@ -155,7 +142,6 @@ router.post('/connexion', async (req, res) => {
       });
     }
     
-    // Vérifier le mot de passe
     const motDePasseValide = await bcrypt.compare(motDePasse, utilisateur.motDePasse);
     
     if (!motDePasseValide) {
@@ -165,7 +151,6 @@ router.post('/connexion', async (req, res) => {
       });
     }
     
-    // Vérifier si le compte est actif
     if (!utilisateur.estActif) {
       return res.status(403).json({
         success: false,
@@ -173,7 +158,6 @@ router.post('/connexion', async (req, res) => {
       });
     }
     
-    // Créer le token JWT
     const token = jwt.sign(
       { 
         id: utilisateur._id,
@@ -185,7 +169,6 @@ router.post('/connexion', async (req, res) => {
     );
     
     console.log('✅ Connexion réussie:', email);
-    console.log(`   User: ${utilisateur.prenom} ${utilisateur.nom}\n`);
     
     res.json({
       success: true,
@@ -196,6 +179,7 @@ router.post('/connexion', async (req, res) => {
         prenom: utilisateur.prenom,
         nom: utilisateur.nom,
         email: utilisateur.email,
+        telephone: utilisateur.telephone,
         photoProfil: utilisateur.photoProfil,
         role: utilisateur.role,
         idDispositif: utilisateur.idDispositif,
@@ -213,29 +197,15 @@ router.post('/connexion', async (req, res) => {
   }
 });
 
-// 👤 GET /api/auth/profil - Récupérer le profil (nécessite token)
-router.get('/profil', async (req, res) => {
+// GET /api/auth/profil
+router.get('/profil', verifierToken, async (req, res) => {
   try {
-    // Récupérer le token depuis les headers
-    const token = req.headers.authorization?.split(' ')[1]; // "Bearer TOKEN"
-    
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: '❌ Token manquant. Connectez-vous d\'abord.'
-      });
-    }
-    
-    // Vérifier le token
-    const decoded = jwt.verify(token, JWT_SECRET);
-    
-    // Récupérer l'utilisateur
-    const utilisateur = await Utilisateur.findById(decoded.id);
+    const utilisateur = await User.findById(req.utilisateur.id).select('-motDePasse');
     
     if (!utilisateur) {
       return res.status(404).json({
         success: false,
-        message: '❌ Utilisateur non trouvé'
+        message: 'Utilisateur non trouvé'
       });
     }
     
@@ -247,142 +217,177 @@ router.get('/profil', async (req, res) => {
         id: utilisateur._id,
         prenom: utilisateur.prenom,
         nom: utilisateur.nom,
-        nomComplet: utilisateur.nomComplet,
         email: utilisateur.email,
+        telephone: utilisateur.telephone,
         photoProfil: utilisateur.photoProfil,
-        dateDeNaissance: utilisateur.dateDeNaissance,
-        genre: utilisateur.genre,
         idDispositif: utilisateur.idDispositif,
         role: utilisateur.role,
-        parametresAlertes: utilisateur.parametresAlertes,
-        dateCreation: utilisateur.createdAt
+        createdAt: utilisateur.createdAt
       }
     });
     
   } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({
-        success: false,
-        message: '❌ Token invalide'
-      });
-    }
-    
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({
-        success: false,
-        message: '❌ Token expiré. Reconnectez-vous.'
-      });
-    }
-    
-    console.error('❌ Erreur profil:', error.message);
+    console.error('❌ Erreur profil:', error);
     res.status(500).json({
       success: false,
-      message: '❌ Erreur serveur',
+      message: 'Erreur serveur',
       error: error.message
     });
   }
 });
 
-
-// Mettre à jour le profil utilisateur
-// Mettre à jour le profil utilisateur
-router.put('/utilisateurs/:userId', async (req, res) => {
+// GET /api/auth/patients
+router.get('/patients', verifierToken, async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const { prenom, nom, email, photoProfil } = req.body;
-
-    console.log('📝 Mise à jour profil pour:', userId);
-    console.log('Données reçues:', { 
-      prenom, 
-      nom, 
-      email, 
-      photoProfil: photoProfil ? 'oui (longueur: ' + photoProfil.length + ')' : 'non' 
-    });
-
-    const utilisateur = await Utilisateur.findById(userId);
-    if (!utilisateur) {
-      return res.status(404).json({
+    if (req.utilisateur.role !== 'medecin' && req.utilisateur.role !== 'admin') {
+      return res.status(403).json({
         success: false,
-        message: 'Utilisateur non trouvé'
+        message: 'Accès réservé aux médecins'
       });
     }
 
-    // Mettre à jour UNIQUEMENT les champs fournis
-    if (prenom !== undefined) utilisateur.prenom = prenom;
-    if (nom !== undefined) utilisateur.nom = nom;
-    if (email !== undefined) utilisateur.email = email;
-    
-    // Ne mettre à jour la photo QUE si elle est fournie
-    if (photoProfil !== undefined) {
-      utilisateur.photoProfil = photoProfil;
-      console.log('✅ Photo mise à jour, taille:', photoProfil.length);
-    }
+    const patients = await User.find({ role: 'patient' })
+      .select('-motDePasse')
+      .sort({ createdAt: -1 });
 
-    await utilisateur.save();
-
-    console.log('✅ Profil mis à jour');
+    console.log(`📋 ${patients.length} patients trouvés`);
 
     res.json({
       success: true,
-      message: 'Profil mis à jour avec succès',
+      patients: patients.map(p => ({
+        _id: p._id,
+        prenom: p.prenom,
+        nom: p.nom,
+        email: p.email,
+        telephone: p.telephone,
+        photoProfil: p.photoProfil,
+        idDispositif: p.idDispositif,
+        createdAt: p.createdAt,
+        role: p.role
+      })),
+      total: patients.length
+    });
+  } catch (error) {
+    console.error('Erreur récupération patients:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+});
+
+// GET /api/auth/patients/:patientId
+router.get('/patients/:patientId', verifierToken, async (req, res) => {
+  try {
+    if (req.utilisateur.role !== 'medecin' && req.utilisateur.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Accès réservé aux médecins'
+      });
+    }
+
+    const patient = await User.findById(req.params.patientId).select('-motDePasse');
+    
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: 'Patient non trouvé'
+      });
+    }
+
+    res.json({
+      success: true,
+      patient: {
+        _id: patient._id,
+        prenom: patient.prenom,
+        nom: patient.nom,
+        email: patient.email,
+        telephone: patient.telephone,
+        photoProfil: patient.photoProfil,
+        idDispositif: patient.idDispositif,
+        createdAt: patient.createdAt,
+        role: patient.role
+      }
+    });
+  } catch (error) {
+    console.error('Erreur récupération patient:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+});
+
+// PUT /api/auth/utilisateurs/:userId
+router.put('/utilisateurs/:userId', verifierToken, async (req, res) => {
+  try {
+    const { prenom, nom, email, telephone, role, idDispositif } = req.body;
+    
+    console.log('📝 Mise à jour utilisateur:', req.params.userId);
+    
+    const utilisateur = await User.findById(req.params.userId);
+    if (!utilisateur) {
+      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé' });
+    }
+
+    if (req.utilisateur.id !== req.params.userId && req.utilisateur.role !== 'admin') {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Vous ne pouvez modifier que votre propre profil' 
+      });
+    }
+
+    if (prenom !== undefined) utilisateur.prenom = prenom;
+    if (nom !== undefined) utilisateur.nom = nom;
+    if (email !== undefined) utilisateur.email = email;
+    if (telephone !== undefined) utilisateur.telephone = telephone || null;
+    if (role !== undefined && req.utilisateur.role === 'admin') utilisateur.role = role;
+    if (idDispositif !== undefined) utilisateur.idDispositif = idDispositif;
+
+    await utilisateur.save({ validateModifiedOnly: true });
+    
+    console.log('✅ Utilisateur mis à jour');
+
+    res.json({
+      success: true,
+      message: 'Profil mis à jour',
       utilisateur: {
         id: utilisateur._id,
         prenom: utilisateur.prenom,
         nom: utilisateur.nom,
         email: utilisateur.email,
+        telephone: utilisateur.telephone,
         role: utilisateur.role,
         photoProfil: utilisateur.photoProfil,
         idDispositif: utilisateur.idDispositif
       }
     });
-
   } catch (error) {
-    console.error('❌ Erreur mise à jour profil:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur lors de la mise à jour du profil'
+    console.error('❌ Erreur mise à jour:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Erreur lors de la mise à jour',
+      error: error.message
     });
   }
 });
 
-// Changer le mot de passe
-// Changer le mot de passe
-router.put('/utilisateurs/:userId/password', async (req, res) => {
+// PUT /api/auth/utilisateurs/:userId/password
+router.put('/utilisateurs/:userId/password', verifierToken, async (req, res) => {
   try {
-    const userId = req.params.userId;
     const { currentPassword, newPassword } = req.body;
 
-    console.log('🔐 Changement mot de passe pour:', userId);
-    console.log('Données reçues:', { currentPassword: '***', newPassword: '***' });
-
-    // IMPORTANT: Récupérer l'utilisateur AVEC le mot de passe (select: false par défaut)
-    const utilisateur = await Utilisateur.findById(userId).select('+motDePasse');
+    const utilisateur = await User.findById(req.params.userId).select('+motDePasse');
     
     if (!utilisateur) {
-      console.log('❌ Utilisateur non trouvé');
       return res.status(404).json({
         success: false,
         message: 'Utilisateur non trouvé'
       });
     }
 
-    console.log('✅ Utilisateur trouvé:', utilisateur.email);
-    console.log('Hash mot de passe existe ?', !!utilisateur.motDePasse);
-    console.log('Longueur du hash:', utilisateur.motDePasse?.length);
-
-    // Vérifier que le mot de passe existe
     if (!utilisateur.motDePasse) {
-      console.log('❌ Pas de mot de passe dans la DB !');
       return res.status(500).json({
         success: false,
-        message: 'Mot de passe non défini dans la base de données. Contactez un administrateur.'
+        message: 'Mot de passe non défini'
       });
     }
 
-    // Vérifier le mot de passe actuel
-    console.log('Comparaison avec bcrypt...');
     const estValide = await bcrypt.compare(currentPassword, utilisateur.motDePasse);
-    console.log('Résultat comparaison:', estValide);
 
     if (!estValide) {
       return res.status(401).json({
@@ -391,15 +396,8 @@ router.put('/utilisateurs/:userId/password', async (req, res) => {
       });
     }
 
-    // Hasher le nouveau mot de passe
-    console.log('Création du nouveau hash...');
-    const nouveauHash = await bcrypt.hash(newPassword, 10);
-    console.log('Nouveau hash créé, longueur:', nouveauHash.length);
-    
-    utilisateur.motDePasse = nouveauHash;
+    utilisateur.motDePasse = await bcrypt.hash(newPassword, 10);
     await utilisateur.save();
-
-    console.log('✅ Mot de passe modifié avec succès');
 
     res.json({
       success: true,
@@ -407,7 +405,7 @@ router.put('/utilisateurs/:userId/password', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Erreur changement mot de passe:', error);
+    console.error('❌ Erreur mot de passe:', error);
     res.status(500).json({
       success: false,
       message: 'Erreur lors du changement de mot de passe',
@@ -416,23 +414,61 @@ router.put('/utilisateurs/:userId/password', async (req, res) => {
   }
 });
 
-// Upload photo de profil
-router.post('/utilisateurs/:userId/photo', async (req, res) => {
+// POST /api/auth/utilisateurs/:userId/photo
+router.post('/utilisateurs/:userId/photo', verifierToken, async (req, res) => {
   try {
-    const userId = req.params.userId;
-    // TODO: Implémenter l'upload réel avec multer + cloudinary
+    const { photo } = req.body;
     
+    console.log('📸 Upload photo pour:', req.params.userId);
+    
+    if (!photo) {
+      return res.status(400).json({
+        success: false,
+        message: 'Photo requise'
+      });
+    }
+    
+    if (req.utilisateur.id !== req.params.userId && req.utilisateur.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Permission refusée'
+      });
+    }
+
+    const utilisateur = await User.findById(req.params.userId);
+    if (!utilisateur) {
+      return res.status(404).json({
+        success: false,
+        message: 'Utilisateur non trouvé'
+      });
+    }
+
+    utilisateur.photoProfil = photo;
+    await utilisateur.save();
+
+    console.log('✅ Photo mise à jour');
+
     res.json({
       success: true,
       message: 'Photo mise à jour avec succès',
-      photoUrl: 'https://ui-avatars.com/api/?name=Updated&size=200'
+      utilisateur: {
+        id: utilisateur._id,
+        prenom: utilisateur.prenom,
+        nom: utilisateur.nom,
+        email: utilisateur.email,
+        telephone: utilisateur.telephone,
+        photoProfil: utilisateur.photoProfil,
+        role: utilisateur.role,
+        idDispositif: utilisateur.idDispositif
+      }
     });
 
   } catch (error) {
-    console.error('Erreur upload photo:', error);
+    console.error('❌ Erreur upload photo:', error);
     res.status(500).json({
       success: false,
-      message: 'Erreur lors de l\'upload de la photo'
+      message: 'Erreur upload',
+      error: error.message
     });
   }
 });
