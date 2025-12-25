@@ -66,6 +66,21 @@ const SchemaUtilisateur = new mongoose.Schema({
     required: false,
     default: 'https://ui-avatars.com/api/?background=random&name=' // Avatar par défaut
   },
+
+  resetPasswordToken: {
+    type: String,
+    default: undefined
+  },
+  
+  resetPasswordExpire: {
+    type: Date,
+    default: undefined
+  },
+  
+  estActif: {
+    type: Boolean,
+    default: true
+  },
   
   // ID du dispositif ESP32 associé à cet utilisateur
   idDispositif: {

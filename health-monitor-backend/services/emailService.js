@@ -264,8 +264,13 @@ const envoyerEmailResetPassword = async (utilisateur, resetToken) => {
   }
 };
 
+
 // ==================== EXPORT ====================
 module.exports = {
+  sendWelcomeEmail: envoyerEmailBienvenue,
+  sendAlertEmail: envoyerEmailAlerte,
+  sendPasswordResetEmail: envoyerEmailResetPassword,
+  // Garder aussi les anciens noms pour compatibilité
   envoyerEmailBienvenue,
   envoyerEmailAlerte,
   envoyerEmailResetPassword

@@ -48,6 +48,7 @@ const medecinRoutes = require('./routes/medecin');
 const alertesRoutes = require('./routes/alertes');
 const notesRoutes = require('./routes/notes');
 const questionsRoutes = require('./routes/questions');
+const adminRoutes = require('./routes/admin');
 
 
 
@@ -65,6 +66,10 @@ app.use('/api/medecin', medecinRoutes);
 app.use('/api/alertes', alertesRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/questions', questionsRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/assignments', require('./routes/assignments')); 
+
 
 
 

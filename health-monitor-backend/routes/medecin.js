@@ -12,12 +12,40 @@ const verifierMedecin = (req, res, next) => {
   next();
 };
 
-// Liste des patients
+// Liste des patients ASSIGNÉS au médecin
 router.get('/patients', verifierToken, verifierMedecin, async (req, res) => {
   try {
     const includeArchived = req.query.archives === 'true';
     
-    const filter = { role: 'patient' };
+    console.log('👨‍⚕️ Récupération patients du médecin:', req.utilisateur.id);
+    
+    // MODIFICATION ICI ↓ Récupérer les assignations actives du médecin
+    const Assignment = require('../models/Assignment');
+    const assignments = await Assignment.find({
+      medecinId: req.utilisateur.id,
+      actif: true
+    });
+    
+    // Extraire les IDs des patients assignés
+    const patientIds = assignments.map(a => a.patientId);
+    
+    console.log(`📋 ${patientIds.length} patient(s) assigné(s)`);
+    
+    // Si aucun patient assigné, retourner tableau vide
+    if (patientIds.length === 0) {
+      return res.json({
+        success: true,
+        patients: [],
+        total: 0
+      });
+    }
+    
+    // Filtrer seulement les patients assignés
+    const filter = { 
+      _id: { $in: patientIds },
+      role: 'patient'
+    };
+    
     if (!includeArchived) {
       filter.estArchive = false;
     }
@@ -33,6 +61,9 @@ router.get('/patients', verifierToken, verifierMedecin, async (req, res) => {
           .sort({ horodatageMesure: -1 });
         
         const nombreMesures = await Mesure.countDocuments({ idUtilisateur: patient._id });
+        
+        // Trouver l'assignation pour ce patient
+        const assignment = assignments.find(a => a.patientId.toString() === patient._id.toString());
         
         return {
           id: patient._id,
@@ -54,7 +85,13 @@ router.get('/patients', verifierToken, verifierMedecin, async (req, res) => {
             spo2: derniereMesure.spo2,
             statut: derniereMesure.statut,
             horodatageMesure: derniereMesure.horodatageMesure
-          } : null
+          } : null,
+          // Ajouter infos d'assignation
+          assignation: {
+            priorite: assignment?.priorite,
+            dateAssignation: assignment?.dateAssignation,
+            notesAssignation: assignment?.notesAssignation
+          }
         };
       })
     );
@@ -71,9 +108,27 @@ router.get('/patients', verifierToken, verifierMedecin, async (req, res) => {
   }
 });
 
-// Détails d'un patient
+// Détails d'un patient ASSIGNÉ
 router.get('/patients/:patientId', verifierToken, verifierMedecin, async (req, res) => {
   try {
+    console.log('👨‍⚕️ Détails patient:', req.params.patientId);
+    
+    // VÉRIFIER QUE LE PATIENT EST ASSIGNÉ AU MÉDECIN ↓
+    const Assignment = require('../models/Assignment');
+    const assignment = await Assignment.findOne({
+      medecinId: req.utilisateur.id,
+      patientId: req.params.patientId,
+      actif: true
+    });
+    
+    // Si pas d'assignation et que c'est pas un admin, refuser l'accès
+    if (!assignment && req.utilisateur.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Ce patient ne vous est pas assigné'
+      });
+    }
+    
     const patient = await User.findById(req.params.patientId)
       .select('-motDePasse -resetPasswordToken');
     
@@ -99,7 +154,12 @@ router.get('/patients/:patientId', verifierToken, verifierMedecin, async (req, r
         id: patient._id
       },
       mesures,
-      statistiques: stats
+      statistiques: stats,
+      assignation: assignment ? {
+        priorite: assignment.priorite,
+        dateAssignation: assignment.dateAssignation,
+        notesAssignation: assignment.notesAssignation
+      } : null
     });
     
   } catch (error) {
@@ -108,27 +168,55 @@ router.get('/patients/:patientId', verifierToken, verifierMedecin, async (req, r
   }
 });
 
-// Statistiques globales médecin
+
+// Statistiques globales médecin (SEULEMENT SES PATIENTS ASSIGNÉS)
 router.get('/statistiques', verifierToken, verifierMedecin, async (req, res) => {
   try {
-    const totalPatients = await User.countDocuments({ role: 'patient' });
-    const patientsActifs = await User.countDocuments({ role: 'patient', estArchive: false });
-    const patientsArchives = await User.countDocuments({ role: 'patient', estArchive: true });
+    console.log('📊 Statistiques médecin:', req.utilisateur.id);
     
-    // Patients avec mesures DANGER récentes (dernières 24h)
+    // MODIFICATION ICI ↓ Récupérer les assignations actives du médecin
+    const Assignment = require('../models/Assignment');
+    const assignments = await Assignment.find({
+      medecinId: req.utilisateur.id,
+      actif: true
+    });
+    
+    // Extraire les IDs des patients assignés
+    const patientIds = assignments.map(a => a.patientId);
+    
+    // Statistiques SEULEMENT pour les patients assignés
+    const totalPatients = patientIds.length;
+    
+    const patientsActifs = await User.countDocuments({ 
+      _id: { $in: patientIds },
+      role: 'patient', 
+      estArchive: false 
+    });
+    
+    const patientsArchives = await User.countDocuments({ 
+      _id: { $in: patientIds },
+      role: 'patient', 
+      estArchive: true 
+    });
+    
+    // Patients à risque (avec mesures DANGER récentes - dernières 24h)
     const hier = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const mesuresDanger = await Mesure.find({
+      idUtilisateur: { $in: patientIds },
       statut: 'DANGER',
       horodatageMesure: { $gte: hier }
     }).distinct('idUtilisateur');
     
     const patientsARisque = mesuresDanger.length;
     
-    // Alertes actives
+    // Alertes actives (SEULEMENT pour les patients assignés)
     const alertesActives = await Mesure.countDocuments({
+      idUtilisateur: { $in: patientIds },
       statut: { $in: ['DANGER', 'ATTENTION'] },
       horodatageMesure: { $gte: hier }
     });
+    
+    console.log(`✅ Stats: ${totalPatients} patients, ${patientsARisque} à risque, ${alertesActives} alertes`);
     
     res.json({
       success: true,
@@ -143,6 +231,89 @@ router.get('/statistiques', verifierToken, verifierMedecin, async (req, res) => 
     
   } catch (error) {
     console.error('Erreur statistiques:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+});
+
+// Alertes (SEULEMENT pour les patients assignés)
+router.get('/alertes', verifierToken, verifierMedecin, async (req, res) => {
+  try {
+    const { statut, limite = 50 } = req.query;
+    
+    console.log('🚨 Récupération alertes médecin:', req.utilisateur.id);
+    
+    // Récupérer les assignations actives
+    const Assignment = require('../models/Assignment');
+    const assignments = await Assignment.find({
+      medecinId: req.utilisateur.id,
+      actif: true
+    });
+    
+    // Extraire les IDs des patients assignés
+    const patientIds = assignments.map(a => a.patientId);
+    
+    if (patientIds.length === 0) {
+      return res.json({
+        success: true,
+        alertes: [],
+        total: 0
+      });
+    }
+    
+    // Construire le filtre
+    let filter = {
+      idUtilisateur: { $in: patientIds }
+    };
+    
+    // Filtrer par statut si spécifié
+    if (statut && statut !== 'toutes') {
+      if (statut === 'critiques') {
+        filter.statut = 'DANGER';
+      } else if (statut === 'danger') {
+        filter.statut = { $in: ['DANGER', 'ATTENTION'] };
+      } else if (statut === 'acquittees') {
+        filter.acquittee = true;
+      } else {
+        filter.statut = statut.toUpperCase();
+      }
+    }
+    
+    // Récupérer les mesures
+    const mesures = await Mesure.find(filter)
+      .populate('idUtilisateur', 'prenom nom email photoProfil idDispositif')
+      .sort({ horodatageMesure: -1 })
+      .limit(parseInt(limite));
+    
+    // Statistiques
+    const stats = {
+      total: mesures.length,
+      critiques: await Mesure.countDocuments({
+        idUtilisateur: { $in: patientIds },
+        statut: 'DANGER',
+        acquittee: { $ne: true }
+      }),
+      danger: await Mesure.countDocuments({
+        idUtilisateur: { $in: patientIds },
+        statut: { $in: ['DANGER', 'ATTENTION'] },
+        acquittee: { $ne: true }
+      }),
+      acquittees: await Mesure.countDocuments({
+        idUtilisateur: { $in: patientIds },
+        acquittee: true
+      })
+    };
+    
+    console.log(`✅ ${mesures.length} alerte(s) trouvée(s)`);
+    
+    res.json({
+      success: true,
+      alertes: mesures,
+      total: mesures.length,
+      stats
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur alertes:', error);
     res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 });
@@ -306,20 +477,40 @@ router.get('/rapport-patient/:patientId', verifierToken, verifierMedecin, async 
   }
 });
 
-// Export CSV global
+// Export CSV global (SEULEMENT PATIENTS ASSIGNÉS)
 router.get('/export-csv-global', verifierToken, verifierMedecin, async (req, res) => {
   try {
-    console.log('📊 Export CSV global pour médecin:', req.utilisateur.id);
+    console.log('📊 Export CSV médecin:', req.utilisateur.id);
     
-    // Récupérer tous les patients du médecin (via les mesures)
-    const mesures = await Mesure.find()
+    // MODIFICATION ICI ↓ Récupérer les assignations actives
+    const Assignment = require('../models/Assignment');
+    const assignments = await Assignment.find({
+      medecinId: req.utilisateur.id,
+      actif: true
+    });
+    
+    // Extraire les IDs des patients assignés
+    const patientIds = assignments.map(a => a.patientId);
+    
+    if (patientIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Aucun patient assigné'
+      });
+    }
+    
+    // Récupérer SEULEMENT les mesures des patients assignés
+    const mesures = await Mesure.find({
+      idUtilisateur: { $in: patientIds }
+    })
       .populate('idUtilisateur', 'prenom nom email idDispositif')
       .sort({ horodatageMesure: -1 })
-      .limit(1000);
+      .limit(5000);
     
     // Créer CSV
-    let csv = '# Export global Health Monitor\n';
+    let csv = '# Export Health Monitor - Dr. ' + req.utilisateur.prenom + ' ' + req.utilisateur.nom + '\n';
     csv += `# Généré le: ${new Date().toLocaleString('fr-FR')}\n`;
+    csv += `# Nombre de patients: ${patientIds.length}\n`;
     csv += `# Nombre de mesures: ${mesures.length}\n`;
     csv += '\n';
     csv += 'Patient;Email;Dispositif;Date;Heure;BPM;SpO2;Statut;Batterie\n';
@@ -337,13 +528,13 @@ router.get('/export-csv-global', verifierToken, verifierMedecin, async (req, res
     
     // Headers
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename=export-global-${Date.now()}.csv`);
+    res.setHeader('Content-Disposition', `attachment; filename=export-patients-${Date.now()}.csv`);
     
     // BOM UTF-8
     const BOM = '\uFEFF';
     res.send(BOM + csv);
     
-    console.log('✅ Export CSV généré');
+    console.log('✅ Export CSV généré:', mesures.length, 'mesures');
     
   } catch (error) {
     console.error('❌ Erreur export CSV:', error);

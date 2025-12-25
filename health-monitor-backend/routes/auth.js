@@ -120,6 +120,7 @@ router.post('/inscription', async (req, res) => {
 });
 
 // 🔐 POST /api/auth/connexion
+// 🔐 POST /api/auth/connexion
 router.post('/connexion', async (req, res) => {
   try {
     console.log('\n🔐 Tentative de connexion');
@@ -129,7 +130,8 @@ router.post('/connexion', async (req, res) => {
     if (!email || !motDePasse) {
       return res.status(400).json({
         success: false,
-        message: '❌ Email et mot de passe requis'
+        message: '❌ Email et mot de passe requis',
+        field: 'general'
       });
     }
     
@@ -138,7 +140,8 @@ router.post('/connexion', async (req, res) => {
     if (!utilisateur) {
       return res.status(401).json({
         success: false,
-        message: '❌ Email ou mot de passe incorrect'
+        message: 'Aucun compte avec cet email',
+        field: 'email'  // ← Indique que c'est l'email le problème
       });
     }
     
@@ -147,14 +150,16 @@ router.post('/connexion', async (req, res) => {
     if (!motDePasseValide) {
       return res.status(401).json({
         success: false,
-        message: '❌ Email ou mot de passe incorrect'
+        message: 'Mot de passe incorrect',
+        field: 'password'  // ← Indique que c'est le mot de passe le problème
       });
     }
     
     if (!utilisateur.estActif) {
       return res.status(403).json({
         success: false,
-        message: '❌ Compte désactivé. Contactez un administrateur.'
+        message: 'Compte désactivé. Contactez un administrateur.',
+        field: 'general'
       });
     }
     
@@ -192,11 +197,11 @@ router.post('/connexion', async (req, res) => {
     res.status(500).json({
       success: false,
       message: '❌ Erreur serveur',
+      field: 'general',
       error: error.message
     });
   }
 });
-
 // GET /api/auth/profil
 router.get('/profil', verifierToken, async (req, res) => {
   try {
@@ -472,5 +477,118 @@ router.post('/utilisateurs/:userId/photo', verifierToken, async (req, res) => {
     });
   }
 });
+
+// ==================== RÉINITIALISATION MOT DE PASSE ====================
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    console.log('🔐 Demande réinitialisation pour:', email);
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email requis'
+      });
+    }
+    
+    const utilisateur = await User.findOne({ email: email.toLowerCase() });
+    
+    if (!utilisateur) {
+      // Ne pas révéler que l'email n'existe pas (sécurité)
+      return res.json({
+        success: true,
+        message: 'Si cet email existe, vous recevrez un lien de réinitialisation'
+      });
+    }
+    
+    const crypto = require('crypto');
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+    
+    utilisateur.resetPasswordToken = resetTokenHash;
+    utilisateur.resetPasswordExpire = Date.now() + 3600000; // 1 heure
+    await utilisateur.save();
+    
+    const { envoyerEmailResetPassword } = require('../services/emailService');
+    
+    try {
+      await envoyerEmailResetPassword(utilisateur, resetToken);
+      console.log('📧 Email de réinitialisation envoyé à:', email);
+    } catch (emailError) {
+      console.error('⚠️ Erreur envoi email:', emailError.message);
+    }
+    
+    res.json({
+      success: true,
+      message: 'Si cet email existe, vous recevrez un lien de réinitialisation'
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur forgot password:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur'
+    });
+  }
+});
+
+// POST /api/auth/reset-password/:token
+router.post('/reset-password/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+    
+    console.log('🔑 Réinitialisation mot de passe avec token');
+    
+    if (!password || password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Le mot de passe doit contenir au moins 6 caractères'
+      });
+    }
+    
+    const crypto = require('crypto');
+    const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    
+    const utilisateur = await User.findOne({
+      resetPasswordToken: resetTokenHash,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+    
+    if (!utilisateur) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token invalide ou expiré'
+      });
+    }
+    
+    const salt = await bcrypt.genSalt(10);
+    utilisateur.motDePasse = await bcrypt.hash(password, salt);
+    
+    utilisateur.resetPasswordToken = undefined;
+    utilisateur.resetPasswordExpire = undefined;
+    
+    await utilisateur.save();
+    
+    console.log('✅ Mot de passe réinitialisé pour:', utilisateur.email);
+    
+    res.json({
+      success: true,
+      message: 'Mot de passe réinitialisé avec succès'
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur reset password:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur'
+    });
+  }
+});
+
+
 
 module.exports = router;

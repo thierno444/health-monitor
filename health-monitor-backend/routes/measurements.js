@@ -52,17 +52,24 @@ router.post('/', async (req, res) => {
 
     // Envoyer email si statut ATTENTION ou DANGER
     if (status === 'ATTENTION' || status === 'DANGER') {
-      envoyerEmailAlerte(utilisateur, {
-        bpm: bpm,
-        spo2: spo2,
-        statut: status,
-        idDispositif: deviceId,
-        horodatageMesure: nouvelleMesure.horodatageMesure
-      }).catch(err => {
-        console.error('⚠️ Email alerte non envoyé:', err.message);
-      });
+      console.log('🔔 Tentative d\'envoi email d\'alerte...');
+      
+      try {
+        await envoyerEmailAlerte(utilisateur, {
+          bpm: bpm,
+          spo2: spo2,
+          statut: status,
+          idDispositif: deviceId,
+          horodatageMesure: nouvelleMesure.horodatageMesure
+        });
+        
+        console.log(`📧 Email d'alerte envoyé à ${utilisateur.email}`);
+      } catch (emailError) {
+        console.error('⚠️ Email alerte non envoyé:', emailError.message);
+        console.error('Stack:', emailError.stack);
+      }
     }
-    
+
     // ⚡ ÉMETTRE UN ÉVÉNEMENT SOCKET.IO
     const io = req.app.get('io');
     
@@ -112,37 +119,80 @@ router.post('/', async (req, res) => {
 });
 
 // 📊 GET /api/measurements - Récupérer les mesures d'un utilisateur
-router.get('/', async (req, res) => {
+router.get('/', verifierToken, async (req, res) => {
   try {
-    const { userId, deviceId, limit = 50, status } = req.query;
+    const utilisateurConnecte = req.utilisateur;
     
-    // Construire le filtre de recherche
+    console.log('📊 Récupération mesures pour:', utilisateurConnecte.email, '(', utilisateurConnecte.role, ')');
+    
     let filtre = {};
     
-    if (userId) {
-      filtre.idUtilisateur = userId;
+    // SI PATIENT : Ne peut voir QUE ses propres mesures
+    if (utilisateurConnecte.role === 'patient') {
+      const mongoose = require('mongoose');
+      filtre.idUtilisateur = new mongoose.Types.ObjectId(utilisateurConnecte.id);  // ← CONVERTIR EN ObjectId !
+      console.log('👤 Patient - Filtre par userId:', filtre.idUtilisateur);
     }
     
-    if (deviceId) {
-      filtre.idDispositif = deviceId;
+    // SI MÉDECIN : Ne peut voir QUE les mesures de ses patients assignés
+    else if (utilisateurConnecte.role === 'medecin') {
+      // Récupérer les IDs des patients assignés
+      const Assignment = require('../models/Assignment');
+      const assignments = await Assignment.find({
+        medecinId: utilisateurConnecte.id,
+        actif: true
+      });
+      
+      const patientIds = assignments.map(a => a.patientId);
+      
+      if (patientIds.length === 0) {
+        return res.json({
+          success: true,
+          count: 0,
+          data: [],
+          message: 'Aucun patient assigné'
+        });
+      }
+      
+      filtre.idUtilisateur = { $in: patientIds };
+      console.log('👨‍⚕️ Médecin - Filtre par', patientIds.length, 'patient(s) assigné(s)');
     }
     
-    if (status) {
-      filtre.statut = status;
+   // SI ADMIN : Peut filtrer par userId si fourni, sinon voit tout
+    else if (utilisateurConnecte.role === 'admin') {
+      if (req.query.userId) {
+        const mongoose = require('mongoose');
+        filtre.idUtilisateur = new mongoose.Types.ObjectId(req.query.userId);  // ← CONVERTIR EN ObjectId !
+        console.log('👑 Admin - Filtre par userId:', filtre.idUtilisateur);
+      } else {
+        console.log('👑 Admin - Toutes les mesures');
+      }
     }
+    
+    // Filtres supplémentaires (optionnels)
+    if (req.query.deviceId) {
+      filtre.idDispositif = req.query.deviceId;
+    }
+    
+    if (req.query.status) {
+      filtre.statut = req.query.status;
+    }
+    
+    const limit = parseInt(req.query.limit) || 50;
     
     // Récupérer les mesures (les plus récentes en premier)
     const mesures = await Mesure.find(filtre)
-      .sort({ createdAt: -1 }) // Trier par date décroissante
-      .limit(parseInt(limit))
-      .populate('idUtilisateur', 'prenom nom email'); // Joindre les infos utilisateur
+      .sort({ horodatageMesure: -1 }) // ← UTILISE horodatageMesure, pas createdAt
+      .limit(limit)
+      .populate('idUtilisateur', 'prenom nom email photoProfil');
     
-    console.log(`📊 ${mesures.length} mesure(s) récupérée(s)`);
+    console.log(`✅ ${mesures.length} mesure(s) trouvée(s)`);
     
     res.json({
       success: true,
       count: mesures.length,
-      data: mesures
+      mesures: mesures, // ← UTILISE "mesures" pour cohérence avec le frontend
+      total: mesures.length
     });
     
   } catch (error) {
