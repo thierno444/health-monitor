@@ -66,6 +66,19 @@ export class AuthService {
     );
   }
 
+  // Inscription
+  register(userData: any): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/inscription`, userData).pipe(
+      tap(response => {
+        if (response.success && response.token) {
+          this.setToken(response.token);
+          this.currentUserSubject.next(response.utilisateur);
+        }
+      })
+    );
+  }
+  
+
   loadUserProfile(): void {
     this.http.get<any>(`${this.apiUrl}/auth/profil`).subscribe({
       next: (response) => {
@@ -181,4 +194,46 @@ export class AuthService {
       })
     );
   }
+
+  // Mot de passe oublié
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/forgot-password`, { email });
+  }
+
+  // Réinitialiser le mot de passe
+  resetPassword(token: string, password: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/reset-password/${token}`, { password });
+  }
+
+  // Valider l'email (format)
+  validateEmail(email: string): { valid: boolean; message: string } {
+    if (!email) {
+      return { valid: false, message: 'L\'email est requis' };
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return { valid: false, message: 'Format d\'email invalide' };
+    }
+    
+    return { valid: true, message: '' };
+  }
+
+  // Valider le mot de passe
+  validatePassword(password: string): { valid: boolean; message: string } {
+    if (!password) {
+      return { valid: false, message: 'Le mot de passe est requis' };
+    }
+    
+    if (password.length < 6) {
+      return { valid: false, message: 'Le mot de passe doit contenir au moins 6 caractères' };
+    }
+    
+    return { valid: true, message: '' };
+  }
+
+
+
+
+  
 }

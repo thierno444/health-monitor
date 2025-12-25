@@ -12,6 +12,8 @@ import { ExportService } from '../../../core/services/export.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ToastComponent } from '../../../shared/components/toast/toast.component';
 import { NoteService, Note } from '../../../core/services/note.service';
+import { NotificationsDropdownComponent } from '../../../shared/components/notifications-dropdown/notifications-dropdown';
+import { NotificationService } from '../../../core/services/notification.service';
 import { QuestionService, Question } from '../../../core/services/question.service';
 import { take } from 'rxjs/operators'; 
 
@@ -23,7 +25,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule,FormsModule,ToastComponent],
+  imports: [CommonModule,FormsModule,ToastComponent,NotificationsDropdownComponent],
   templateUrl: './patient-dashboard.html',
   styleUrls: ['./patient-dashboard.scss']
 })
@@ -170,7 +172,8 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
     private exportService: ExportService,
     private toastService: ToastService,
     private noteService: NoteService ,
-    private questionService: QuestionService
+    private questionService: QuestionService,
+    private notificationService: NotificationService
 
 
   ) {}
@@ -215,6 +218,8 @@ ngOnInit(): void {
           this.router.navigate(['/login']);
         }
     });
+
+        this.notificationService.loadUnreadCount(); 
   }
 
   ngAfterViewInit(): void {
@@ -226,56 +231,60 @@ ngOnInit(): void {
   }, 1000);
 }
 
- loadDashboardData(userId: string): void {
-    console.log('📥 Chargement des mesures pour:', userId);
-    this.loading = true;
+loadDashboardData(userId: string): void {
+  console.log('📥 Chargement des mesures pour:', userId);
+  this.loading = true;
 
-    // Charger les mesures
-    this.measurementService.getMeasurements(userId, 50).subscribe({
-      next: (response) => {
-        console.log('📊 Réponse mesures:', response);
-        if (response.success && response.data) {
-          this.measurements = response.data;
-          this.latestMeasurement = this.measurements[0] || null;
-          console.log('✅ Mesures chargées:', this.measurements.length);
-          
-          // Créer les graphiques selon l'onglet actif
-          setTimeout(() => {
-            if (this.currentTab === 'overview' && this.measurements.length > 0) {
-              this.createCharts();
-            } else if (this.currentTab === 'charts' && this.measurements.length > 0) {
-              this.createDetailedCharts();
-            }
-          }, 500);
-        } else {
-          console.log('⚠️ Pas de mesures trouvées');
-          this.measurements = [];
-          this.latestMeasurement = null;
-        }
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('❌ Erreur chargement mesures:', err);
+  // Charger les mesures
+  this.measurementService.getMeasurements(userId, 50).subscribe({
+    next: (response: any) => {
+      console.log('📊 Réponse mesures:', response);
+      console.log('📊 response.mesures existe?', !!response.mesures);
+      console.log('📊 response.mesures.length:', response.mesures?.length);
+      
+      // LE BACKEND RETOURNE response.mesures, PAS response.data !
+      if (response && response.success && Array.isArray(response.mesures) && response.mesures.length > 0) {
+        this.measurements = response.mesures;
+        this.latestMeasurement = this.measurements[0] || null;
+        console.log('✅', this.measurements.length, 'mesure(s) chargée(s)');
+        
+        // Créer les graphiques selon l'onglet actif
+        setTimeout(() => {
+          if (this.currentTab === 'overview' && this.measurements.length > 0) {
+            this.createCharts();
+          } else if (this.currentTab === 'charts' && this.measurements.length > 0) {
+            this.createDetailedCharts();
+          }
+        }, 500);
+      } else {
+        console.warn('⚠️ Pas de mesures dans la réponse');
         this.measurements = [];
         this.latestMeasurement = null;
-        this.loading = false;
       }
-    });
+      this.loading = false;
+    },
+    error: (err: any) => {
+      console.error('❌ Erreur chargement mesures:', err);
+      this.measurements = [];
+      this.latestMeasurement = null;
+      this.loading = false;
+    }
+  });
 
-    // Charger les stats
-    this.measurementService.getStats(userId).subscribe({
-      next: (response) => {
-        console.log('📈 Stats reçues:', response);
-        if (response.success) {
-          this.stats = response.stats;
-          console.log('✅ Stats chargées');
-        }
-      },
-      error: (err) => {
-        console.error('❌ Erreur chargement stats:', err);
+  // Charger les stats
+  this.measurementService.getStats(userId).subscribe({
+    next: (response: any) => {
+      console.log('📈 Stats reçues:', response);
+      if (response.success) {
+        this.stats = response.stats;
+        console.log('✅ Stats chargées');
       }
-    });
-  }
+    },
+    error: (err: any) => {
+      console.error('❌ Erreur chargement stats:', err);
+    }
+  });
+}
 
   setupSocketConnection(userId: string): void {
     console.log('⚡ Configuration Socket.IO pour:', userId);

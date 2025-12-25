@@ -8,6 +8,8 @@ import { SocketService } from '../../../core/services/socket.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ExportService } from '../../../core/services/export.service';
+import { NotificationsDropdownComponent } from '../../../shared/components/notifications-dropdown/notifications-dropdown';
+import { NotificationService } from '../../../core/services/notification.service';
 import { AlerteService, Alerte, StatistiquesAlertes } from '../../../core/services/alerte.service';
 import { NoteService, Note } from '../../../core/services/note.service';
 import { QuestionService, Question } from '../../../core/services/question.service';
@@ -17,7 +19,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-doctor-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastComponent],
+  imports: [CommonModule, FormsModule, ToastComponent,NotificationsDropdownComponent],
   templateUrl: './doctor-dashboard.html',
   styleUrls: ['./doctor-dashboard.scss']
 })
@@ -198,8 +200,8 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     private alerteService: AlerteService,
     private noteService: NoteService,
     private exportService: ExportService,
-    private questionService: QuestionService 
-
+    private questionService: QuestionService ,
+    private notificationService: NotificationService
 
   ) {}
 
@@ -227,6 +229,8 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+      this.notificationService.loadUnreadCount(); 
     
   }
 

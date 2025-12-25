@@ -1,210 +1,251 @@
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+<div class="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 gradient-animate flex items-center justify-center p-4 relative overflow-hidden">
   
-  <div class="glass max-w-2xl w-full rounded-3xl p-8 border border-white/20 dark:border-gray-700 backdrop-blur-xl">
+  <!-- Particules animées -->
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="particle particle-1"></div>
+    <div class="particle particle-2"></div>
+    <div class="particle particle-3"></div>
+    <div class="particle particle-4"></div>
+  </div>
+
+  <!-- Container principal -->
+  <div class="relative z-10 w-full max-w-2xl">
     
-    <!-- Header -->
-    <div class="text-center mb-8">
-      <div class="inline-block p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4">
-        <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- Logo et titre -->
+    <div class="text-center mb-8 animate-slide-up">
+      <div class="inline-block p-4 bg-white/10 backdrop-blur-lg rounded-2xl mb-4">
+        <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
         </svg>
       </div>
-      <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+      <h1 class="text-4xl font-bold text-white mb-2">
         Créer un compte
       </h1>
-      <p class="text-gray-600 dark:text-gray-400">
+      <p class="text-white/80 text-lg">
         Rejoignez Health Monitor pour suivre votre santé
       </p>
     </div>
 
-    <!-- Formulaire -->
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-4">
+    <!-- Carte -->
+    <div class="glass rounded-3xl p-8 shadow-2xl animate-fade-in">
       
-      <!-- Prénom & Nom -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            👤 Prénom
+      <!-- Formulaire -->
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        
+        <!-- Prénom & Nom -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Prénom -->
+          <div class="space-y-2">
+            <label class="block text-white/90 text-sm font-medium">
+              👤 Prénom
+            </label>
+            <input
+              type="text"
+              formControlName="prenom"
+              placeholder="Jean"
+              class="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all backdrop-blur-sm"
+            />
+            <p *ngIf="registerForm.get('prenom')?.invalid && registerForm.get('prenom')?.touched" 
+               class="text-red-300 text-sm flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+              </svg>
+              Prénom requis (min 2 caractères)
+            </p>
+          </div>
+
+          <!-- Nom -->
+          <div class="space-y-2">
+            <label class="block text-white/90 text-sm font-medium">
+              👤 Nom
+            </label>
+            <input
+              type="text"
+              formControlName="nom"
+              placeholder="Dupont"
+              class="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all backdrop-blur-sm"
+            />
+            <p *ngIf="registerForm.get('nom')?.invalid && registerForm.get('nom')?.touched" 
+               class="text-red-300 text-sm flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+              </svg>
+              Nom requis (min 2 caractères)
+            </p>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="space-y-2">
+          <label class="block text-white/90 text-sm font-medium">
+            📧 Adresse email
           </label>
           <input
-            type="text"
-            formControlName="prenom"
-            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-all"
-            placeholder="Jean"
+            type="email"
+            formControlName="email"
+            placeholder="votre@email.com"
+            class="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all backdrop-blur-sm"
           />
-          <p *ngIf="registerForm.get('prenom')?.invalid && registerForm.get('prenom')?.touched" 
-             class="text-red-500 text-sm mt-1">
-            Prénom requis (min 2 caractères)
+          <p *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" 
+             class="text-red-300 text-sm flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            Email invalide
           </p>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            👤 Nom
+        <!-- Téléphone -->
+        <div class="space-y-2">
+          <label class="block text-white/90 text-sm font-medium">
+            📱 Téléphone
           </label>
           <input
-            type="text"
-            formControlName="nom"
-            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-all"
-            placeholder="Dupont"
+            type="tel"
+            formControlName="telephone"
+            placeholder="+221 XX XXX XX XX"
+            class="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all backdrop-blur-sm"
           />
-          <p *ngIf="registerForm.get('nom')?.invalid && registerForm.get('nom')?.touched" 
-             class="text-red-500 text-sm mt-1">
-            Nom requis (min 2 caractères)
+          <p *ngIf="registerForm.get('telephone')?.invalid && registerForm.get('telephone')?.touched" 
+             class="text-red-300 text-sm flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            Numéro de téléphone invalide
           </p>
         </div>
-      </div>
 
-      <!-- Email -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          📧 Email
-        </label>
-        <input
-          type="email"
-          formControlName="email"
-          class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-all"
-          placeholder="votre@email.com"
-        />
-        <p *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" 
-           class="text-red-500 text-sm mt-1">
-          Email invalide
-        </p>
-      </div>
-
-      <!-- Téléphone -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          📱 Téléphone
-        </label>
-        <input
-          type="tel"
-          formControlName="telephone"
-          class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-all"
-          placeholder="+221 XX XXX XX XX"
-        />
-        <p *ngIf="registerForm.get('telephone')?.invalid && registerForm.get('telephone')?.touched" 
-           class="text-red-500 text-sm mt-1">
-          Numéro de téléphone invalide
-        </p>
-      </div>
-
-      <!-- Mot de passe -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          🔒 Mot de passe
-        </label>
-        <div class="relative">
-          <input
-            [type]="showPassword ? 'text' : 'password'"
-            formControlName="motDePasse"
-            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-all"
-            placeholder="••••••••"
-          />
-          <button
-            type="button"
-            (click)="togglePassword()"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-          >
-            <svg *ngIf="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+        <!-- Mot de passe -->
+        <div class="space-y-2">
+          <label class="block text-white/90 text-sm font-medium">
+            🔒 Mot de passe
+          </label>
+          <div class="relative">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="motDePasse"
+              placeholder="••••••••"
+              class="w-full px-4 py-3 pr-12 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all backdrop-blur-sm"
+            />
+            <button
+              type="button"
+              (click)="togglePassword()"
+              class="absolute inset-y-0 right-0 pr-4 flex items-center text-white/60 hover:text-white transition-colors"
+            >
+              <svg *ngIf="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+              <svg *ngIf="showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+              </svg>
+            </button>
+          </div>
+          <p *ngIf="registerForm.get('motDePasse')?.invalid && registerForm.get('motDePasse')?.touched" 
+             class="text-red-300 text-sm flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
             </svg>
-            <svg *ngIf="showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-            </svg>
-          </button>
+            Mot de passe requis (min 6 caractères)
+          </p>
         </div>
-        <p *ngIf="registerForm.get('motDePasse')?.invalid && registerForm.get('motDePasse')?.touched" 
-           class="text-red-500 text-sm mt-1">
-          Mot de passe requis (min 6 caractères)
-        </p>
-      </div>
 
-      <!-- Confirmer mot de passe -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          🔒 Confirmer le mot de passe
-        </label>
-        <div class="relative">
-          <input
-            [type]="showConfirmPassword ? 'text' : 'password'"
-            formControlName="confirmMotDePasse"
-            class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-all"
-            placeholder="••••••••"
-          />
-          <button
-            type="button"
-            (click)="toggleConfirmPassword()"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-          >
-            <svg *ngIf="!showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+        <!-- Confirmer mot de passe -->
+        <div class="space-y-2">
+          <label class="block text-white/90 text-sm font-medium">
+            🔒 Confirmer le mot de passe
+          </label>
+          <div class="relative">
+            <input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              formControlName="confirmMotDePasse"
+              placeholder="••••••••"
+              class="w-full px-4 py-3 pr-12 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all backdrop-blur-sm"
+            />
+            <button
+              type="button"
+              (click)="toggleConfirmPassword()"
+              class="absolute inset-y-0 right-0 pr-4 flex items-center text-white/60 hover:text-white transition-colors"
+            >
+              <svg *ngIf="!showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+              <svg *ngIf="showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+              </svg>
+            </button>
+          </div>
+          <p *ngIf="registerForm.errors?.['mismatch'] && registerForm.get('confirmMotDePasse')?.touched" 
+             class="text-red-300 text-sm flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
             </svg>
-            <svg *ngIf="showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-            </svg>
-          </button>
+            Les mots de passe ne correspondent pas
+          </p>
         </div>
-        <p *ngIf="registerForm.errors?.['mismatch'] && registerForm.get('confirmMotDePasse')?.touched" 
-           class="text-red-500 text-sm mt-1">
-          Les mots de passe ne correspondent pas
-        </p>
-      </div>
 
-      <!-- Rôle -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          🎭 Rôle
-        </label>
-        <select
-          formControlName="role"
-          class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-all"
+        <!-- Rôle & Dispositif -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Rôle -->
+          <div class="space-y-2">
+            <label class="block text-white/90 text-sm font-medium">
+              🎭 Rôle
+            </label>
+            <select
+              formControlName="role"
+              class="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all backdrop-blur-sm"
+            >
+              <option value="patient" class="bg-gray-800">👤 Patient</option>
+              <option value="medecin" class="bg-gray-800">👨‍⚕️ Médecin</option>
+            </select>
+          </div>
+
+          <!-- ID Dispositif -->
+          <div *ngIf="registerForm.get('role')?.value === 'patient'" class="space-y-2">
+            <label class="block text-white/90 text-sm font-medium">
+              📟 ID Dispositif (optionnel)
+            </label>
+            <input
+              type="text"
+              formControlName="idDispositif"
+              placeholder="ESP32_XXXXX"
+              class="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all backdrop-blur-sm"
+            />
+          </div>
+        </div>
+
+        <!-- Bouton -->
+        <button
+          type="submit"
+          [disabled]="registerForm.invalid || loading"
+          class="w-full bg-white text-blue-600 font-bold py-4 px-6 rounded-xl hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-white/50 transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center space-x-2 mt-6"
         >
-          <option value="patient">👤 Patient</option>
-          <option value="medecin">👨‍⚕️ Médecin</option>
-        </select>
-      </div>
-
-      <!-- ID Dispositif (optionnel) -->
-      <div *ngIf="registerForm.get('role')?.value === 'patient'">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          📟 ID Dispositif ESP32 (optionnel)
-        </label>
-        <input
-          type="text"
-          formControlName="idDispositif"
-          class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-all"
-          placeholder="ESP32_XXXXX"
-        />
-      </div>
-
-      <!-- Bouton -->
-      <button
-        type="submit"
-        [disabled]="registerForm.invalid || loading"
-        class="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <span *ngIf="!loading">✨ Créer mon compte</span>
-        <span *ngIf="loading" class="flex items-center justify-center">
-          <svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
+          <svg *ngIf="loading" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          Inscription...
-        </span>
-      </button>
-    </form>
+          <span>{{ loading ? 'Inscription...' : '✨ Créer mon compte' }}</span>
+        </button>
 
-    <!-- Lien connexion -->
-    <div class="mt-6 text-center">
-      <p class="text-gray-600 dark:text-gray-400">
-        Déjà un compte ?
-        <a routerLink="/login" class="text-blue-600 dark:text-blue-400 font-bold hover:underline">
-          Se connecter
-        </a>
-      </p>
+      </form>
+
+      <!-- Lien connexion -->
+      <div class="mt-6 text-center">
+        <p class="text-white/80 text-sm">
+          Déjà un compte ?
+          <a routerLink="/login" class="text-white font-bold hover:underline ml-1">
+            Se connecter
+          </a>
+        </p>
+      </div>
+
     </div>
+
+    <!-- Footer -->
+    <div class="mt-8 text-center text-white/60 text-sm">
+      <p>© 2024 Health Monitor. Tous droits réservés.</p>
+    </div>
+
   </div>
 </div>

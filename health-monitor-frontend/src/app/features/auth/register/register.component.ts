@@ -43,39 +43,55 @@ export class RegisterComponent implements OnInit {
       ? null : { mismatch: true };
   }
 
-  onSubmit(): void {
-    if (this.registerForm.invalid) {
-      this.toastService.warning('Formulaire invalide', 'Veuillez remplir tous les champs correctement');
-      return;
-    }
-
-    this.loading = true;
-    const formData = { ...this.registerForm.value };
-    delete formData.confirmMotDePasse;
-
-    this.authService.login(formData.email, formData.motDePasse).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.toastService.success('Inscription réussie', 'Bienvenue !');
-          
-          // Redirection selon le rôle
-          if (response.utilisateur.role === 'patient') {
-            this.router.navigate(['/dashboard/patient']);
-          } else if (response.utilisateur.role === 'medecin') {
-            this.router.navigate(['/dashboard/doctor']);
-          } else {
-            this.router.navigate(['/dashboard/admin']);
-          }
-        }
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Erreur inscription:', err);
-        this.toastService.error('Erreur', err.error?.message || 'Inscription échouée');
-        this.loading = false;
-      }
+onSubmit(): void {
+  if (this.registerForm.invalid) {
+    // Marquer tous les champs comme touchés pour afficher les erreurs
+    Object.keys(this.registerForm.controls).forEach(key => {
+      this.registerForm.get(key)?.markAsTouched();
     });
+    return;
   }
+
+  this.loading = true;
+  
+  const formData = {
+    ...this.registerForm.value,
+    sendEmail: true  // Pour envoyer l'email de bienvenue
+  };
+  
+  // Supprimer confirmMotDePasse avant l'envoi
+  delete formData.confirmMotDePasse;
+
+  // UTILISER register(), PAS login() !
+  this.authService.register(formData).subscribe({
+    next: (response: any) => {  // ← AJOUTER LE TYPE
+      console.log('✅ Inscription réussie:', response);
+      this.loading = false;
+      
+      if (response.success) {
+        // Le token est déjà stocké automatiquement par le service
+        // Redirection selon le rôle
+        const role = response.utilisateur.role;
+        
+        if (role === 'medecin') {
+          this.router.navigate(['/dashboard/medecin']);
+        } else if (role === 'admin') {
+          this.router.navigate(['/dashboard/admin']);
+        } else {
+          this.router.navigate(['/dashboard/patient']);
+        }
+      }
+    },
+    error: (err: any) => {  // ← AJOUTER LE TYPE
+      console.error('❌ Erreur inscription:', err);
+      this.loading = false;
+      
+      const errorMessage = err.error?.message || 'Une erreur est survenue lors de l\'inscription';
+      alert(errorMessage);
+    }
+  });
+}
+
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;

@@ -1,0 +1,426 @@
+// ========== VARIABLES ==========
+$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$success-gradient: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);
+$danger-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+$warning-gradient: linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%);
+
+// ========== GLASS MORPHISM ==========
+.glass {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15);
+  }
+}
+
+:host-context(.dark) .glass {
+  background: rgba(17, 24, 39, 0.8);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  &:hover {
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+  }
+}
+
+// ========== GLASS TABS ==========
+.glass-tabs {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+:host-context(.dark) .glass-tabs {
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+// ========== ANIMATIONS ==========
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+// ========== CARTES STATS ==========
+.stat-card {
+  animation: slideUp 0.6s ease-out;
+  
+  &:hover {
+    transform: translateY(-5px) scale(1.02);
+    
+    .stat-icon {
+      transform: rotate(10deg) scale(1.1);
+    }
+  }
+}
+
+.stat-icon {
+  transition: all 0.3s ease;
+}
+
+// ========== TABLE ==========
+table {
+  tbody tr {
+    animation: fadeIn 0.3s ease-out;
+    
+    &:hover {
+      transform: scale(1.01);
+    }
+  }
+}
+
+// ========== BOUTONS ==========
+button {
+  position: relative;
+  overflow: hidden;
+  
+  &:not(:disabled) {
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    &:active::before {
+      width: 300px;
+      height: 300px;
+    }
+  }
+}
+
+// ========== INPUTS ==========
+input, select, textarea {
+  transition: all 0.3s ease;
+  
+  &:focus {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  }
+}
+
+// ========== CHECKBOXES ==========
+input[type="checkbox"] {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:checked {
+    transform: scale(1.1);
+  }
+}
+
+// ========== MODALS ==========
+.modal-backdrop {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+  animation: slideUp 0.4s ease-out;
+}
+
+// ========== BADGES ==========
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+// ========== SCROLLBAR CUSTOM ==========
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  
+  &:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  }
+}
+
+:host-context(.dark) {
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    
+    &:hover {
+      background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+    }
+  }
+}
+
+// ========== LOADING SKELETON ==========
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.5) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+:host-context(.dark) .skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(255, 255, 255, 0.1) 60%,
+    rgba(255, 255, 255, 0)
+  );
+}
+
+// ========== PAGINATION ==========
+.pagination {
+  button {
+    transition: all 0.2s ease;
+    
+    &:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+    
+    &.active {
+      animation: pulse 2s infinite;
+    }
+  }
+}
+
+// ========== EMPTY STATE ==========
+.empty-state {
+  animation: fadeIn 0.6s ease-out;
+  
+  svg {
+    animation: pulse 3s infinite;
+  }
+}
+
+// ========== TABS ==========
+.tab-button {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transform: translateX(-50%);
+    transition: width 0.3s ease;
+  }
+  
+  &.active::after {
+    width: 80%;
+  }
+}
+
+// ========== CARDS HOVER EFFECTS ==========
+.hover-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
+    
+    &::before {
+      opacity: 1;
+    }
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+}
+
+// ========== GRADIENT TEXT ==========
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s infinite;
+  background-size: 200% 100%;
+}
+
+// ========== PULSE ANIMATION ==========
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+  }
+  
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
+  }
+  
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+  }
+}
+
+.pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+// ========== GLOW EFFECT ==========
+.glow {
+  box-shadow: 
+    0 0 20px rgba(139, 92, 246, 0.4),
+    0 0 40px rgba(139, 92, 246, 0.2),
+    0 0 60px rgba(139, 92, 246, 0.1);
+  
+  &:hover {
+    box-shadow: 
+      0 0 30px rgba(139, 92, 246, 0.6),
+      0 0 60px rgba(139, 92, 246, 0.4),
+      0 0 90px rgba(139, 92, 246, 0.2);
+  }
+}
+
+// ========== RESPONSIVE ==========
+@media (max-width: 768px) {
+  .glass-tabs {
+    overflow-x: auto;
+    
+    button {
+      white-space: nowrap;
+    }
+  }
+  
+  table {
+    font-size: 0.875rem;
+    
+    th, td {
+      padding: 0.75rem 0.5rem;
+    }
+  }
+}
+
+// ========== PRINT STYLES ==========
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .glass {
+    background: white;
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+  }
+}
+
+// ========== ACCESSIBILITY ==========
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ========== FOCUS VISIBLE ==========
+:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+// ========== HIGH CONTRAST MODE ==========
+@media (prefers-contrast: high) {
+  .glass {
+    background: white;
+    border: 2px solid black;
+  }
+  
+  :host-context(.dark) .glass {
+    background: black;
+    border: 2px solid white;
+  }
+}

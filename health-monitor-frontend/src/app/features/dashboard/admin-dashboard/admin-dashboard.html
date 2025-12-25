@@ -1,0 +1,2856 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
+
+    <!-- Header -->
+    <header class="glass dark:bg-gray-900/95 border-b border-white/10 dark:border-gray-700/50 backdrop-blur-xl sticky top-0 z-50 shadow-lg">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-red-600 to-orange-600 dark:from-red-400 dark:to-orange-400 bg-clip-text text-transparent">
+                            Dashboard Admin
+                        </h1>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Gestion complète</p>
+                    </div>
+                </div>
+
+                <!-- Actions droite -->
+                <div class="flex items-center space-x-3">
+                    <!-- Notifications -->
+                    <app-notifications-dropdown></app-notifications-dropdown>
+
+                    <!-- Toggle Dark/Light -->
+                    <button
+                        (click)="toggleTheme()"
+                        class="p-2.5 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 dark:from-indigo-500 dark:to-purple-600 hover:scale-110 transition-all shadow-lg"
+                    >
+                        <svg *ngIf="!darkMode" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                        <svg *ngIf="darkMode" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Photo profil -->
+                    <img
+                        [src]="admin?.photoProfil || 'https://ui-avatars.com/api/?name=Admin'"
+                        class="w-10 h-10 rounded-full border-2 border-white dark:border-gray-800 shadow-lg"
+                    />
+
+                    <!-- Info admin -->
+                    <div class="text-right hidden md:block">
+                        <p class="text-sm font-bold text-gray-800 dark:text-white">{{ admin?.prenom }} {{ admin?.nom }}</p>
+                        <p class="text-xs text-red-600 dark:text-red-400 font-bold">🔧 Administrateur</p>
+                    </div>
+
+                    <!-- Déconnexion -->
+                    <button
+                        (click)="logout()"
+                        class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl transition-all font-medium text-sm border border-red-500/20"
+                    >
+                        Déconnexion
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Tabs navigation -->
+    <div class="sticky top-[73px] z-30 bg-gradient-to-br from-indigo-50/95 via-purple-50/95 to-pink-50/95 dark:from-gray-900/95 dark:via-purple-900/20 dark:to-indigo-900/20 backdrop-blur-xl border-b border-purple-500/20">
+        <div class="container mx-auto px-6 py-4">
+            <div class="glass-tabs rounded-2xl p-2 inline-flex space-x-2 shadow-xl backdrop-blur-xl bg-white/60 dark:bg-gray-800/60">
+
+                <!-- Vue d'ensemble -->
+                <button
+                    (click)="switchTab('overview')"
+                    [class]="activeTab === 'overview' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
+                    class="relative px-8 py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-3 group"
+                >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                    </svg>
+                    <span>Vue d'ensemble</span>
+                    <div *ngIf="activeTab === 'overview'" class="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur-xl opacity-50 -z-10"></div>
+                </button>
+
+                <!-- Utilisateurs -->
+                <button
+                    (click)="switchTab('users')"
+                    [class]="activeTab === 'users' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
+                    class="relative px-8 py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-3 group"
+                >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <span>Utilisateurs</span>
+                    <div *ngIf="activeTab === 'users'" class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur-xl opacity-50 -z-10"></div>
+                </button>
+
+                <!-- Dispositifs -->
+                <button
+                    (click)="switchTab('devices')"
+                    [class]="activeTab === 'devices' ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
+                    class="relative px-8 py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-3 group"
+                >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    <span>Dispositifs</span>
+                    <div *ngIf="activeTab === 'devices'" class="absolute inset-0 bg-gradient-to-r from-green-500 to-teal-500 rounded-xl blur-xl opacity-50 -z-10"></div>
+                </button>
+
+                <!-- Logs -->
+                <button
+                (click)="switchTab('logs')"
+                [class]="activeTab === 'logs' ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
+                class="relative px-8 py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-3 group"
+                >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <span>Logs</span>
+                <div *ngIf="activeTab === 'logs'" class="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-xl opacity-50 -z-10"></div>
+                </button>
+
+                <!-- Assignations -->
+                <button
+                  (click)="switchTab('assignments')"
+                  [class]="activeTab === 'assignments' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
+                  class="relative px-8 py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-3 group"
+                >
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  </svg>
+                  <span>Assignations</span>
+                  <div *ngIf="activeTab === 'assignments'" class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur-xl opacity-50 -z-10"></div>
+                </button>
+
+
+                <!-- Profil -->
+                <button
+                    (click)="switchTab('profile')"
+                    [class]="activeTab === 'profile' ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
+                    class="relative px-8 py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-3 group"
+                >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span>Mon Profil</span>
+                    <div *ngIf="activeTab === 'profile'" class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl blur-xl opacity-50 -z-10"></div>
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="container mx-auto px-4 pb-12">
+
+        <!-- ========== ONGLET VUE D'ENSEMBLE ========== -->
+        <div *ngIf="activeTab === 'overview'" class="space-y-6 mt-6">
+        
+        <!-- Header -->
+        <div class="glass rounded-2xl p-6 border-2 border-blue-500/30">
+            <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            📊 Vue d'ensemble
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">
+            Statistiques globales de la plateforme
+            </p>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loadingStats" class="glass rounded-2xl p-12 text-center">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+
+        <!-- Statistiques -->
+        <div *ngIf="!loadingStats && stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <!-- Total utilisateurs -->
+            <div class="glass rounded-2xl p-6 border-2 border-blue-500/30 hover:scale-105 transition-all cursor-pointer">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-blue-500/20 rounded-xl">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                </div>
+            </div>
+            <div class="text-4xl font-bold text-blue-600 mb-1">{{ stats.utilisateurs.total }}</div>
+            <div class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total utilisateurs</div>
+            </div>
+
+            <!-- Patients -->
+            <div class="glass rounded-2xl p-6 border-2 border-purple-500/30 hover:scale-105 transition-all cursor-pointer">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-purple-500/20 rounded-xl">
+                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                </div>
+            </div>
+            <div class="text-4xl font-bold text-purple-600 mb-1">{{ stats.utilisateurs.patients }}</div>
+            <div class="text-gray-600 dark:text-gray-400 text-sm font-medium">Patients actifs</div>
+            </div>
+
+            <!-- Médecins -->
+            <div class="glass rounded-2xl p-6 border-2 border-green-500/30 hover:scale-105 transition-all cursor-pointer">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-green-500/20 rounded-xl">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                </svg>
+                </div>
+            </div>
+            <div class="text-4xl font-bold text-green-600 mb-1">{{ stats.utilisateurs.medecins }}</div>
+            <div class="text-gray-600 dark:text-gray-400 text-sm font-medium">Médecins</div>
+            </div>
+
+            <!-- Dispositifs -->
+            <div class="glass rounded-2xl p-6 border-2 border-orange-500/30 hover:scale-105 transition-all cursor-pointer">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-orange-500/20 rounded-xl">
+                <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                </div>
+            </div>
+            <div class="text-4xl font-bold text-orange-600 mb-1">{{ stats.dispositifs.assignes }}</div>
+            <div class="text-gray-600 dark:text-gray-400 text-sm font-medium">Dispositifs assignés</div>
+            </div>
+
+        </div>
+
+        <!-- GRAPHIQUES -->
+        <div *ngIf="!loadingCharts && chartsData" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            
+            <!-- Répartition par rôle -->
+            <div class="glass rounded-2xl p-6 border-2 border-indigo-500/30">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                <span class="p-2 bg-indigo-500/20 rounded-lg mr-3">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                </svg>
+                </span>
+                Répartition par rôle
+            </h3>
+            
+            <div class="space-y-3">
+                <div *ngFor="let role of chartsData.repartitionRoles" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                <div class="flex items-center space-x-3">
+                    <div [class]="getRoleBadge(role.role)" class="w-4 h-4 rounded-full"></div>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ getRoleLabel(role.role) }}</span>
+                </div>
+                <span class="text-2xl font-bold text-indigo-600">{{ role.count }}</span>
+                </div>
+            </div>
+            </div>
+
+            <!-- Évolution utilisateurs -->
+            <div class="glass rounded-2xl p-6 border-2 border-green-500/30">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                <span class="p-2 bg-green-500/20 rounded-lg mr-3">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+                </span>
+                Nouveaux utilisateurs (30j)
+            </h3>
+            
+            <div class="text-center py-8">
+                <div class="text-5xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent mb-2">
+                {{ getTotalNewUsers() }}
+                </div>
+                <p class="text-gray-600 dark:text-gray-400">inscriptions ce mois</p>
+            </div>
+
+            <div *ngIf="chartsData.evolutionUtilisateurs.length > 0" class="mt-4 space-y-2">
+                <div *ngFor="let ev of chartsData.evolutionUtilisateurs.slice(-7)" class="flex items-center justify-between text-sm">
+                <span class="text-gray-600 dark:text-gray-400">{{ ev.date }}</span>
+                <span class="font-bold text-green-600">+{{ ev.count }}</span>
+                </div>
+            </div>
+            </div>
+
+            <!-- Activité globale -->
+            <div class="glass rounded-2xl p-6 border-2 border-blue-500/30">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                <span class="p-2 bg-blue-500/20 rounded-lg mr-3">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                </span>
+                Activité globale
+            </h3>
+            
+            <div *ngIf="chartsData.activiteGlobale.length > 0" class="space-y-2">
+                <div *ngFor="let act of chartsData.activiteGlobale.slice(-10)" class="flex items-center">
+                <span class="text-xs text-gray-500 dark:text-gray-400 w-24">{{ act.date }}</span>
+                <div class="flex-1 mx-3">
+                    <div class="h-6 bg-blue-500/20 rounded-lg overflow-hidden">
+                    <div 
+                    class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg transition-all duration-500"
+                    [style.width.%]="getActivityBarWidth(act.count)"
+                    ></div>
+                    </div>
+                </div>
+                <span class="text-sm font-bold text-blue-600 w-12 text-right">{{ act.count }}</span>
+                </div>
+            </div>
+            <div *ngIf="chartsData.activiteGlobale.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+                Aucune donnée d'activité
+            </div>
+            </div>
+
+            <!-- Top alertes -->
+            <div class="glass rounded-2xl p-6 border-2 border-red-500/30">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                <span class="p-2 bg-red-500/20 rounded-lg mr-3">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                </span>
+                Top alertes (30j)
+            </h3>
+            
+            <div *ngIf="chartsData.topAlertes.length > 0" class="space-y-3">
+                <div *ngFor="let alerte of chartsData.topAlertes" class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/10 rounded-xl">
+                <span class="font-medium text-gray-900 dark:text-white capitalize">{{ alerte.type }}</span>
+                <span class="text-xl font-bold text-red-600">{{ alerte.count }}</span>
+                </div>
+            </div>
+            <div *ngIf="chartsData.topAlertes.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+                Aucune alerte enregistrée
+            </div>
+            </div>
+
+        </div>
+
+        </div>
+
+        <!-- ========== ONGLET UTILISATEURS ========== -->
+        <div *ngIf="activeTab === 'users'" class="space-y-6 mt-6">
+
+            <!-- Header + Actions -->
+            <div class="glass rounded-2xl p-6 border-2 border-purple-500/30">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                    <div>
+                        <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent">
+                            👥 Gestion utilisateurs
+                        </h2>
+                        <p class="text-gray-600 dark:text-gray-400 mt-2">
+                            {{ filteredUsers.length }} utilisateur(s)
+                        </p>
+                    </div>
+
+                    <!-- Actions principales -->
+                    <div class="flex flex-wrap gap-3">
+                        <button
+                            (click)="openCreateUserModal()"
+                            class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl"
+                        >
+                            ➕ Nouveau
+                        </button>
+
+                        <button
+                            (click)="openImportModal()"
+                            class="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl"
+                        >
+                            📤 Import CSV
+                        </button>
+
+                        <button
+                            (click)="bulkDelete()"
+                            [disabled]="selectedUsers.length === 0"
+                            class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            🗑️ Supprimer ({{ selectedUsers.length }})
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtres -->
+            <div class="glass rounded-xl p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                    <!-- Recherche -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">🔍 Rechercher</label>
+                        <input
+                            type="text"
+                            [(ngModel)]="searchQuery"
+                            (ngModelChange)="applyFilters()"
+                            placeholder="Nom, email..."
+                            class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                        />
+                    </div>
+
+                    <!-- Filtre rôle -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">👤 Rôle</label>
+                        <select
+                            [(ngModel)]="filterRole"
+                            (ngModelChange)="applyFilters()"
+                            class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                        >
+                            <option value="tous">Tous</option>
+                            <option value="patient">Patients</option>
+                            <option value="medecin">Médecins</option>
+                            <option value="admin">Admins</option>
+                        </select>
+                    </div>
+
+                    <!-- Archives -->
+                    <div class="flex items-end">
+                        <label class="flex items-center space-x-3 cursor-pointer p-4 bg-gray-50 dark:bg-gray-700 rounded-xl w-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-all">
+                            <input
+                                type="checkbox"
+                                [(ngModel)]="includeArchived"
+                                (ngModelChange)="applyFilters()"
+                                class="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
+                            />
+                            <span class="text-gray-800 dark:text-white font-medium">📦 Inclure archivés</span>
+                        </label>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div *ngIf="loadingUsers" class="glass rounded-2xl p-12 text-center">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            </div>
+
+            <!-- Table utilisateurs -->
+            <div *ngIf="!loadingUsers" class="glass rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+                            <tr>
+                                <th class="px-6 py-4 text-left">
+                                    <input
+                                        type="checkbox"
+                                        [checked]="allSelected"
+                                        (change)="toggleSelectAll($event)"
+                                        class="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
+                                    />
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Nom</th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Email</th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Téléphone</th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Rôle</th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Dispositif</th>
+                                <th class="px-6 py-4 text-center text-sm font-bold text-gray-900 dark:text-white">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                *ngFor="let user of paginatedUsers"
+                                class="border-t border-gray-200 dark:border-gray-700 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors"
+                            >
+                                <td class="px-6 py-4">
+                                    <input
+                                        type="checkbox"
+                                        [checked]="isUserSelected(user._id)"
+                                        (change)="toggleSelectUser(user._id)"
+                                        class="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
+                                    />
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <img
+                                            [src]="user.photoProfil || 'https://ui-avatars.com/api/?name=' + user.prenom + '+' + user.nom"
+                                            class="w-10 h-10 rounded-full border-2 border-purple-500"
+                                        />
+                                        <div>
+                                            <p class="font-bold text-gray-900 dark:text-white">{{ user.prenom }} {{ user.nom }}</p>
+                                            <p *ngIf="user.estArchive" class="text-xs text-purple-600 dark:text-purple-400">📦 Archivé</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ user.email }}</td>
+                                <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ user.telephone || 'N/A' }}</td>
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="px-3 py-1 rounded-full text-sm font-bold"
+                                        [class]="getRoleBadge(user.role)"
+                                    >
+                                        {{ getRoleLabel(user.role) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-gray-700 dark:text-gray-300">
+                                    {{ user.idDispositif || 'Aucun' }}
+                                </td>
+                                <td class="px-6 py-4">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <!-- Bouton Modifier -->
+                                    <button
+                                    (click)="openEditUserModal(user)"
+                                    class="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-600 rounded-lg transition-all"
+                                    title="Modifier"
+                                    >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                    </button>
+
+                                    <!-- Bouton Assigner (uniquement pour les patients) -->
+                                    <button
+                                      *ngIf="user.role === 'patient'"
+                                      (click)="openAssignPatientModal(user)"
+                                      class="p-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-600 rounded-lg transition-all"
+                                      title="Assigner à un médecin"
+                                    >
+                                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v4m0 0l2-2m-2 2l-2-2"></path>
+                                      </svg>
+                                    </button>
+
+                                    <!-- Bouton Désassigner (uniquement pour les patients) -->
+                                    <button
+                                      *ngIf="user.role === 'patient'"
+                                      (click)="openUnassignModalFromUser(user)"
+                                      class="p-2 bg-orange-500/20 hover:bg-orange-500/30 text-orange-600 rounded-lg transition-all"
+                                      title="Désassigner"
+                                    >
+                                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12h-6"></path>
+                                      </svg>
+                                    </button>
+
+                                    <!-- Bouton Supprimer (désactivé seulement pour soi-même) -->
+                                    <button
+                                    (click)="deleteUser(user)"
+                                    [disabled]="user._id === admin.id"
+                                    [class.opacity-50]="user._id === admin.id"
+                                    [class.cursor-not-allowed]="user._id === admin.id"
+                                    class="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-600 rounded-lg transition-all disabled:hover:bg-red-500/20"
+                                    [title]="user._id === admin.id ? 'Vous ne pouvez pas vous supprimer' : 'Supprimer'"
+                                    >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                    </button>
+                                </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div *ngIf="totalPages > 1" class="p-6 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            Page {{ currentPage }} sur {{ totalPages }} - Total: {{ filteredUsers.length }} utilisateurs
+                        </div>
+
+                        <div class="flex space-x-2">
+                            <button
+                                (click)="goToPage(currentPage - 1)"
+                                [disabled]="currentPage === 1"
+                                class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                ← Précédent
+                            </button>
+                            <button
+                                *ngFor="let page of pages"
+                                (click)="goToPage(page)"
+                                [class]="page === currentPage ? 'bg-purple-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
+                                class="px-4 py-2 rounded-lg hover:bg-purple-500 hover:text-white transition-all"
+                            >
+                                {{ page }}
+                            </button>
+
+                            <button
+                                (click)="goToPage(currentPage + 1)"
+                                [disabled]="currentPage === totalPages"
+                                class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Suivant →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========== ONGLET DISPOSITIFS ========== -->
+        <!-- ========== ONGLET DISPOSITIFS ========== -->
+    <div *ngIf="activeTab === 'devices'" class="space-y-6 mt-6">
+      
+      <!-- Header + Actions -->
+      <div class="glass rounded-2xl p-6 border-2 border-green-500/30">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+          <div>
+            <h2 class="text-3xl font-bold bg-gradient-to-r from-green-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
+              📟 Gestion des dispositifs ESP32
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">
+              {{ filteredDevices.length }} dispositif(s)
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <button
+              (click)="openCreateDeviceModal()"
+              class="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl"
+            >
+              ➕ Nouveau dispositif
+            </button>
+
+            <button
+              (click)="openSyncConfirmModal()"
+              class="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl"
+            >
+              🔄 Synchroniser
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtres -->
+      <div class="glass rounded-xl p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Recherche -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">🔍 Rechercher</label>
+            <input
+              type="text"
+              [(ngModel)]="deviceSearchQuery"
+              (ngModelChange)="applyDeviceFilters()"
+              placeholder="ID, nom, patient..."
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <!-- Filtre statut -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">📊 Statut</label>
+            <select
+              [(ngModel)]="deviceFilterStatus"
+              (ngModelChange)="applyDeviceFilters()"
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"
+            >
+              <option value="tous">Tous</option>
+              <option value="disponible">Disponibles</option>
+              <option value="assigne">Assignés</option>
+              <option value="inactif">Inactifs</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loadingDevices" class="glass rounded-2xl p-12 text-center">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      </div>
+
+      <!-- Table dispositifs -->
+      <div *ngIf="!loadingDevices" class="glass rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gradient-to-r from-green-500/10 to-teal-500/10">
+              <tr>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">ID Dispositif</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Nom</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Statut</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Patient assigné</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Dernière connexion</th>
+                <th class="px-6 py-4 text-center text-sm font-bold text-gray-900 dark:text-white">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+                <tr
+                    *ngFor="let device of paginatedDevices"
+                    class="border-t border-gray-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-900/10 transition-colors"
+                >
+                <td class="px-6 py-4">
+                  <span class="font-mono font-bold text-green-600 dark:text-green-400">{{ device.idDispositif }}</span>
+                </td>
+                <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ device.nom }}</td>
+                <td class="px-6 py-4">
+                  <span
+                    class="px-3 py-1 rounded-full text-sm font-bold"
+                    [class]="getStatusBadge(device.statut)"
+                  >
+                    {{ getStatusLabel(device.statut) }}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <div *ngIf="device.patientId" class="flex items-center space-x-2">
+                    <img
+                      [src]="device.patientId.photoProfil || 'https://ui-avatars.com/api/?name=' + device.patientId.prenom"
+                      class="w-8 h-8 rounded-full border-2 border-green-500"
+                    />
+                    <div>
+                      <p class="font-bold text-gray-900 dark:text-white text-sm">
+                        {{ device.patientId.prenom }} {{ device.patientId.nom }}
+                      </p>
+                      <p class="text-xs text-gray-500">{{ device.patientId.email }}</p>
+                    </div>
+                  </div>
+                  <span *ngIf="!device.patientId" class="text-gray-400 italic">Non assigné</span>
+                </td>
+                <td class="px-6 py-4 text-gray-700 dark:text-gray-300 text-sm">
+                  {{ device.derniereConnexion ? (device.derniereConnexion | date:'short') : 'Jamais' }}
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center justify-center space-x-2">
+                    <button
+                      (click)="openAssignModal(device)"
+                      class="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-600 rounded-lg transition-all"
+                      title="Assigner/Désassigner"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                      </svg>
+                    </button>
+
+                    <button
+                      (click)="openDeleteDeviceModal(device)"
+                      [disabled]="device.statut === 'assigne'"
+                      class="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-600 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Supprimer"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="totalDevicePages > 1" class="p-6 border-t border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+              Page {{ currentDevicePage }} sur {{ totalDevicePages }} - Total: {{ filteredDevices.length }} dispositifs
+            </div>
+            
+            <div class="flex space-x-2">
+              <button
+                (click)="goToDevicePage(currentDevicePage - 1)"
+                [disabled]="currentDevicePage === 1"
+                class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ← Précédent
+              </button>
+
+              <button
+                *ngFor="let page of devicePages"
+                (click)="goToDevicePage(page)"
+                [class]="page === currentDevicePage ? 'bg-green-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
+                class="px-4 py-2 rounded-lg hover:bg-green-500 hover:text-white transition-all"
+              >
+                {{ page }}
+              </button>
+
+              <button
+                (click)="goToDevicePage(currentDevicePage + 1)"
+                [disabled]="currentDevicePage === totalDevicePages"
+                class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Suivant →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message si vide -->
+        <div *ngIf="filteredDevices.length === 0" class="p-12 text-center text-gray-500 dark:text-gray-400">
+          <svg class="w-20 h-20 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+          <p class="text-lg font-medium">Aucun dispositif trouvé</p>
+          <p class="text-sm mt-2">Cliquez sur "Nouveau dispositif" pour en ajouter un</p>
+        </div>
+      </div>
+
+    </div>
+
+        <!-- ========== ONGLET LOGS ========== -->
+    <div *ngIf="activeTab === 'logs'" class="space-y-6 mt-6">
+      
+      <!-- Header + Stats -->
+      <div class="glass rounded-2xl p-6 border-2 border-orange-500/30">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+          <div>
+            <h2 class="text-3xl font-bold bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 bg-clip-text text-transparent">
+              📜 Historique des actions
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">
+              {{ filteredLogs.length }} action(s) enregistrée(s)
+            </p>
+          </div>
+
+          <button
+            (click)="openClearLogsModal()"
+            class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl"
+          >
+            🗑️ Nettoyer les logs
+          </button>
+        </div>
+      </div>
+
+      <!-- Statistiques rapides -->
+      <div *ngIf="logStats" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Total logs -->
+        <div class="glass rounded-2xl p-6 border-2 border-blue-500/30">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total des logs</p>
+              <p class="text-3xl font-bold text-blue-600">{{ logStats.totalLogs }}</p>
+            </div>
+            <div class="p-3 bg-blue-500/20 rounded-xl">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Erreurs récentes -->
+        <div class="glass rounded-2xl p-6 border-2 border-red-500/30">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Erreurs (24h)</p>
+              <p class="text-3xl font-bold text-red-600">{{ logStats.recentErrors }}</p>
+            </div>
+            <div class="p-3 bg-red-500/20 rounded-xl">
+              <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Types d'actions -->
+        <div class="glass rounded-2xl p-6 border-2 border-purple-500/30">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Types d'actions</p>
+              <p class="text-3xl font-bold text-purple-600">{{ logStats.logsByType.length }}</p>
+            </div>
+            <div class="p-3 bg-purple-500/20 rounded-xl">
+              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Filtres -->
+      <div class="glass rounded-xl p-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          
+          <!-- Recherche -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">🔍 Rechercher</label>
+            <input
+              type="text"
+              [(ngModel)]="logSearchQuery"
+              (ngModelChange)="applyLogFilters()"
+              placeholder="Action, admin, cible..."
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+
+          <!-- Type d'action -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">📋 Type</label>
+            <select
+              [(ngModel)]="logFilterType"
+              (ngModelChange)="loadLogs()"
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="tous">Tous</option>
+              <option value="user_create">Création utilisateur</option>
+              <option value="user_update">Modification utilisateur</option>
+              <option value="user_delete">Suppression utilisateur</option>
+              <option value="device_create">Création dispositif</option>
+              <option value="device_assign">Assignation dispositif</option>
+              <option value="device_delete">Suppression dispositif</option>
+              <option value="assign_patient">Assignation médecin/patient</option>   
+              <option value="unassign_patient">Désassignation médecin/patient</option>
+              <option value="import_csv">Import CSV</option>
+              <option value="sync_devices">Synchronisation</option>
+            </select>
+          </div>
+
+          <!-- Date début -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">📅 Date début</label>
+            <input
+              type="date"
+              [(ngModel)]="logStartDate"
+              (ngModelChange)="loadLogs()"
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+
+          <!-- Date fin -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">📅 Date fin</label>
+            <input
+              type="date"
+              [(ngModel)]="logEndDate"
+              (ngModelChange)="loadLogs()"
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loadingLogs" class="glass rounded-2xl p-12 text-center">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+      </div>
+
+      <!-- Table logs -->
+      <div *ngIf="!loadingLogs" class="glass rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gradient-to-r from-orange-500/10 to-red-500/10">
+              <tr>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Date/Heure</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Type</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Admin</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Action</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Cible</th>
+                <th class="px-6 py-4 text-center text-sm font-bold text-gray-900 dark:text-white">Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let log of paginatedLogs"
+                class="border-t border-gray-200 dark:border-gray-700 hover:bg-orange-50 dark:hover:bg-orange-900/10 transition-colors"
+              >
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                  {{ log.createdAt | date:'short' }}
+                </td>
+                <td class="px-6 py-4">
+                  <span
+                    class="px-3 py-1 rounded-full text-xs font-bold"
+                    [class]="getLogTypeBadge(log.type)"
+                  >
+                    {{ getLogTypeLabel(log.type) }}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center space-x-2">
+                    <img
+                      [src]="log.adminId?.photoProfil || 'https://ui-avatars.com/api/?name=' + (log.adminId?.prenom || 'Admin')"
+                      class="w-8 h-8 rounded-full border-2 border-orange-500"
+                    />
+                    <div>
+                      <p class="text-sm font-bold text-gray-900 dark:text-white">
+                        {{ log.adminId?.prenom }} {{ log.adminId?.nom }}
+                      </p>
+                      <p class="text-xs text-gray-500">{{ log.adminEmail }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                  {{ log.action }}
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                  <span *ngIf="log.targetName">{{ log.targetName }}</span>
+                  <span *ngIf="!log.targetName" class="italic">N/A</span>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex justify-center">
+                    <span
+                      class="px-3 py-1 rounded-full text-xs font-bold"
+                      [class]="getStatusBadgeLog(log.status)"
+                    >
+                      {{ log.status === 'success' ? '✅ Succès' : '❌ Erreur' }}
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="totalLogPages > 1" class="p-6 border-t border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+              Page {{ currentLogPage }} sur {{ totalLogPages }} - Total: {{ filteredLogs.length }} logs
+            </div>
+            
+            <div class="flex space-x-2">
+              <button
+                (click)="goToLogPage(currentLogPage - 1)"
+                [disabled]="currentLogPage === 1"
+                class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ← Précédent
+              </button>
+
+              <button
+                *ngFor="let page of logPages"
+                (click)="goToLogPage(page)"
+                [class]="page === currentLogPage ? 'bg-orange-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
+                class="px-4 py-2 rounded-lg hover:bg-orange-500 hover:text-white transition-all"
+              >
+                {{ page }}
+              </button>
+
+              <button
+                (click)="goToLogPage(currentLogPage + 1)"
+                [disabled]="currentLogPage === totalLogPages"
+                class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Suivant →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message si vide -->
+        <div *ngIf="filteredLogs.length === 0" class="p-12 text-center text-gray-500 dark:text-gray-400">
+          <svg class="w-20 h-20 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <p class="text-lg font-medium">Aucun log trouvé</p>
+          <p class="text-sm mt-2">Essayez de modifier les filtres</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========== ONGLET ASSIGNATIONS ========== -->
+    <div *ngIf="activeTab === 'assignments'" class="space-y-6 mt-6">
+      
+      <!-- Header + Actions -->
+      <div class="glass rounded-2xl p-6 border-2 border-purple-500/30">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+          <div>
+            <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent">
+              👨‍⚕️ Assignations Médecin-Patient
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">
+              {{ filteredAssignments.length }} assignation(s)
+            </p>
+          </div>
+
+          <button
+            (click)="exportAssignmentsCSV()"
+            class="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl"
+          >
+            📥 Exporter CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Statistiques -->
+      <div *ngIf="assignmentStats" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        
+        <!-- Total -->
+        <div class="glass rounded-2xl p-6 border-2 border-blue-500/30">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total</p>
+              <p class="text-3xl font-bold text-blue-600">{{ assignmentStats.total }}</p>
+            </div>
+            <div class="p-3 bg-blue-500/20 rounded-xl">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actives -->
+        <div class="glass rounded-2xl p-6 border-2 border-green-500/30">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Actives</p>
+              <p class="text-3xl font-bold text-green-600">{{ assignmentStats.actives }}</p>
+            </div>
+            <div class="p-3 bg-green-500/20 rounded-xl">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inactives -->
+        <div class="glass rounded-2xl p-6 border-2 border-gray-500/30">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Inactives</p>
+              <p class="text-3xl font-bold text-gray-600">{{ assignmentStats.inactives }}</p>
+            </div>
+            <div class="p-3 bg-gray-500/20 rounded-xl">
+              <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Urgentes -->
+        <div class="glass rounded-2xl p-6 border-2 border-red-500/30">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Urgentes</p>
+              <p class="text-3xl font-bold text-red-600">{{ assignmentStats.parPriorite.urgente }}</p>
+            </div>
+            <div class="p-3 bg-red-500/20 rounded-xl">
+              <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Filtres -->
+      <div class="glass rounded-xl p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Recherche -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">🔍 Rechercher</label>
+            <input
+              type="text"
+              [(ngModel)]="assignmentSearchQuery"
+              (ngModelChange)="applyAssignmentFilters()"
+              placeholder="Patient, médecin, email..."
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <!-- Filtre statut -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">📊 Statut</label>
+            <select
+              [(ngModel)]="assignmentFilterStatus"
+              (ngModelChange)="loadAssignments()"
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="toutes">Toutes</option>
+              <option value="actives">Actives uniquement</option>
+              <option value="inactives">Inactives uniquement</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loadingAssignments" class="glass rounded-2xl p-12 text-center">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+
+      <!-- Table assignations -->
+      <div *ngIf="!loadingAssignments" class="glass rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+              <tr>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Patient</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Médecin</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Priorité</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Date Assignation</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-900 dark:text-white">Statut</th>
+                <th class="px-6 py-4 text-center text-sm font-bold text-gray-900 dark:text-white">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let assignment of paginatedAssignments"
+                class="border-t border-gray-200 dark:border-gray-700 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors"
+              >
+                <!-- Patient -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center space-x-3">
+                    <img
+                      [src]="assignment.patientId?.photoProfil || 'https://ui-avatars.com/api/?name=' + (assignment.patientId?.prenom || 'P')"
+                      class="w-10 h-10 rounded-full border-2 border-blue-500"
+                    />
+                    <div>
+                      <p class="font-bold text-gray-900 dark:text-white text-sm">
+                        {{ assignment.patientId?.prenom }} {{ assignment.patientId?.nom }}
+                      </p>
+                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ assignment.patientId?.email }}</p>
+                      <p *ngIf="assignment.patientId?.idDispositif" class="text-xs text-gray-500 mt-1">
+                        📟 {{ assignment.patientId.idDispositif }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Médecin -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center space-x-3">
+                    <img
+                      [src]="assignment.medecinId?.photoProfil || 'https://ui-avatars.com/api/?name=' + (assignment.medecinId?.prenom || 'M')"
+                      class="w-10 h-10 rounded-full border-2 border-purple-500"
+                    />
+                    <div>
+                      <p class="font-bold text-gray-900 dark:text-white text-sm">
+                        Dr. {{ assignment.medecinId?.prenom }} {{ assignment.medecinId?.nom }}
+                      </p>
+                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ assignment.medecinId?.email }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Priorité -->
+                <td class="px-6 py-4">
+                  <span
+                    class="px-3 py-1 rounded-full text-xs font-bold"
+                    [class]="getPriorityBadge(assignment.priorite)"
+                  >
+                    {{ getPriorityLabel(assignment.priorite) }}
+                  </span>
+                </td>
+
+                <!-- Date Assignation -->
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                  {{ assignment.dateAssignation | date:'short' }}
+                </td>
+
+                <!-- Statut -->
+                <td class="px-6 py-4">
+                  <div class="flex flex-col space-y-1">
+                    <span
+                      class="px-3 py-1 rounded-full text-xs font-bold"
+                      [class]="assignment.actif ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-900/20 text-gray-700 dark:text-gray-400'"
+                    >
+                      {{ assignment.actif ? '✅ Active' : '⚫ Inactive' }}
+                    </span>
+                    <span *ngIf="!assignment.actif && assignment.dateDesassignation" class="text-xs text-gray-500">
+                      Fin: {{ assignment.dateDesassignation | date:'short' }}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Actions -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center justify-center space-x-2">
+                    <button
+                      *ngIf="assignment.actif"
+                      (click)="openUnassignFromTableModal(assignment)"
+                      class="p-2 bg-orange-500/20 hover:bg-orange-500/30 text-orange-600 rounded-lg transition-all"
+                      title="Désassigner"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12h-6"></path>
+                      </svg>
+                    </button>
+
+                    <span *ngIf="!assignment.actif" class="text-gray-400 italic text-sm">Terminée</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="totalAssignmentPages > 1" class="p-6 border-t border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+              Page {{ currentAssignmentPage }} sur {{ totalAssignmentPages }} - Total: {{ filteredAssignments.length }} assignations
+            </div>
+            
+            <div class="flex space-x-2">
+              <button
+                (click)="goToAssignmentPage(currentAssignmentPage - 1)"
+                [disabled]="currentAssignmentPage === 1"
+                class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ← Précédent
+              </button>
+
+              <button
+                *ngFor="let page of assignmentPages"
+                (click)="goToAssignmentPage(page)"
+                [class]="page === currentAssignmentPage ? 'bg-purple-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
+                class="px-4 py-2 rounded-lg hover:bg-purple-500 hover:text-white transition-all"
+              >
+                {{ page }}
+              </button>
+
+              <button
+                (click)="goToAssignmentPage(currentAssignmentPage + 1)"
+                [disabled]="currentAssignmentPage === totalAssignmentPages"
+                class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Suivant →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message si vide -->
+        <div *ngIf="filteredAssignments.length === 0" class="p-12 text-center text-gray-500 dark:text-gray-400">
+          <svg class="w-20 h-20 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+          <p class="text-lg font-medium">Aucune assignation trouvée</p>
+          <p class="text-sm mt-2">Assignez des patients à des médecins depuis l'onglet Utilisateurs</p>
+        </div>
+      </div>
+
+    </div>
+
+
+        <!-- ========== ONGLET PROFIL ========== -->
+    <div *ngIf="activeTab === 'profile'" class="space-y-6 mt-6">
+      
+      <div class="glass rounded-2xl p-6 border-2 border-indigo-500/30">
+        <h2 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          👤 Mon profil administrateur
+        </h2>
+      </div>
+
+      <!-- Photo de profil -->
+      <div class="glass rounded-2xl p-8">
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">📸 Photo de profil</h3>
+        
+        <div class="flex items-center space-x-6">
+          <img
+            [src]="admin?.photoProfil || 'https://ui-avatars.com/api/?name=Admin'"
+            class="w-24 h-24 rounded-full border-4 border-indigo-500 shadow-lg"
+          />
+          
+          <div>
+            <label class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl font-bold transition-all shadow-lg cursor-pointer">
+              📤 Changer la photo
+              <input
+                type="file"
+                accept="image/*"
+                (change)="uploadPhoto($event)"
+                class="hidden"
+              />
+            </label>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              JPG, PNG ou GIF (max 2MB)
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulaire profil -->
+      <div class="glass rounded-2xl p-8">
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">📝 Informations personnelles</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prénom</label>
+            <input
+              type="text"
+              [(ngModel)]="profileForm.prenom"
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nom</label>
+            <input
+              type="text"
+              [(ngModel)]="profileForm.nom"
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+            <input
+              type="email"
+              [(ngModel)]="profileForm.email"
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Téléphone</label>
+            <input
+              type="tel"
+              [(ngModel)]="profileForm.telephone"
+              placeholder="+221XXXXXXXXX"
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+        </div>
+
+        <div class="mt-6 flex justify-between">
+          <button
+            (click)="openChangePasswordModal()"
+            class="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white rounded-xl font-bold transition-all shadow-lg"
+          >
+            🔐 Changer le mot de passe
+          </button>
+
+          <button
+            (click)="saveProfile()"
+            [disabled]="savingProfile"
+            class="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl font-bold transition-all shadow-lg disabled:opacity-50"
+          >
+            <span *ngIf="!savingProfile">💾 Enregistrer</span>
+            <span *ngIf="savingProfile">⏳ Enregistrement...</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+    </div>
+
+    <!-- ========== MODAL CRÉER/MODIFIER UTILISATEUR ========== -->
+    <div
+    *ngIf="showUserModal"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+    (click)="closeUserModal()"
+    >
+    <div
+        class="glass rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-purple-500/30"
+        (click)="$event.stopPropagation()"
+    >
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        {{ editingUser ? '✏️ Modifier utilisateur' : '➕ Nouveau utilisateur' }}
+        </h3>
+
+        <div class="space-y-4">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Prénom -->
+            <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Prénom <span class="text-red-500">*</span>
+            </label>
+            <input
+                type="text"
+                [(ngModel)]="userForm.prenom"
+                (ngModelChange)="validateField('prenom')"
+                [class.border-red-500]="formErrors.prenom"
+                class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all"
+                placeholder="Marc"
+            />
+            <p *ngIf="formErrors.prenom" class="text-red-500 text-sm mt-1 animate-pulse">
+                {{ formErrors.prenom }}
+            </p>
+            </div>
+
+            <!-- Nom -->
+            <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Nom <span class="text-red-500">*</span>
+            </label>
+            <input
+                type="text"
+                [(ngModel)]="userForm.nom"
+                (ngModelChange)="validateField('nom')"
+                [class.border-red-500]="formErrors.nom"
+                class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all"
+                placeholder="Simon"
+            />
+            <p *ngIf="formErrors.nom" class="text-red-500 text-sm mt-1 animate-pulse">
+                {{ formErrors.nom }}
+            </p>
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Email <span class="text-red-500">*</span>
+            </label>
+            <input
+            type="email"
+            [(ngModel)]="userForm.email"
+            (ngModelChange)="validateField('email')"
+            [class.border-red-500]="formErrors.email"
+            class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all"
+            placeholder="marc@example.com"
+            />
+            <p *ngIf="formErrors.email" class="text-red-500 text-sm mt-1 animate-pulse">
+            {{ formErrors.email }}
+            </p>
+        </div>
+
+        <!-- Téléphone -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Téléphone
+            </label>
+            <input
+            type="tel"
+            [(ngModel)]="userForm.telephone"
+            (ngModelChange)="validateField('telephone')"
+            [class.border-red-500]="formErrors.telephone"
+            class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all"
+            placeholder="+221771234567"
+            />
+            <p *ngIf="formErrors.telephone" class="text-red-500 text-sm mt-1 animate-pulse">
+            {{ formErrors.telephone }}
+            </p>
+        </div>
+
+        <!-- Mot de passe (uniquement création) -->
+        <div *ngIf="!editingUser">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Mot de passe <span class="text-red-500">*</span>
+            </label>
+            <input
+            type="password"
+            [(ngModel)]="userForm.motDePasse"
+            (ngModelChange)="validateField('motDePasse')"
+            [class.border-red-500]="formErrors.motDePasse"
+            class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all"
+            placeholder="Minimum 6 caractères"
+            />
+            <p *ngIf="formErrors.motDePasse" class="text-red-500 text-sm mt-1 animate-pulse">
+            {{ formErrors.motDePasse }}
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Rôle -->
+            <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Rôle <span class="text-red-500">*</span>
+            </label>
+            <select
+                [(ngModel)]="userForm.role"
+                (ngModelChange)="onRoleChange()"
+                class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all"
+            >
+                <option value="patient">👤 Patient</option>
+                <option value="medecin">👨‍⚕️ Médecin</option>
+                <option value="admin">🔧 Admin</option>
+            </select>
+            </div>
+
+            <!-- ID Dispositif (seulement pour patients) -->
+            <div *ngIf="userForm.role === 'patient'">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                ID Dispositif <span class="text-red-500">*</span>
+            </label>
+            <input
+                type="text"
+                [(ngModel)]="userForm.idDispositif"
+                (ngModelChange)="validateField('idDispositif')"
+                [class.border-red-500]="formErrors.idDispositif"
+                class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all"
+                placeholder="ESP32_001"
+            />
+            <p *ngIf="formErrors.idDispositif" class="text-red-500 text-sm mt-1 animate-pulse">
+                {{ formErrors.idDispositif }}
+            </p>
+            <p class="text-blue-500 text-xs mt-1">
+                💡 Format: ESP32_XXX (ex: ESP32_001, ESP32_002...)
+            </p>
+            </div>
+        </div>
+
+        </div>
+
+        <div class="flex justify-end space-x-3 mt-8">
+        <button
+            (click)="closeUserModal()"
+            class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+        >
+            Annuler
+        </button>
+
+        <button
+            (click)="saveUser()"
+            class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-xl font-bold transition-all shadow-lg"
+        >
+            {{ editingUser ? '💾 Enregistrer' : '➕ Créer' }}
+        </button>
+        </div>
+    </div>
+    </div>
+
+    <!-- ========== MODAL IMPORT CSV ========== -->
+    <div
+        *ngIf="showImportModal"
+        class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+        (click)="closeImportModal()"
+     >
+        <div
+            class="glass rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto border-2 border-green-500/30"
+            (click)="$event.stopPropagation()"
+        >
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                📤 Import CSV - Utilisateurs en masse
+            </h3>
+            <div class="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500/30 rounded-xl p-4 mb-6">
+                <p class="text-sm text-blue-900 dark:text-blue-200 font-medium mb-2">
+                    📋 Format CSV attendu :
+                </p>
+                <pre class="text-xs bg-white dark:bg-gray-800 p-3 rounded-lg overflow-x-auto">prenom,nom,email,telephone,role,idDispositif,motDePasse,Marc,Simon,marc@example.com,+221771234567,patient,ESP32_001,password123
+            Alice,Durand,alice@example.com,+221771234568,patient,ESP32_002,password123</pre>
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Collez vos données CSV :
+                </label>
+                <textarea
+                    [(ngModel)]="csvData"
+                    rows="10"
+                    placeholder="prenom,nom,email,telephone,role,idDispositif,motDePasseMarc,Simon,marc@example.com,+221771234567,patient,ESP32_001,password123"
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 font-mono text-sm"
+                ></textarea>
+            </div>
+            <!-- Résultats import -->
+            <div *ngIf="importResults" class="mb-6 space-y-4">
+
+                <div class="bg-green-50 dark:bg-green-900/20 border-2 border-green-500/30 rounded-xl p-4">
+                    <p class="text-green-900 dark:text-green-200 font-bold">
+                        ✅ {{ importResults.imported }} utilisateur(s) importé(s)
+                    </p>
+                </div>
+
+                <div *ngIf="importResults.errors.length > 0" class="bg-red-50 dark:bg-red-900/20 border-2 border-red-500/30 rounded-xl p-4">
+                    <p class="text-red-900 dark:text-red-200 font-bold mb-2">
+                        ❌ {{ importResults.errors.length }} erreur(s) :
+                    </p>
+                    <ul class="text-sm text-red-800 dark:text-red-300 space-y-1">
+                        <li *ngFor="let err of importResults.errors">
+                            Ligne {{ err.ligne }} ({{ err.email }}): {{ err.erreur }}
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button
+                    (click)="closeImportModal()"
+                    class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+                >
+                    Fermer
+                </button>
+
+                <button
+                    (click)="importCSV()"
+                    class="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white rounded-xl font-bold transition-all shadow-lg"
+                >
+                    📤 Importer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL CHANGEMENT MOT DE PASSE ========== -->
+    <div
+    *ngIf="showChangePassword"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+    (click)="closeChangePasswordModal()"
+    >
+    <div
+        class="glass rounded-3xl p-8 max-w-md w-full border-2 border-orange-500/30"
+        (click)="$event.stopPropagation()"
+    >
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        🔐 Changer le mot de passe
+        </h3>
+
+        <div class="space-y-4">
+        
+        <!-- Mot de passe actuel -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Mot de passe actuel <span class="text-red-500">*</span>
+            </label>
+            <input
+            type="password"
+            [(ngModel)]="changePasswordForm.currentPassword"
+            (ngModelChange)="validatePassword('currentPassword')"
+            [class.border-red-500]="passwordErrors.currentPassword"
+            class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+            />
+            <p *ngIf="passwordErrors.currentPassword" class="text-red-500 text-sm mt-1 animate-pulse">
+            {{ passwordErrors.currentPassword }}
+            </p>
+        </div>
+
+        <!-- Nouveau mot de passe -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Nouveau mot de passe <span class="text-red-500">*</span>
+            </label>
+            <input
+            type="password"
+            [(ngModel)]="changePasswordForm.newPassword"
+            (ngModelChange)="validatePassword('newPassword')"
+            [class.border-red-500]="passwordErrors.newPassword"
+            class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+            placeholder="Minimum 6 caractères"
+            />
+            <p *ngIf="passwordErrors.newPassword" class="text-red-500 text-sm mt-1 animate-pulse">
+            {{ passwordErrors.newPassword }}
+            </p>
+        </div>
+
+        <!-- Confirmation -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Confirmer le mot de passe <span class="text-red-500">*</span>
+            </label>
+            <input
+            type="password"
+            [(ngModel)]="changePasswordForm.confirmPassword"
+            (ngModelChange)="validatePassword('confirmPassword')"
+            [class.border-red-500]="passwordErrors.confirmPassword"
+            class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+            />
+            <p *ngIf="passwordErrors.confirmPassword" class="text-red-500 text-sm mt-1 animate-pulse">
+            {{ passwordErrors.confirmPassword }}
+            </p>
+        </div>
+
+        </div>
+
+        <div class="flex justify-end space-x-3 mt-8">
+        <button
+            (click)="closeChangePasswordModal()"
+            class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+        >
+            Annuler
+        </button>
+
+        <button
+            (click)="changePassword()"
+            [disabled]="changingPassword"
+            class="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white rounded-xl font-bold transition-all shadow-lg disabled:opacity-50"
+        >
+            <span *ngIf="!changingPassword">🔐 Changer</span>
+            <span *ngIf="changingPassword">⏳ Changement...</span>
+        </button>
+        </div>
+    </div>
+    </div>
+
+    <!-- ========== MODAL CONFIRMATION SUPPRESSION UNIQUE ========== -->
+    <div
+    *ngIf="showDeleteConfirmModal"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+    (click)="closeDeleteConfirmModal()"
+    >
+    <div
+        class="glass rounded-3xl p-8 max-w-md w-full border-2 border-red-500/30 animate-pulse-slow"
+        (click)="$event.stopPropagation()"
+    >
+        <div class="text-center mb-6">
+        <div class="mx-auto w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-red-600 dark:text-red-400 mb-2">
+            Confirmer la suppression
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400">
+            Cette action est irréversible
+        </p>
+        </div>
+
+        <div *ngIf="userToDelete" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-6">
+        <div class="flex items-center space-x-3 mb-3">
+            <img
+            [src]="userToDelete.photoProfil || 'https://ui-avatars.com/api/?name=' + userToDelete.prenom"
+            class="w-12 h-12 rounded-full border-2 border-red-500"
+            />
+            <div>
+            <p class="font-bold text-gray-900 dark:text-white">
+                {{ userToDelete.prenom }} {{ userToDelete.nom }}
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ userToDelete.email }}</p>
+            </div>
+        </div>
+        <div class="text-sm text-gray-700 dark:text-gray-300">
+            <p>🎭 Rôle: <span class="font-bold">{{ getRoleLabel(userToDelete.role) }}</span></p>
+            <p *ngIf="userToDelete.idDispositif">📟 Dispositif: <span class="font-bold">{{ userToDelete.idDispositif }}</span></p>
+        </div>
+        </div>
+
+        <div class="flex space-x-3">
+        <button
+            (click)="closeDeleteConfirmModal()"
+            class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+        >
+            Annuler
+        </button>
+
+        <button
+            (click)="confirmDeleteUser()"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-xl font-bold transition-all shadow-lg"
+        >
+            🗑️ Supprimer
+        </button>
+        </div>
+    </div>
+    </div>
+
+    <!-- ========== MODAL CONFIRMATION SUPPRESSION MULTIPLE ========== -->
+    <div
+    *ngIf="showBulkDeleteConfirmModal"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+    (click)="closeBulkDeleteConfirmModal()"
+    >
+    <div
+        class="glass rounded-3xl p-8 max-w-md w-full border-2 border-red-500/30 animate-pulse-slow"
+        (click)="$event.stopPropagation()"
+    >
+        <div class="text-center mb-6">
+        <div class="mx-auto w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-red-600 dark:text-red-400 mb-2">
+            Suppression multiple
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400">
+            Vous allez supprimer <span class="font-bold text-red-600">{{ selectedUsers.length }}</span> utilisateur(s)
+        </p>
+        </div>
+
+        <div class="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-500/30 rounded-xl p-4 mb-6">
+        <p class="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+            ⚠️ Cette action est irréversible !
+        </p>
+        <p class="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+            Vous ne pouvez pas vous supprimer vous-même.
+        </p>
+        </div>
+
+        <div class="flex space-x-3">
+        <button
+            (click)="closeBulkDeleteConfirmModal()"
+            class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+        >
+            Annuler
+        </button>
+
+        <button
+            (click)="confirmBulkDelete()"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-xl font-bold transition-all shadow-lg"
+        >
+            🗑️ Tout supprimer
+        </button>
+        </div>
+    </div>
+    </div>
+
+    <!-- ========== MODAL CRÉER DISPOSITIF ========== -->
+    <div
+    *ngIf="showDeviceModal"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+    (click)="closeDeviceModal()"
+    >
+    <div
+        class="glass rounded-3xl p-8 max-w-md w-full border-2 border-green-500/30"
+        (click)="$event.stopPropagation()"
+    >
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        ➕ Nouveau dispositif ESP32
+        </h3>
+
+        <div class="space-y-4">
+        
+        <!-- ID Dispositif -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            ID Dispositif <span class="text-red-500">*</span>
+            </label>
+            <input
+            type="text"
+            [(ngModel)]="deviceForm.idDispositif"
+            (ngModelChange)="validateDeviceField('idDispositif')"
+            [class.border-red-500]="deviceFormErrors.idDispositif"
+            placeholder="ESP32_001"
+            class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 font-mono"
+            />
+            <p *ngIf="deviceFormErrors.idDispositif" class="text-red-500 text-sm mt-1 animate-pulse">
+            {{ deviceFormErrors.idDispositif }}
+            </p>
+            <p class="text-blue-500 text-xs mt-1">
+            💡 Format: ESP32_XXX (ex: ESP32_001, ESP32_A1B2...)
+            </p>
+        </div>
+
+        <!-- Nom -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Nom (optionnel)
+            </label>
+            <input
+            type="text"
+            [(ngModel)]="deviceForm.nom"
+            (ngModelChange)="validateDeviceField('nom')"
+            placeholder="Capteur salle 1"
+            class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"
+            />
+        </div>
+
+        <!-- Notes -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Notes (optionnel)
+            </label>
+            <textarea
+            [(ngModel)]="deviceForm.notes"
+            rows="3"
+            placeholder="Remarques sur ce dispositif..."
+            class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"
+            ></textarea>
+        </div>
+
+        </div>
+
+        <div class="flex justify-end space-x-3 mt-8">
+        <button
+            (click)="closeDeviceModal()"
+            class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+        >
+            Annuler
+        </button>
+
+        <button
+            (click)="saveDevice()"
+            class="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white rounded-xl font-bold transition-all shadow-lg"
+        >
+            ➕ Créer
+        </button>
+        </div>
+    </div>
+    </div>
+
+    <!-- ========== MODAL ASSIGNER DISPOSITIF ========== -->
+    <div
+    *ngIf="showAssignModal"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+    (click)="closeAssignModal()"
+    >
+    <div
+        class="glass rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-blue-500/30"
+        (click)="$event.stopPropagation()"
+    >
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        📌 Assigner le dispositif {{ deviceToAssign?.idDispositif }}
+        </h3>
+
+        <!-- Dispositif info -->
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-6">
+        <div class="flex items-center justify-between mb-3">
+            <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Dispositif</p>
+            <p class="font-mono font-bold text-green-600 dark:text-green-400 text-lg">
+                {{ deviceToAssign?.idDispositif }}
+            </p>
+            </div>
+            <span
+            class="px-3 py-1 rounded-full text-sm font-bold"
+            [class]="getStatusBadge(deviceToAssign?.statut || 'disponible')"
+            >
+            {{ getStatusLabel(deviceToAssign?.statut || 'disponible') }}
+            </span>
+        </div>
+
+        <div *ngIf="deviceToAssign?.patientId" class="pt-3 border-t border-gray-200 dark:border-gray-700">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Actuellement assigné à :</p>
+        <div class="flex items-center space-x-3">
+          <img
+            [src]="deviceToAssign?.patientId?.photoProfil || 'https://ui-avatars.com/api/?name=' + (deviceToAssign?.patientId?.prenom || 'User')"
+            class="w-10 h-10 rounded-full border-2 border-blue-500"
+          />
+          <div>
+            <p class="font-bold text-gray-900 dark:text-white">
+              {{ deviceToAssign?.patientId?.prenom }} {{ deviceToAssign?.patientId?.nom }}
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ deviceToAssign?.patientId?.email }}</p>
+          </div>
+        </div>
+        </div>
+        </div>
+
+        <!-- Sélection patient -->
+        <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            Sélectionnez un patient (ou laissez vide pour désassigner)
+        </label>
+
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+            <!-- Option vide (désassigner) -->
+            <label
+            class="flex items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all border-2"
+            [class.border-red-500]="selectedPatientId === null"
+            [class.border-gray-200]="selectedPatientId !== null"
+            >
+            <input
+                type="radio"
+                name="patient"
+                [value]="null"
+                [(ngModel)]="selectedPatientId"
+                class="w-5 h-5 text-red-600 focus:ring-2 focus:ring-red-500"
+            />
+            <div class="ml-3">
+                <p class="font-bold text-red-600">❌ Désassigner (aucun patient)</p>
+                <p class="text-sm text-gray-500">Le dispositif deviendra disponible</p>
+            </div>
+            </label>
+
+            <!-- Patients disponibles -->
+            <label
+            *ngFor="let patient of availablePatients"
+            class="flex items-center p-4 bg-white dark:bg-gray-800 rounded-xl cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all border-2"
+            [class.border-blue-500]="selectedPatientId === patient._id"
+            [class.border-gray-200]="selectedPatientId !== patient._id"
+            >
+            <input
+                type="radio"
+                name="patient"
+                [value]="patient._id"
+                [(ngModel)]="selectedPatientId"
+                class="w-5 h-5 text-blue-600 focus:ring-2 focus:ring-blue-500"
+            />
+            <img
+                [src]="patient.photoProfil || 'https://ui-avatars.com/api/?name=' + patient.prenom"
+                class="w-12 h-12 rounded-full border-2 border-gray-300 ml-3"
+            />
+            <div class="ml-3">
+                <p class="font-bold text-gray-900 dark:text-white">
+                {{ patient.prenom }} {{ patient.nom }}
+                </p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ patient.email }}</p>
+                <p *ngIf="patient.idDispositif" class="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                📟 Dispositif actuel: {{ patient.idDispositif }}
+                </p>
+            </div>
+            </label>
+
+            <!-- Message si aucun patient -->
+            <div *ngIf="availablePatients.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+            <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+            <p>Aucun patient disponible</p>
+            <p class="text-sm mt-1">Tous les patients ont déjà un dispositif assigné</p>
+            </div>
+        </div>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+        <button
+            (click)="closeAssignModal()"
+            class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+        >
+            Annuler
+        </button>
+
+        <button
+            (click)="assignDevice()"
+            class="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white rounded-xl font-bold transition-all shadow-lg"
+        >
+            📌 {{ selectedPatientId ? 'Assigner' : 'Désassigner' }}
+        </button>
+        </div>
+    </div>
+    </div>
+
+    <!-- ========== MODAL CONFIRMATION SYNCHRONISATION ========== -->
+    <div
+    *ngIf="showSyncConfirmModal"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+    (click)="closeSyncConfirmModal()"
+    >
+    <div
+        class="glass rounded-3xl p-8 max-w-md w-full border-2 border-blue-500/30"
+        (click)="$event.stopPropagation()"
+    >
+        <div class="text-center mb-6">
+        <div class="mx-auto w-20 h-20 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+            Synchroniser les dispositifs
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400">
+            Cette action va créer automatiquement tous les dispositifs manquants pour les patients
+        </p>
+        </div>
+
+        <div class="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500/30 rounded-xl p-4 mb-6">
+        <p class="text-sm text-blue-800 dark:text-blue-200 font-medium">
+            ℹ️ La synchronisation va :
+        </p>
+        <ul class="text-xs text-blue-700 dark:text-blue-300 mt-2 space-y-1 ml-4 list-disc">
+            <li>Créer les dispositifs manquants</li>
+            <li>Assigner automatiquement aux patients</li>
+            <li>Mettre à jour les assignations existantes</li>
+        </ul>
+        </div>
+
+        <div class="flex space-x-3">
+        <button
+            (click)="closeSyncConfirmModal()"
+            class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+        >
+            Annuler
+        </button>
+
+        <button
+            (click)="syncDevices()"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white rounded-xl font-bold transition-all shadow-lg"
+        >
+            🔄 Synchroniser
+        </button>
+        </div>
+    </div>
+    </div>
+
+    <!-- ========== MODAL CONFIRMATION SUPPRESSION DISPOSITIF ========== -->
+    <div
+    *ngIf="showDeleteDeviceModal"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+    (click)="closeDeleteDeviceModal()"
+    >
+    <div
+        class="glass rounded-3xl p-8 max-w-md w-full border-2 border-red-500/30 animate-pulse-slow"
+        (click)="$event.stopPropagation()"
+    >
+        <div class="text-center mb-6">
+        <div class="mx-auto w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-red-600 dark:text-red-400 mb-2">
+            Supprimer le dispositif
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400">
+            Cette action est irréversible
+        </p>
+        </div>
+
+        <div *ngIf="deviceToDelete" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-6">
+        <p class="font-mono font-bold text-green-600 dark:text-green-400 text-lg mb-2">
+            {{ deviceToDelete.idDispositif }}
+        </p>
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+            {{ deviceToDelete.nom }}
+        </p>
+        <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <span
+            class="px-3 py-1 rounded-full text-sm font-bold"
+            [class]="getStatusBadge(deviceToDelete.statut)"
+            >
+            {{ getStatusLabel(deviceToDelete.statut) }}
+            </span>
+        </div>
+        </div>
+
+        <div class="flex space-x-3">
+        <button
+            (click)="closeDeleteDeviceModal()"
+            class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+        >
+            Annuler
+        </button>
+
+        <button
+            (click)="deleteDevice()"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-xl font-bold transition-all shadow-lg"
+        >
+            🗑️ Supprimer
+        </button>
+        </div>
+    </div>
+    </div>
+
+    <!-- ========== MODAL NETTOYAGE DES LOGS ========== -->
+    <div
+    *ngIf="showClearLogsModal"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+    (click)="closeClearLogsModal()"
+    >
+    <div
+        class="glass rounded-3xl p-8 max-w-md w-full border-2 border-orange-500/30"
+        (click)="$event.stopPropagation()"
+    >
+        <div class="text-center mb-6">
+        <div class="mx-auto w-20 h-20 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-12 h-12 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+            Nettoyer les anciens logs
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400">
+            Supprimez les logs anciens pour libérer de l'espace
+        </p>
+        </div>
+
+        <!-- Sélection nombre de jours -->
+        <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            Supprimer les logs de plus de :
+        </label>
+
+        <div class="space-y-2">
+            <!-- 7 jours -->
+            <label
+            class="flex items-center p-4 bg-white dark:bg-gray-800 rounded-xl cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all border-2"
+            [class.border-orange-500]="clearLogsDays === 7"
+            [class.border-gray-200]="clearLogsDays !== 7"
+            >
+            <input
+                type="radio"
+                name="days"
+                [value]="7"
+                [(ngModel)]="clearLogsDays"
+                class="w-5 h-5 text-orange-600 focus:ring-2 focus:ring-orange-500"
+            />
+            <div class="ml-3">
+                <p class="font-bold text-gray-900 dark:text-white">7 jours</p>
+                <p class="text-sm text-gray-500">Garder seulement la dernière semaine</p>
+            </div>
+            </label>
+
+            <!-- 30 jours -->
+            <label
+            class="flex items-center p-4 bg-white dark:bg-gray-800 rounded-xl cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all border-2"
+            [class.border-orange-500]="clearLogsDays === 30"
+            [class.border-gray-200]="clearLogsDays !== 30"
+            >
+            <input
+                type="radio"
+                name="days"
+                [value]="30"
+                [(ngModel)]="clearLogsDays"
+                class="w-5 h-5 text-orange-600 focus:ring-2 focus:ring-orange-500"
+            />
+            <div class="ml-3">
+                <p class="font-bold text-gray-900 dark:text-white">30 jours</p>
+                <p class="text-sm text-gray-500">Garder le dernier mois (recommandé)</p>
+            </div>
+            </label>
+
+            <!-- 90 jours -->
+            <label
+            class="flex items-center p-4 bg-white dark:bg-gray-800 rounded-xl cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all border-2"
+            [class.border-orange-500]="clearLogsDays === 90"
+            [class.border-gray-200]="clearLogsDays !== 90"
+            >
+            <input
+                type="radio"
+                name="days"
+                [value]="90"
+                [(ngModel)]="clearLogsDays"
+                class="w-5 h-5 text-orange-600 focus:ring-2 focus:ring-orange-500"
+            />
+            <div class="ml-3">
+                <p class="font-bold text-gray-900 dark:text-white">90 jours</p>
+                <p class="text-sm text-gray-500">Garder les 3 derniers mois</p>
+            </div>
+            </label>
+
+            <!-- 180 jours -->
+            <label
+            class="flex items-center p-4 bg-white dark:bg-gray-800 rounded-xl cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all border-2"
+            [class.border-orange-500]="clearLogsDays === 180"
+            [class.border-gray-200]="clearLogsDays !== 180"
+            >
+            <input
+                type="radio"
+                name="days"
+                [value]="180"
+                [(ngModel)]="clearLogsDays"
+                class="w-5 h-5 text-orange-600 focus:ring-2 focus:ring-orange-500"
+            />
+            <div class="ml-3">
+                <p class="font-bold text-gray-900 dark:text-white">180 jours</p>
+                <p class="text-sm text-gray-500">Garder les 6 derniers mois</p>
+            </div>
+            </label>
+        </div>
+        </div>
+
+        <div class="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-500/30 rounded-xl p-4 mb-6">
+        <p class="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+            ⚠️ Cette action est irréversible !
+        </p>
+        <p class="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+            Les logs supprimés ne pourront pas être récupérés.
+        </p>
+        </div>
+
+        <div class="flex space-x-3">
+        <button
+            (click)="closeClearLogsModal()"
+            class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+        >
+            Annuler
+        </button>
+
+        <button
+            (click)="clearOldLogs()"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white rounded-xl font-bold transition-all shadow-lg"
+        >
+            🗑️ Nettoyer
+        </button>
+        </div>
+    </div>
+    </div>
+
+    <!-- ========== MODAL ASSIGNER PATIENT À MÉDECIN ========== -->
+    <div
+      *ngIf="showAssignPatientModal"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+      (click)="closeAssignPatientModal()"
+    >
+      <div
+        class="glass rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-purple-500/30"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="text-center mb-6">
+          <div class="mx-auto w-20 h-20 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-12 h-12 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+            👨‍⚕️ Assigner un médecin
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            Assigner un médecin référent au patient
+          </p>
+        </div>
+
+        <!-- Info patient -->
+        <div *ngIf="selectedPatientForAssignment" class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-6 border-2 border-blue-500/30">
+          <div class="flex items-center space-x-3">
+            <img
+              [src]="selectedPatientForAssignment.photoProfil || 'https://ui-avatars.com/api/?name=' + selectedPatientForAssignment.prenom"
+              class="w-16 h-16 rounded-full border-2 border-purple-500"
+            />
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Patient</p>
+              <p class="font-bold text-xl text-gray-900 dark:text-white">
+                {{ selectedPatientForAssignment.prenom }} {{ selectedPatientForAssignment.nom }}
+              </p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">{{ selectedPatientForAssignment.email }}</p>
+              <p *ngIf="selectedPatientForAssignment.idDispositif" class="text-xs text-gray-500 mt-1">
+                📟 {{ selectedPatientForAssignment.idDispositif }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulaire -->
+        <div class="space-y-4">
+          
+          <!-- Sélection médecin -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+              Sélectionnez un médecin <span class="text-red-500">*</span>
+            </label>
+
+            <div class="space-y-2">
+              <label
+                *ngFor="let doctor of paginatedDoctors"
+                class="flex items-center p-4 bg-white dark:bg-gray-800 rounded-xl cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all border-2"
+                [class.border-purple-500]="assignmentForm.medecinId === doctor._id"
+                [class.border-gray-200]="assignmentForm.medecinId !== doctor._id"
+              >
+                <input
+                  type="radio"
+                  name="medecin"
+                  [value]="doctor._id"
+                  [(ngModel)]="assignmentForm.medecinId"
+                  class="w-5 h-5 text-purple-600 focus:ring-2 focus:ring-purple-500"
+                />
+                <img
+                  [src]="doctor.photoProfil || 'https://ui-avatars.com/api/?name=' + doctor.prenom"
+                  class="w-12 h-12 rounded-full border-2 border-gray-300 ml-3"
+                />
+                <div class="ml-3 flex-1">
+                  <p class="font-bold text-gray-900 dark:text-white">
+                    Dr. {{ doctor.prenom }} {{ doctor.nom }}
+                  </p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">{{ doctor.email }}</p>
+                  <p *ngIf="doctor.telephone" class="text-xs text-gray-500 mt-1">
+                    📞 {{ doctor.telephone }}
+                  </p>
+                </div>
+              </label>
+
+              <!-- Pagination médecins -->
+              <div *ngIf="totalDoctorPages > 1" class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                  Page {{ currentDoctorPage }} / {{ totalDoctorPages }} - {{ availableDoctors.length }} médecin(s)
+                </div>
+                
+                <div class="flex space-x-2">
+                  <button
+                    (click)="goToDoctorPage(currentDoctorPage - 1)"
+                    [disabled]="currentDoctorPage === 1"
+                    class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  >
+                    ←
+                  </button>
+
+                  <button
+                    *ngFor="let page of doctorPages"
+                    (click)="goToDoctorPage(page)"
+                    [class]="page === currentDoctorPage ? 'bg-purple-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
+                    class="px-3 py-1 rounded-lg hover:bg-purple-500 hover:text-white transition-all text-sm"
+                  >
+                    {{ page }}
+                  </button>
+
+                  <button
+                    (click)="goToDoctorPage(currentDoctorPage + 1)"
+                    [disabled]="currentDoctorPage === totalDoctorPages"
+                    class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  >
+                    →
+                  </button>
+                </div>
+              </div>
+
+              <!-- Message si aucun médecin -->
+              <div *ngIf="availableDoctors.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+                <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <p class="font-medium">Aucun médecin disponible</p>
+                <p class="text-sm mt-1">Créez d'abord un compte médecin</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Priorité -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Niveau de priorité
+            </label>
+            <select
+              [(ngModel)]="assignmentForm.priorite"
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="basse">🟢 Basse</option>
+              <option value="moyenne">🔵 Moyenne</option>
+              <option value="haute">🟠 Haute</option>
+              <option value="urgente">🔴 Urgente</option>
+            </select>
+          </div>
+
+          <!-- Notes -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Notes d'assignation (optionnel)
+            </label>
+            <textarea
+              [(ngModel)]="assignmentForm.notes"
+              rows="3"
+              placeholder="Raison de l'assignation, consignes spéciales..."
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+            ></textarea>
+          </div>
+
+        </div>
+
+        <div class="bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-500/30 rounded-xl p-4 mt-6 mb-6">
+          <p class="text-sm text-purple-800 dark:text-purple-200 font-medium">
+            ℹ️ Après l'assignation :
+          </p>
+          <ul class="text-xs text-purple-700 dark:text-purple-300 mt-2 space-y-1 ml-4 list-disc">
+            <li>Le médecin recevra une notification</li>
+            <li>Le patient recevra une notification</li>
+            <li>Le médecin pourra consulter les données du patient</li>
+          </ul>
+        </div>
+
+        <div class="flex space-x-3">
+          <button
+            (click)="closeAssignPatientModal()"
+            class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+          >
+            Annuler
+          </button>
+
+          <button
+            (click)="assignPatientToDoctor()"
+            [disabled]="!assignmentForm.medecinId || availableDoctors.length === 0"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-xl font-bold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            👨‍⚕️ Assigner
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL CONFIRMATION DÉSASSIGNATION ========== -->
+    <div
+      *ngIf="showUnassignConfirmModal"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+      (click)="closeUnassignModal()"
+    >
+      <div
+        class="glass rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-orange-500/30"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="text-center mb-6">
+          <div class="mx-auto w-20 h-20 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-12 h-12 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+            🔓 Désassigner le patient
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            Sélectionnez le médecin à désassigner
+          </p>
+        </div>
+
+        <!-- Info patient -->
+        <div *ngIf="patientToUnassign" class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-6 border-2 border-blue-500/30">
+          <div class="flex items-center space-x-3">
+            <img
+              [src]="patientToUnassign.photoProfil || 'https://ui-avatars.com/api/?name=' + patientToUnassign.prenom"
+              class="w-16 h-16 rounded-full border-2 border-orange-500"
+            />
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Patient</p>
+              <p class="font-bold text-xl text-gray-900 dark:text-white">
+                {{ patientToUnassign.prenom }} {{ patientToUnassign.nom }}
+              </p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">{{ patientToUnassign.email }}</p>
+              <p class="text-xs text-orange-600 mt-1">
+                {{ allPatientAssignments.length }} médecin(s) assigné(s)
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sélection médecin à désassigner -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            Sélectionnez le médecin à désassigner <span class="text-red-500">*</span>
+          </label>
+
+          <div class="space-y-2">
+            <label
+              *ngFor="let assignment of paginatedUnassignDoctors"
+              class="flex items-start p-4 bg-white dark:bg-gray-800 rounded-xl cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all border-2"
+              [class.border-orange-500]="selectedAssignmentToUnassign === assignment._id"
+              [class.border-gray-200]="selectedAssignmentToUnassign !== assignment._id"
+            >
+              <input
+                type="radio"
+                name="assignment"
+                [value]="assignment._id"
+                [(ngModel)]="selectedAssignmentToUnassign"
+                class="w-5 h-5 text-orange-600 focus:ring-2 focus:ring-orange-500 mt-1"
+              />
+              <img
+                [src]="assignment.medecinId?.photoProfil || 'https://ui-avatars.com/api/?name=' + (assignment.medecinId?.prenom || 'M')"
+                class="w-14 h-14 rounded-full border-2 border-gray-300 ml-3"
+              />
+              <div class="ml-3 flex-1">
+                <p class="font-bold text-gray-900 dark:text-white text-lg">
+                  Dr. {{ assignment.medecinId?.prenom }} {{ assignment.medecinId?.nom }}
+                </p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ assignment.medecinId?.email }}</p>
+                
+                <div class="mt-2 flex items-center space-x-2">
+                  <span
+                    class="px-2 py-1 rounded-full text-xs font-bold"
+                    [class]="getPriorityBadge(assignment.priorite)"
+                  >
+                    {{ getPriorityLabel(assignment.priorite) }}
+                  </span>
+                  <span class="text-xs text-gray-500">
+                    Assigné le {{ assignment.dateAssignation | date:'short' }}
+                  </span>
+                </div>
+                
+                <p *ngIf="assignment.notesAssignation" class="text-xs text-gray-600 dark:text-gray-400 mt-2 italic">
+                  "{{ assignment.notesAssignation }}"
+                </p>
+              </div>
+            </label>
+
+            <!-- Pagination -->
+            <div *ngIf="totalUnassignDoctorPages > 1" class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div class="text-sm text-gray-600 dark:text-gray-400">
+                Page {{ currentUnassignDoctorPage }} / {{ totalUnassignDoctorPages }}
+              </div>
+              
+              <div class="flex space-x-2">
+                <button
+                  (click)="goToUnassignDoctorPage(currentUnassignDoctorPage - 1)"
+                  [disabled]="currentUnassignDoctorPage === 1"
+                  class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                >
+                  ←
+                </button>
+
+                <button
+                  *ngFor="let page of unassignDoctorPages"
+                  (click)="goToUnassignDoctorPage(page)"
+                  [class]="page === currentUnassignDoctorPage ? 'bg-orange-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
+                  class="px-3 py-1 rounded-lg hover:bg-orange-500 hover:text-white transition-all text-sm"
+                >
+                  {{ page }}
+                </button>
+
+                <button
+                  (click)="goToUnassignDoctorPage(currentUnassignDoctorPage + 1)"
+                  [disabled]="currentUnassignDoctorPage === totalUnassignDoctorPages"
+                  class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                >
+                  →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-500/30 rounded-xl p-4 mb-6">
+          <p class="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+            ⚠️ Conséquences de la désassignation :
+          </p>
+          <ul class="text-xs text-yellow-700 dark:text-yellow-300 mt-2 space-y-1 ml-4 list-disc">
+            <li>Le suivi médical avec CE médecin sera terminé</li>
+            <li>Le médecin et le patient seront notifiés</li>
+            <li>Le médecin n'aura plus accès aux données du patient</li>
+            <li>L'historique sera conservé dans les logs</li>
+          </ul>
+        </div>
+
+        <div class="flex space-x-3">
+          <button
+            (click)="closeUnassignModal()"
+            class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+          >
+            Annuler
+          </button>
+
+          <button
+            (click)="unassignPatient()"
+            [disabled]="!selectedAssignmentToUnassign"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white rounded-xl font-bold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            🔓 Désassigner
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL ASSIGNATION EXISTANTE ========== -->
+    <div
+      *ngIf="showAssignmentExistsModal"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+      (click)="closeAssignmentExistsModal()"
+    >
+      <div
+        class="glass rounded-3xl p-8 max-w-md w-full border-2 border-blue-500/30"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="text-center mb-6">
+          <div class="mx-auto w-20 h-20 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+            ℹ️ Assignation existante
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            Ce patient est déjà assigné à ce médecin
+          </p>
+        </div>
+
+        <!-- Info patient -->
+        <div *ngIf="existingAssignmentPatient" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4">
+          <div class="flex items-center space-x-3">
+            <img
+              [src]="existingAssignmentPatient.photoProfil || 'https://ui-avatars.com/api/?name=' + existingAssignmentPatient.prenom"
+              class="w-12 h-12 rounded-full border-2 border-blue-500"
+            />
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Patient</p>
+              <p class="font-bold text-gray-900 dark:text-white">
+                {{ existingAssignmentPatient.prenom }} {{ existingAssignmentPatient.nom }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info médecin -->
+        <div *ngIf="existingAssignmentDoctor" class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 mb-6">
+          <div class="flex items-center space-x-3">
+            <img
+              [src]="existingAssignmentDoctor.photoProfil || 'https://ui-avatars.com/api/?name=' + existingAssignmentDoctor.prenom"
+              class="w-12 h-12 rounded-full border-2 border-purple-500"
+            />
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Médecin déjà assigné</p>
+              <p class="font-bold text-gray-900 dark:text-white">
+                Dr. {{ existingAssignmentDoctor.prenom }} {{ existingAssignmentDoctor.nom }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500/30 rounded-xl p-4 mb-6">
+          <p class="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">
+            💡 Pour réassigner ce patient :
+          </p>
+          <ol class="text-xs text-blue-700 dark:text-blue-300 space-y-2 ml-4 list-decimal">
+            <li>Cliquez sur "Désassigner" ci-dessous</li>
+            <li>Sélectionnez le médecin à désassigner</li>
+            <li>Confirmez la désassignation</li>
+            <li>Réessayez l'assignation avec le nouveau médecin</li>
+          </ol>
+        </div>
+
+        <div class="flex space-x-3">
+          <button
+            (click)="closeAssignmentExistsModal()"
+            class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+          >
+            Fermer
+          </button>
+
+          <button
+            (click)="openUnassignFromExistsModal()"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white rounded-xl font-bold transition-all shadow-lg"
+          >
+            🔓 Désassigner
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ========== MODAL CONFIRMATION DÉSASSIGNATION DEPUIS TABLEAU ========== -->
+    <div
+      *ngIf="showUnassignFromTableModal"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+      (click)="closeUnassignFromTableModal()"
+    >
+      <div
+        class="glass rounded-3xl p-8 max-w-md w-full border-2 border-orange-500/30"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="text-center mb-6">
+          <div class="mx-auto w-20 h-20 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-12 h-12 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+            🔓 Confirmer la désassignation
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            Voulez-vous vraiment mettre fin à ce suivi ?
+          </p>
+        </div>
+
+        <div *ngIf="assignmentToUnassignFromTable" class="space-y-4 mb-6">
+          <!-- Patient -->
+          <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
+            <div class="flex items-center space-x-3">
+              <img
+                [src]="assignmentToUnassignFromTable.patientId?.photoProfil || 'https://ui-avatars.com/api/?name=' + (assignmentToUnassignFromTable.patientId?.prenom || 'P')"
+                class="w-12 h-12 rounded-full border-2 border-orange-500"
+              />
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Patient</p>
+                <p class="font-bold text-gray-900 dark:text-white">
+                  {{ assignmentToUnassignFromTable.patientId?.prenom }} {{ assignmentToUnassignFromTable.patientId?.nom }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Médecin -->
+          <div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4">
+            <div class="flex items-center space-x-3">
+              <img
+                [src]="assignmentToUnassignFromTable.medecinId?.photoProfil || 'https://ui-avatars.com/api/?name=' + (assignmentToUnassignFromTable.medecinId?.prenom || 'M')"
+                class="w-12 h-12 rounded-full border-2 border-orange-500"
+              />
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Médecin</p>
+                <p class="font-bold text-gray-900 dark:text-white">
+                  Dr. {{ assignmentToUnassignFromTable.medecinId?.prenom }} {{ assignmentToUnassignFromTable.medecinId?.nom }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-500/30 rounded-xl p-4 mb-6">
+          <p class="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+            ⚠️ Cette action va :
+          </p>
+          <ul class="text-xs text-yellow-700 dark:text-yellow-300 mt-2 space-y-1 ml-4 list-disc">
+            <li>Désactiver l'assignation</li>
+            <li>Notifier le médecin et le patient</li>
+            <li>Terminer le suivi médical</li>
+          </ul>
+        </div>
+
+        <div class="flex space-x-3">
+          <button
+            (click)="closeUnassignFromTableModal()"
+            class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+          >
+            Annuler
+          </button>
+
+          <button
+            (click)="unassignFromList()"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white rounded-xl font-bold transition-all shadow-lg"
+          >
+            🔓 Désassigner
+          </button>
+        </div>
+      </div>
+    </div>
+
+</div>
