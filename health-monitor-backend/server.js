@@ -6,8 +6,6 @@ const { Server } = require('socket.io');
 require('dotenv').config();
 const connectDB = require('./config/database');
 
-
-
 // Modèles (après dotenv et connectDB)
 const Utilisateur = require('./models/User');
 const Mesure = require('./models/Measurement');
@@ -20,11 +18,76 @@ const PORT = process.env.PORT || 5000;
 // Créer le serveur HTTP (nécessaire pour Socket.IO)
 const serveurHttp = http.createServer(app);
 
-// Initialiser Socket.IO
+// ==================== CONFIGURATION CORS INTELLIGENTE ====================
+// Liste des origines autorisées selon l'environnement
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [
+      'https://health-monitor-frontend.vercel.app',           // Production Vercel
+      /^https:\/\/health-monitor-frontend-.*\.vercel\.app$/  // Preview deployments Vercel
+    ]
+  : [
+      'http://localhost:4200',      // Angular dev server
+      'http://localhost:4202',      // Angular custom port
+      'http://127.0.0.1:4200',      // Variante localhost
+      'http://127.0.0.1:4202'       // Variante localhost custom
+    ];
+
+// Configuration CORS dynamique
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Autoriser les requêtes sans origin (Postman, mobile apps, ESP32)
+    if (!origin) {
+      console.log('✅ Requête sans origin autorisée (Postman/ESP32/Mobile)');
+      return callback(null, true);
+    }
+    
+    // Vérifier si l'origin est autorisée
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (allowed instanceof RegExp) {
+        return allowed.test(origin);
+      }
+      return allowed === origin;
+    });
+    
+    if (isAllowed) {
+      console.log(`✅ CORS autorisé pour: ${origin}`);
+      callback(null, true);
+    } else {
+      console.log(`❌ CORS bloqué pour: ${origin}`);
+      callback(new Error('Non autorisé par CORS'));
+    }
+  },
+  credentials: true,  // Autoriser les cookies/auth
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+
+// ==================== CONFIGURATION SOCKET.IO ====================
 const io = new Server(serveurHttp, {
   cors: {
-    origin: "*", // Accepter toutes les origines (à sécuriser en production)
-    methods: ["GET", "POST"]
+    origin: function (origin, callback) {
+      // Même logique que CORS
+      if (!origin) return callback(null, true);
+      
+      const isAllowed = allowedOrigins.some(allowed => {
+        if (allowed instanceof RegExp) {
+          return allowed.test(origin);
+        }
+        return allowed === origin;
+      });
+      
+      if (isAllowed) {
+        console.log(`⚡ Socket.IO autorisé pour: ${origin}`);
+        callback(null, true);
+      } else {
+        console.log(`❌ Socket.IO bloqué pour: ${origin}`);
+        callback(new Error('Non autorisé par CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST']
   }
 });
 
@@ -32,10 +95,18 @@ const io = new Server(serveurHttp, {
 app.set('io', io);
 
 // ==================== MIDDLEWARE ====================
-app.use(cors());
 // Middleware pour parser le body JSON avec limite augmentée pour les images base64
-app.use(express.json({ limit: '10mb' })); // ← AUGMENTER LA LIMITE
-app.use(express.urlencoded({ extended: true, limit: '10mb' })); // ← AUGMENTER ICI AUSSI
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Middleware de logging selon l'environnement
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    console.log(`📡 ${req.method} ${req.path}`);
+    next();
+  });
+}
+
 // ==================== IMPORT DES ROUTES ====================
 const routeMesures = require('./routes/measurements');
 const routeAuth = require('./routes/auth');
@@ -50,10 +121,6 @@ const notesRoutes = require('./routes/notes');
 const questionsRoutes = require('./routes/questions');
 const adminRoutes = require('./routes/admin');
 
-
-
-
-
 // ==================== UTILISATION DES ROUTES ====================
 app.use('/api/measurements', routeMesures);
 app.use('/api/auth', routeAuth);
@@ -64,22 +131,26 @@ app.use('/api/password', routePassword);
 app.use('/api/archivage', archivageRoutes);
 app.use('/api/medecin', medecinRoutes);
 app.use('/api/alertes', alertesRoutes);
-app.use('/api/notes', notesRoutes);
 app.use('/api/questions', questionsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', require('./routes/notifications'));
-app.use('/api/assignments', require('./routes/assignments')); 
-
-
-
-
-
 
 // ==================== ROUTES DE TEST ====================
 app.get('/', (req, res) => {
   res.json({
     message: '🏥 Health Monitor API v1.0',
     status: 'Server is running',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Route de santé pour Render
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV,
     timestamp: new Date().toISOString()
   });
 });
@@ -98,7 +169,6 @@ app.get('/api/test/modeles', async (req, res) => {
   try {
     console.log('🧪 Test des modèles MongoDB...');
     
-    // Compter les documents dans chaque collection
     const nombreUtilisateurs = await Utilisateur.countDocuments();
     const nombreMesures = await Mesure.countDocuments();
     const nombreAlertes = await Alerte.countDocuments();
@@ -126,6 +196,7 @@ app.get('/api/test/modeles', async (req, res) => {
         }
       },
       database: 'healthmonitor',
+      environment: process.env.NODE_ENV,
       timestamp: new Date().toISOString()
     });
     
@@ -143,19 +214,17 @@ app.get('/api/test/modeles', async (req, res) => {
 io.on('connection', (socket) => {
   console.log(`⚡ Nouveau client connecté: ${socket.id}`);
   
-  // Envoyer un message de bienvenue
   socket.emit('bienvenue', {
     message: '👋 Connecté au serveur Health Monitor !',
     socketId: socket.id,
+    environment: process.env.NODE_ENV,
     timestamp: new Date().toISOString()
   });
   
-  // Quand un client se déconnecte
   socket.on('disconnect', () => {
     console.log(`❌ Client déconnecté: ${socket.id}`);
   });
   
-  // Écouter les demandes d'abonnement à un utilisateur
   socket.on('abonner-utilisateur', (userId) => {
     socket.join(`user-${userId}`);
     console.log(`📻 Client ${socket.id} abonné aux mesures de l'utilisateur ${userId}`);
@@ -168,7 +237,6 @@ io.on('connection', (socket) => {
 });
 
 // ==================== CONNEXION DB + DÉMARRAGE ====================
-// Fonction asynchrone pour démarrer le serveur
 const demarrerServeur = async () => {
   try {
     // 1. Connecter à MongoDB d'abord
@@ -179,9 +247,11 @@ const demarrerServeur = async () => {
       console.log('\n╔════════════════════════════════════════╗');
       console.log('║   🏥 HEALTH MONITOR API SERVER       ║');
       console.log('╚════════════════════════════════════════╝');
-      console.log(`\n✅ Serveur HTTP démarré sur le port ${PORT}`);
+      console.log(`\n🌍 Environnement: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`✅ Serveur HTTP démarré sur le port ${PORT}`);
       console.log(`🌐 http://localhost:${PORT}\n`);
-      console.log(`⚡ Socket.IO activé et prêt !\n`);
+      console.log(`⚡ Socket.IO activé et prêt !`);
+      console.log(`🔒 CORS configuré pour: ${process.env.NODE_ENV === 'production' ? 'Vercel Production' : 'Localhost Development'}\n`);
       console.log('📡 En attente de requêtes...\n');
     });
     
