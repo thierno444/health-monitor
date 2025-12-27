@@ -12,11 +12,19 @@ const transporter = nodemailer.createTransport({
 });
 
 // Vérifier la connexion au démarrage
+// Vérifier la connexion au démarrage
 transporter.verify((error, success) => {
   if (error) {
     console.log('❌ Erreur configuration email:', error.message);
+    console.log('📧 Détails:', {
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      user: process.env.EMAIL_USER,
+      passLength: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0
+    });
   } else {
     console.log('✅ Service email prêt');
+    console.log('📧 Serveur:', process.env.EMAIL_HOST);
   }
 });
 
