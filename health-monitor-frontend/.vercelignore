@@ -1,0 +1,9 @@
+node_modules
+.angular
+.git
+.vscode
+.idea
+*.log
+.env
+.env.local
+src/environment.ts
