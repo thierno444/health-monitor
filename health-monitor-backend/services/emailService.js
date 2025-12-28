@@ -156,9 +156,9 @@ async function envoyerEmailAlerte(utilisateur, mesure) {
             `}
             
             <center>
-              <a href="${process.env.FRONTEND_URL}/dashboard" class="button">
-                📊 Voir mes mesures
-              </a>
+            <a href="${process.env.FRONTEND_URL}/dashboard/patient" class="button">
+              📊 Voir mes mesures
+            </a>
             </center>
             
             <p><em>⚠️ Cet email est envoyé automatiquement. En cas de doute, consultez un professionnel de santé.</em></p>
