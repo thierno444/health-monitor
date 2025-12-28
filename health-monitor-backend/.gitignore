@@ -4,3 +4,6 @@ node_modules/
 .DS_Store
 test-api.html
 test-socketio.html
+test-*.js
+.env.development
+.env.production
