@@ -26,6 +26,7 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "NG_BUILD_ENV": "production"
   }
 }
