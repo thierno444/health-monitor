@@ -9,7 +9,7 @@
   "build:prod": "ng build --configuration production && ./replace-urls.sh",
   "watch": "ng build --watch --configuration development",
   "test": "ng test",
-  "vercel-build": "ng build --configuration production && ./replace-urls.sh"
+  "vercel-build": "ng build --configuration production && node replace-urls.js"
   },
   "private": true,
   "dependencies": {
