@@ -41,6 +41,96 @@ router.get('/patient/mes-notes', verifierToken, async (req, res) => {
   }
 });
 
+
+// Marquer toutes les notes d'un patient comme lues
+router.put('/patient/:patientId/marquer-lues', verifierToken, async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    const userId = req.utilisateur.id;
+
+    console.log('📝 Demande marquage notes lues:', { patientId, userId });
+
+    // Vérifier que c'est bien le patient connecté
+    if (userId !== patientId) {
+      console.warn('⚠️ Tentative non autorisée:', userId, '!=', patientId);
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Non autorisé' 
+      });
+    }
+
+    // Mettre à jour toutes les notes visibles du patient
+    const result = await Note.updateMany(
+      { 
+        patientId: patientId,
+        visible: true,
+        prive: false,
+        lue: false  // Seulement celles non lues
+      },
+      { 
+        $set: { lue: true }
+      }
+    );
+
+    console.log(`✅ ${result.modifiedCount} notes marquées comme lues pour patient ${patientId}`);
+
+    res.json({
+      success: true,
+      updated: result.modifiedCount,
+      message: `${result.modifiedCount} note(s) marquée(s) comme lue(s)`
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur marquage notes lues:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Erreur serveur',
+      error: error.message 
+    });
+  }
+});
+
+// Compter les notes non lues d'un patient
+router.get('/patient/:patientId/non-lues', verifierToken, async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    const userId = req.utilisateur.id;
+
+    console.log('🔢 Demande comptage notes non lues:', { patientId, userId });
+
+    // Vérifier que c'est bien le patient connecté
+    if (userId !== patientId) {
+      console.warn('⚠️ Tentative non autorisée:', userId, '!=', patientId);
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Non autorisé' 
+      });
+    }
+
+    const count = await Note.countDocuments({
+      patientId: patientId,
+      visible: true,
+      prive: false,
+      lue: false
+    });
+
+    console.log(`✅ ${count} notes non lues pour patient ${patientId}`);
+
+    res.json({
+      success: true,
+      count: count
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur comptage notes non lues:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Erreur serveur',
+      error: error.message 
+    });
+  }
+});
+
 // ========== ROUTES MÉDECIN ==========
 
 // Liste notes d'un patient (médecin)

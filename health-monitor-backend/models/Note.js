@@ -44,6 +44,12 @@ const noteSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+
+  // Note lue par le patient
+  lue: {
+    type: Boolean,
+    default: false
+  },
   
   // Priorité
   priorite: {
