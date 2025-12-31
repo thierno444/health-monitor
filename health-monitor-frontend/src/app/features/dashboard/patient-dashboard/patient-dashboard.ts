@@ -835,41 +835,49 @@ updateCharts(): void {
 
 // Navigation sidebar
 setCurrentTab(tab: string): void {
-    this.currentTab = tab;
+  this.currentTab = tab;
+  
+  // Recréer les graphiques selon l'onglet
+  if (tab === 'overview') {
+    setTimeout(() => {
+      if (this.measurements.length > 0) {
+        this.createCharts();
+      }
+    }, 100);
+  } else if (tab === 'charts') {
+    setTimeout(() => {
+      if (this.measurements.length > 0) {
+        this.createDetailedCharts();
+      }
+    }, 100);
+  } else if (tab === 'notes') {
+    // Charger les notes médicales
+    this.loadMesNotes();
     
-    // Recréer les graphiques selon l'onglet
-    if (tab === 'overview') {
+    // Marquer toutes les notes comme lues après 2 secondes
+    if (this.user?.id) {
       setTimeout(() => {
-        if (this.measurements.length > 0) {
-          this.createCharts();
-        }
-      }, 100);
-    } else if (tab === 'charts') {
-      setTimeout(() => {
-        if (this.measurements.length > 0) {
-          this.createDetailedCharts();
-        }
-      }, 100);
-    } else if (tab === 'notes') {
-      // Charger les notes médicales
-      this.loadMesNotes();
-      
-      // Marquer toutes les notes comme lues après 2 secondes
-      setTimeout(() => {
-        if (this.mesNotes.length > 0) {
-          const noteIds = this.mesNotes.map(n => n._id);
-          this.setNotesVues(noteIds);
-          this.notesVues = true;
-          console.log('✅ Toutes les notes marquées comme lues');
-        }
+        console.log('⏰ Marquage des notes comme lues...');
+        this.noteService.marquerNotesLues(this.user.id).subscribe({
+          next: (response) => {
+            if (response.success) {
+              console.log('✅ Notes marquées comme lues avec succès');
+              this.notesVues = true;
+            }
+          },
+          error: (err) => {
+            console.error('❌ Erreur marquage notes:', err);
+          }
+        });
       }, 2000);
     }
-    
-    // Fermer la sidebar sur mobile
-    if (window.innerWidth < 1024) {
-      this.sidebarOpen = false;
-    }
   }
+  
+  // Fermer la sidebar sur mobile
+  if (window.innerWidth < 1024) {
+    this.sidebarOpen = false;
+  }
+}
 
 toggleSidebar(): void {
   this.sidebarOpen = !this.sidebarOpen;

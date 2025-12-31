@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface Note {
@@ -23,6 +25,10 @@ export interface Note {
 })
 export class NoteService {
   private apiUrl = environment.apiUrl;
+  
+  // Subject pour le compteur de notes non lues
+  private notesNonLuesSubject = new BehaviorSubject<number>(0);
+  public notesNonLues$ = this.notesNonLuesSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -62,5 +68,42 @@ export class NoteService {
   getMesNotes(): Observable<any> {
     return this.http.get(`${this.apiUrl}/notes/patient/mes-notes`);
   }
-  
+
+  // ========== NOUVEAU: MARQUER NOTES COMME LUES ==========
+  marquerNotesLues(patientId: string): Observable<any> {
+    console.log('📝 Marquage des notes comme lues pour:', patientId);
+    
+    return this.http.put(`${this.apiUrl}/notes/patient/${patientId}/marquer-lues`, {}).pipe(
+      tap((response: any) => {
+        if (response.success) {
+          console.log('✅', response.updated, 'notes marquées comme lues');
+          
+          // IMPORTANT: Recharger le compteur après marquage
+          this.loadNotesNonLues(patientId);
+        }
+      }),
+      catchError(error => {
+        console.error('❌ Erreur marquage notes lues:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // ========== NOUVEAU: CHARGER COMPTEUR NOTES NON LUES ==========
+  loadNotesNonLues(patientId: string): void {
+    this.http.get(`${this.apiUrl}/notes/patient/${patientId}/non-lues`).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.notesNonLuesSubject.next(response.count || 0);
+          console.log('🔔 Compteur notes non lues mis à jour:', response.count);
+        }
+      },
+      error: (err) => console.error('❌ Erreur chargement compteur notes:', err)
+    });
+  }
+
+  // ========== NOUVEAU: GET COMPTEUR ACTUEL ==========
+  getNotesNonLuesCount(): number {
+    return this.notesNonLuesSubject.value;
+  }
 }

@@ -1420,23 +1420,54 @@ openDeleteDeviceModal(device: Device): void {
 
   // ========== ASSIGNATION MÉDECIN-PATIENT ==========
 
-  openAssignPatientModal(patient: User): void {
-    this.selectedPatientForAssignment = patient;
-    
-    // Charger les médecins disponibles
-    this.availableDoctors = this.users.filter(u => u.role === 'medecin');
-    
-    // Reset form
-    this.assignmentForm = {
-      medecinId: '',
-      priorite: 'moyenne',
-      notes: ''
-    };
+openAssignPatientModal(patient: User): void {
+  console.log('📋 Ouverture modal assignation pour:', patient.prenom, patient.nom);
+  
+  this.selectedPatientForAssignment = patient;
+  
+  // Charger les médecins disponibles
+  console.log('👨‍⚕️ Chargement des médecins...');
+  console.log('Total utilisateurs chargés:', this.users.length);
+  
+  this.availableDoctors = this.users.filter(u => {
+    console.log('  - Vérification:', u.prenom, u.nom, 'Role:', u.role);
+    return u.role === 'medecin';
+  });
+  
+  console.log('✅ Médecins trouvés:', this.availableDoctors.length);
+  this.availableDoctors.forEach(d => {
+    console.log('    >', d.prenom, d.nom, '(', d.email, ')');
+  });
+  
+  // Reset form
+  this.assignmentForm = {
+    medecinId: '',
+    priorite: 'moyenne',
+    notes: ''
+  };
 
-        this.currentDoctorPage = 1; 
+  this.currentDoctorPage = 1;
+  
+  // IMPORTANT: Si aucun médecin, recharger les utilisateurs
+  if (this.availableDoctors.length === 0) {
+    console.warn('⚠️ Aucun médecin trouvé, rechargement des utilisateurs...');
+    this.loadUsers();
     
-    this.showAssignPatientModal = true;
+    // Attendre 1 seconde puis réessayer
+    setTimeout(() => {
+      this.availableDoctors = this.users.filter(u => u.role === 'medecin');
+      console.log('🔄 Après rechargement:', this.availableDoctors.length, 'médecins');
+      
+      if (this.availableDoctors.length === 0) {
+        console.error('❌ TOUJOURS AUCUN MÉDECIN après rechargement !');
+        console.log('Utilisateurs totaux:', this.users.length);
+        console.log('Utilisateurs:', this.users.map(u => ({ nom: u.nom, role: u.role })));
+      }
+    }, 1000);
   }
+  
+  this.showAssignPatientModal = true;
+}
 
   closeAssignPatientModal(): void {
     this.showAssignPatientModal = false;
