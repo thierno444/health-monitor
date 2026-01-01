@@ -44,9 +44,10 @@ const assignmentSchema = new mongoose.Schema({
   },
   
   // Priorité du suivi (basse, moyenne, haute)
+  // Priorité du suivi (basse, moyenne, haute, urgente)
   priorite: {
     type: String,
-    enum: ['basse', 'moyenne', 'haute'],
+    enum: ['basse', 'moyenne', 'haute', 'urgente'],
     default: 'moyenne'
   }
 }, {
