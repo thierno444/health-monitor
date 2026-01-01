@@ -279,11 +279,12 @@ export class PatientComparisonComponent implements OnInit, AfterViewInit {
   }
 
   retour(): void {
-    // Détruire les graphiques avant de quitter
-    if (this.bpmChart) this.bpmChart.destroy();
-    if (this.spo2Chart) this.spo2Chart.destroy();
-    this.router.navigate(['/dashboard/doctor'], { queryParams: { tab: 'reports' } });
-  }
+  // Détruire les graphiques avant de quitter
+  if (this.bpmChart) this.bpmChart.destroy();
+  if (this.spo2Chart) this.spo2Chart.destroy();
+  this.router.navigate(['/doctor-dashboard'], { queryParams: { tab: 'reports' } });
+  //                      ^^^^^^^^^^^^^^^^^^^ ✅ BONNE ROUTE !
+}
 
   getPatientColor(index: number): string {
     const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'];
