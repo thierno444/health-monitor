@@ -178,10 +178,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // Profil admin
   profileForm = {
-    prenom: '',
-    nom: '',
-    email: '',
-    telephone: ''
+  prenom: '',
+  nom: '',
+  email: '',
+  telephone: '',
+  genre: '',
+  dateDeNaissance: ''
   };
 
   savingProfile = false;
@@ -781,15 +783,17 @@ importCSV(): void {
   // ========== PROFIL ADMIN ==========
 
   initProfileForm(): void {
-    if (this.admin) {
-      this.profileForm = {
-        prenom: this.admin.prenom,
-        nom: this.admin.nom,
-        email: this.admin.email,
-        telephone: this.admin.telephone || ''
-      };
-    }
+  if (this.admin) {
+    this.profileForm = {
+      prenom: this.admin.prenom,
+      nom: this.admin.nom,
+      email: this.admin.email,
+      telephone: this.admin.telephone || '',
+      genre: this.admin.genre || 'homme',
+      dateDeNaissance: this.admin.dateDeNaissance || ''
+    };
   }
+}
 
   saveProfile(): void {
     this.savingProfile = true;

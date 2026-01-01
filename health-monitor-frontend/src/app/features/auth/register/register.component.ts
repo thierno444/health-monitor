@@ -26,17 +26,19 @@ export class RegisterComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.registerForm = this.fb.group({
-      prenom: ['', [Validators.required, Validators.minLength(2)]],
-      nom: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      telephone: ['', [Validators.required, Validators.pattern(/^(\+?221|0)?[0-9]{9}$/)]], // ← AVEC TÉLÉPHONE
-      motDePasse: ['', [Validators.required, Validators.minLength(6)]],
-      confirmMotDePasse: ['', Validators.required],
-      role: ['patient', Validators.required],
-      idDispositif: ['']
-    }, { validators: this.passwordMatchValidator });
-  }
+  this.registerForm = this.fb.group({
+    prenom: ['', [Validators.required, Validators.minLength(2)]],
+    nom: ['', [Validators.required, Validators.minLength(2)]],
+    email: ['', [Validators.required, Validators.email]],
+    telephone: ['', [Validators.required, Validators.pattern(/^(\+?221|0)?[0-9]{9}$/)]],
+    genre: ['homme', Validators.required],   
+    dateDeNaissance: ['', Validators.required],   
+    motDePasse: ['', [Validators.required, Validators.minLength(6)]],
+    confirmMotDePasse: ['', Validators.required],
+    role: ['patient', Validators.required],
+    idDispositif: ['']
+  }, { validators: this.passwordMatchValidator });
+}
 
   passwordMatchValidator(g: FormGroup) {
     return g.get('motDePasse')?.value === g.get('confirmMotDePasse')?.value

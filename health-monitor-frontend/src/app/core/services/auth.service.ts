@@ -10,6 +10,8 @@ export interface User {
   nom: string;
   email: string;
   telephone: string;
+  genre?: string;  
+  dateDeNaissance?: string;  
   role: 'patient' | 'medecin' | 'admin';
   photoProfil?: string;
   idDispositif?: string;

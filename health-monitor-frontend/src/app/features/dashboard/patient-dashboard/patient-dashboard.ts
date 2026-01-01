@@ -68,10 +68,12 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
   };
 
   profileForm = {
-    prenom: '',
-    nom: '',
-    email: '',
-    telephone: ''
+  prenom: '',
+  nom: '',
+  email: '',
+  telephone: '',
+  genre: '',
+  dateDeNaissance: ''
   };
 
   passwordForm = {
@@ -948,7 +950,9 @@ initForms(): void {
       prenom: this.user.prenom || '',
       nom: this.user.nom || '',
       email: this.user.email || '',
-      telephone: this.user.telephone || '' 
+      telephone: this.user.telephone || '',
+      genre: this.user.genre || 'homme',
+      dateDeNaissance: this.user.dateDeNaissance || ''
      };
   }
 }

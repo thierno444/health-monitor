@@ -1339,6 +1339,31 @@
                 />
               </div>
 
+              <!-- Genre & Date de naissance -->
+              <div>
+                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">👤 Genre</label>
+                <select
+                  [(ngModel)]="profileForm.genre"
+                  name="genre"
+                  class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                >
+                  <option value="homme">👨 Homme</option>
+                  <option value="femme">👩 Femme</option>
+                  <option value="autre">⚧️ Autre</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">🎂 Date de naissance</label>
+                <input 
+                  type="date" 
+                  [(ngModel)]="profileForm.dateDeNaissance"
+                  name="dateDeNaissance"
+                  class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                />
+              </div>
+
+
               <!-- Bouton sauvegarder -->
               <button
                 type="submit"

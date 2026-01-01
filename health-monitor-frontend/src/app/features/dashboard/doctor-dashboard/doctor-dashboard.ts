@@ -110,10 +110,12 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
 
   // Formulaires profil
   profileForm = {
-    prenom: '',
-    nom: '',
-    email: '',
-    telephone: ''
+  prenom: '',
+  nom: '',
+  email: '',
+  telephone: '',
+  genre: '',
+  dateDeNaissance: ''
   };
   
   passwordForm = {
@@ -639,15 +641,17 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   // ========== GESTION PROFIL ==========
   
   initProfileForm(): void {
-    if (this.user) {
-      this.profileForm = {
-        prenom: this.user.prenom,
-        nom: this.user.nom,
-        email: this.user.email,
-        telephone: this.user.telephone || ''
-      };
-    }
+  if (this.user) {
+    this.profileForm = {
+      prenom: this.user.prenom,
+      nom: this.user.nom,
+      email: this.user.email,
+      telephone: this.user.telephone || '',
+      genre: this.user.genre || 'homme',
+      dateDeNaissance: this.user.dateDeNaissance || ''
+    };
   }
+}
 
   saveProfile(): void {
     if (!this.user?.id) return;
