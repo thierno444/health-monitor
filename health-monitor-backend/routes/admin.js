@@ -123,8 +123,7 @@ router.get('/charts', verifierToken, verifierAdmin, async (req, res) => {
     let topAlertes = [];
     try {
       const Alert = require('../models/Alert');  // ✅ BON NOM
-      topAlertes = await Alerte.aggregate([
-        { 
+      topAlertes = await Alert.aggregate([        { 
           $match: { 
             createdAt: { $gte: dateDebut },
             estAcquittee: false // Seulement les alertes non traitées
