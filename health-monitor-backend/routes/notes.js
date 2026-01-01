@@ -29,6 +29,15 @@ router.get('/patient/mes-notes', verifierToken, async (req, res) => {
       .sort({ createdAt: -1 });
     
     console.log(`✅ ${notes.length} notes trouvées pour patient ${req.utilisateur.id}`);
+
+    console.log(`✅ ${notes.length} notes trouvées`);
+    if (notes.length > 0) {
+      console.log('Exemple note:', {
+        _id: notes[0]._id,
+        contenu: notes[0].contenu.substring(0, 30) + '...',
+        lue: notes[0].lue  // ← VÉRIFIER QUE CE CHAMP EXISTE
+      });
+    }
     
     res.json({
       success: true,
