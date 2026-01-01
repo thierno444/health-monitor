@@ -140,6 +140,7 @@
             <input
               type="date"
               formControlName="dateDeNaissance"
+              [max]="today"
               class="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all backdrop-blur-sm"
             />
             <p *ngIf="registerForm.get('dateDeNaissance')?.invalid && registerForm.get('dateDeNaissance')?.touched" 

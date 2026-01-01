@@ -796,9 +796,20 @@ importCSV(): void {
 }
 
   saveProfile(): void {
-    this.savingProfile = true;
+  if (!this.admin?.id) return;
+  
+  this.savingProfile = true;
 
-    this.authService.updateProfile(this.admin.id, this.profileForm).subscribe({
+  const profileData = {
+    prenom: this.profileForm.prenom,
+    nom: this.profileForm.nom,
+    email: this.profileForm.email,
+    telephone: this.profileForm.telephone,
+    genre: this.profileForm.genre,  // ← AJOUT
+    dateDeNaissance: this.profileForm.dateDeNaissance  // ← AJOUT
+  };
+
+  this.authService.updateProfile(this.admin.id, profileData).subscribe({
       next: (response) => {
         if (response.success) {
           this.toastService.success('Profil mis à jour', 'Vos informations ont été enregistrées');

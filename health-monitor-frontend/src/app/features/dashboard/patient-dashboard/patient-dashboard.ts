@@ -966,16 +966,17 @@ saveProfile(): void {
   
   console.log('📝 Sauvegarde profil');
   
-  // N'envoyer QUE les champs texte (pas la photo)
+  // Envoyer TOUS les champs (sauf photo)
   const profileData = {
     prenom: this.profileForm.prenom,
     nom: this.profileForm.nom,
     email: this.profileForm.email,
-    telephone: this.profileForm.telephone
-    // NE PAS INCLURE photoProfil ici
+    telephone: this.profileForm.telephone,
+    genre: this.profileForm.genre,   
+    dateDeNaissance: this.profileForm.dateDeNaissance  
   };
   
-  console.log('Données envoyées:', profileData);
+  console.log('📝 Données envoyées:', profileData);
   
   // Appel API pour modifier le profil
   this.authService.updateProfile(this.user.id, profileData).subscribe({

@@ -654,20 +654,20 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
 }
 
   saveProfile(): void {
-    if (!this.user?.id) return;
-    
-    this.savingProfile = true;
-    
-    console.log('📝 Sauvegarde profil médecin');
-    
-    const profileData = {
-      prenom: this.profileForm.prenom,
-      nom: this.profileForm.nom,
-      email: this.profileForm.email,
-      telephone: this.profileForm.telephone
-      
-
-    };
+  if (!this.user?.id) return;
+  
+  this.savingProfile = true;
+  
+  console.log('📝 Sauvegarde profil médecin');
+  
+  const profileData = {
+    prenom: this.profileForm.prenom,
+    nom: this.profileForm.nom,
+    email: this.profileForm.email,
+    telephone: this.profileForm.telephone,
+    genre: this.profileForm.genre,  
+    dateDeNaissance: this.profileForm.dateDeNaissance  
+  };
     
     this.authService.updateProfile(this.user.id, profileData).subscribe({
       next: (response) => {

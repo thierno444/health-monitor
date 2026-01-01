@@ -17,6 +17,8 @@ export class RegisterComponent implements OnInit {
   loading = false;
   showPassword = false;
   showConfirmPassword = false;
+  today: string = new Date().toISOString().split('T')[0];  
+
 
   constructor(
     private fb: FormBuilder,
