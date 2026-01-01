@@ -92,57 +92,72 @@ router.get('/charts', verifierToken, verifierAdmin, async (req, res) => {
     ]);
 
     // 3. Activité globale (si tu as un modèle Measurement)
+    // 3. Activité globale - Logs admin des 30 derniers jours
     let activiteGlobale = [];
     try {
-      const Measurement = require('../models/Measurement');
-      activiteGlobale = await Measurement.aggregate([
-        { $match: { timestamp: { $gte: dateDebut } } },
+      const Log = require('../models/Log');
+      activiteGlobale = await Log.aggregate([
+        { $match: { createdAt: { $gte: dateDebut } } },
         {
           $group: {
-            _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
             count: { $sum: 1 }
           }
         },
-        { $sort: { _id: 1 } },
-        { $limit: 30 }
+        { $sort: { _id: 1 } }
       ]);
-    } catch (err) {
-      console.log('⚠️ Pas de modèle Measurement');
-    }
+      
+      // Renommer _id en date
+      activiteGlobale = activiteGlobale.map(item => ({
+        date: item._id,
+        count: item.count
+      }));
+      
+        console.log('📊 Activité globale:', activiteGlobale.length, 'jours');
+      } catch (err) {
+        console.warn('⚠️ Pas de logs disponibles:', err.message);
+      }
 
     // 4. Top alertes (si tu as un modèle Alerte)
+    // 4. Top alertes (30 derniers jours)
     let topAlertes = [];
     try {
       const Alerte = require('../models/Alerte');
       topAlertes = await Alerte.aggregate([
-        { $match: { dateCreation: { $gte: dateDebut } } },
-        { $group: { _id: '$type', count: { $sum: 1 } } },
+        { 
+          $match: { 
+            createdAt: { $gte: dateDebut },
+            estAcquittee: false // Seulement les alertes non traitées
+          } 
+        },
+        {
+          $group: {
+            _id: '$type',
+            count: { $sum: 1 }
+          }
+        },
         { $sort: { count: -1 } },
         { $limit: 5 }
       ]);
+      
+      // Renommer _id en type
+      topAlertes = topAlertes.map(item => ({
+        type: item._id,
+        count: item.count
+      }));
+      
+      console.log('⚠️ Top alertes:', topAlertes.length, 'types');
     } catch (err) {
-      console.log('⚠️ Pas de modèle Alerte');
+      console.warn('⚠️ Pas d\'alertes disponibles:', err.message);
     }
 
     res.json({
       success: true,
       charts: {
-        repartitionRoles: repartitionRoles.map(r => ({
-          role: r._id,
-          count: r.count
-        })),
-        evolutionUtilisateurs: evolutionUtilisateurs.map(e => ({
-          date: e._id,
-          count: e.count
-        })),
-        activiteGlobale: activiteGlobale.map(a => ({
-          date: a._id,
-          count: a.count
-        })),
-        topAlertes: topAlertes.map(a => ({
-          type: a._id,
-          count: a.count
-        }))
+        repartitionRoles: repartitionRoles.map(r => ({ role: r._id, count: r.count })),
+        evolutionUtilisateurs: evolutionUtilisateurs.map(e => ({ date: e._id, count: e.count })),
+        activiteGlobale: activiteGlobale,
+        topAlertes: topAlertes
       }
     });
   } catch (error) {
