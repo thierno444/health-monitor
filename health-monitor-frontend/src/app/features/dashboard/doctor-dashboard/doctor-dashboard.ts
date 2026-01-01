@@ -1101,20 +1101,20 @@ uploadPhoto(event: any): void {
     return this.patientsComparaison.includes(patientId);
   }
 
-  lancerComparaison(): void {
-    console.log('🚀 Lancement comparaison avec:', this.patientsComparaison);
-    if (this.patientsComparaison.length < 2) {
-      this.toastService.warning('Sélection insuffisante', 'Sélectionnez au moins 2 patients pour comparer');
-      return;
-    }
-
-    // Rediriger vers la page de comparaison
-    this.router.navigate(['/dashboard/comparison'], { 
-      queryParams: { patients: this.patientsComparaison.join(',') } 
-    });
-    
-    this.closeComparaisonModal();
+lancerComparaison(): void {
+  console.log('🚀 Lancement comparaison avec:', this.patientsComparaison);
+  if (this.patientsComparaison.length < 2) {
+    this.toastService.warning('Sélection insuffisante', 'Sélectionnez au moins 2 patients pour comparer');
+    return;
   }
+
+  // Rediriger vers la page de comparaison
+  this.router.navigate(['/comparison'], {  // ← ✅ BON
+    queryParams: { patients: this.patientsComparaison.join(',') } 
+  });
+  
+  this.closeComparaisonModal();
+}
 
   // ========== QUESTIONS PATIENTS ==========
 
