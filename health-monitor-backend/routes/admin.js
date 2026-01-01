@@ -122,7 +122,7 @@ router.get('/charts', verifierToken, verifierAdmin, async (req, res) => {
     // 4. Top alertes (30 derniers jours)
     let topAlertes = [];
     try {
-      const Alerte = require('../models/Alerte');
+      const Alert = require('../models/Alert');  // ✅ BON NOM
       topAlertes = await Alerte.aggregate([
         { 
           $match: { 
