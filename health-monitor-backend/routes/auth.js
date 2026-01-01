@@ -23,6 +23,31 @@ router.post('/inscription', async (req, res) => {
         message: '❌ Données manquantes (prenom, nom, email, motDePasse requis)'
       });
     }
+
+     if (dateDeNaissance) {
+      const dateSaisie = new Date(dateDeNaissance);
+      const aujourdhui = new Date();
+      aujourdhui.setHours(0, 0, 0, 0);
+      
+      if (dateSaisie > aujourdhui) {
+        return res.status(400).json({
+          success: false,
+          message: '❌ La date de naissance ne peut pas être dans le futur'
+        });
+      }
+      
+      // Vérifier âge minimum (13 ans)
+      const age = aujourdhui.getFullYear() - dateSaisie.getFullYear();
+      const mois = aujourdhui.getMonth() - dateSaisie.getMonth();
+      const ageReel = (mois < 0 || (mois === 0 && aujourdhui.getDate() < dateSaisie.getDate())) ? age - 1 : age;
+      
+      if (ageReel < 13) {
+        return res.status(400).json({
+          success: false,
+          message: '❌ Vous devez avoir au moins 13 ans pour créer un compte'
+        });
+      }
+    }
     
     const utilisateurExistant = await User.findOne({ email: email.toLowerCase() });
     
@@ -320,7 +345,7 @@ router.get('/patients/:patientId', verifierToken, async (req, res) => {
 // PUT /api/auth/utilisateurs/:userId
 router.put('/utilisateurs/:userId', verifierToken, async (req, res) => {
   try {
-    const { prenom, nom, email, telephone, role, idDispositif } = req.body;
+      const { prenom, nom, email, telephone, genre, dateDeNaissance, role, idDispositif } = req.body;
     
     console.log('📝 Mise à jour utilisateur:', req.params.userId);
     
@@ -340,6 +365,23 @@ router.put('/utilisateurs/:userId', verifierToken, async (req, res) => {
     if (nom !== undefined) utilisateur.nom = nom;
     if (email !== undefined) utilisateur.email = email;
     if (telephone !== undefined) utilisateur.telephone = telephone || null;
+    if (genre !== undefined) utilisateur.genre = genre;  // ← AJOUT
+    if (dateDeNaissance !== undefined) {  // ← AJOUT AVEC VALIDATION
+      // Valider si date fournie
+      if (dateDeNaissance) {
+        const dateSaisie = new Date(dateDeNaissance);
+        const aujourdhui = new Date();
+        aujourdhui.setHours(0, 0, 0, 0);
+        
+        if (dateSaisie > aujourdhui) {
+          return res.status(400).json({
+            success: false,
+            message: '❌ La date de naissance ne peut pas être dans le futur'
+          });
+        }
+      }
+      utilisateur.dateDeNaissance = dateDeNaissance || null;
+    }
     if (role !== undefined && req.utilisateur.role === 'admin') utilisateur.role = role;
     if (idDispositif !== undefined) utilisateur.idDispositif = idDispositif;
 
