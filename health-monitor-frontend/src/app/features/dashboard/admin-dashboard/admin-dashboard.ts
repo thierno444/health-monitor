@@ -301,6 +301,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   loadUsers(): void {
   this.loadingUsers = true;
+  console.log('🔧 loadUsers() appelé - filterRole:', this.filterRole);
+
   const role = this.filterRole === 'tous' ? undefined : this.filterRole;
   
   console.log('🔍 Chargement utilisateurs - Filtre rôle:', role || 'TOUS');
@@ -337,6 +339,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 }
 
   applyFilters(): void {
+    console.log('🔧 applyFilters() - filterRole AVANT:', this.filterRole);
     this.currentPage = 1;
     
     // Si recherche par ID dispositif (commence par ESP32_ ou contient _)
@@ -1443,19 +1446,36 @@ openAssignPatientModal(patient: User): void {
   
   this.selectedPatientForAssignment = patient;
   
-  // Charger les médecins disponibles
-  console.log('👨‍⚕️ Chargement des médecins...');
-  console.log('Total utilisateurs chargés:', this.users.length);
+  // ← FORCER filterRole à 'tous' AVANT de filtrer
+  const ancienFiltre = this.filterRole;
+  this.filterRole = 'tous';
+  console.log('🔧 filterRole forcé à "tous" (était:', ancienFiltre, ')');
   
-  this.availableDoctors = this.users.filter(u => {
-    console.log('  - Vérification:', u.prenom, u.nom, 'Role:', u.role);
-    return u.role === 'medecin';
-  });
+  // ← SI this.users NE CONTIENT QUE DES PATIENTS, RECHARGER TOUT
+  const medecinsDansUsers = this.users.filter(u => u.role === 'medecin').length;
+  console.log('📊 Médecins actuellement dans this.users:', medecinsDansUsers);
   
-  console.log('✅ Médecins trouvés:', this.availableDoctors.length);
-  this.availableDoctors.forEach(d => {
-    console.log('    >', d.prenom, d.nom, '(', d.email, ')');
-  });
+  if (medecinsDansUsers === 0) {
+    console.warn('⚠️ Aucun médecin dans this.users, rechargement TOUS les utilisateurs...');
+    
+    // ← APPELER loadUsers() avec filterRole='tous'
+    this.loadUsers();
+    
+    // ← ATTENDRE 1 SECONDE que les utilisateurs se chargent
+    setTimeout(() => {
+      this.availableDoctors = this.users.filter(u => u.role === 'medecin');
+      console.log('✅ Après rechargement:', this.availableDoctors.length, 'médecins trouvés');
+      
+      if (this.availableDoctors.length === 0) {
+        console.error('❌ TOUJOURS AUCUN MÉDECIN après rechargement !');
+        this.toastService.error('Aucun médecin', 'Aucun médecin trouvé dans le système');
+      }
+    }, 1200);
+  } else {
+    // ← SI ON A DÉJÀ DES MÉDECINS, LES UTILISER DIRECTEMENT
+    this.availableDoctors = this.users.filter(u => u.role === 'medecin');
+    console.log('✅ Médecins trouvés:', this.availableDoctors.length);
+  }
   
   // Reset form
   this.assignmentForm = {
@@ -1465,25 +1485,6 @@ openAssignPatientModal(patient: User): void {
   };
 
   this.currentDoctorPage = 1;
-  
-  // IMPORTANT: Si aucun médecin, recharger les utilisateurs
-  if (this.availableDoctors.length === 0) {
-    console.warn('⚠️ Aucun médecin trouvé, rechargement des utilisateurs...');
-    this.loadUsers();
-    
-    // Attendre 1 seconde puis réessayer
-    setTimeout(() => {
-      this.availableDoctors = this.users.filter(u => u.role === 'medecin');
-      console.log('🔄 Après rechargement:', this.availableDoctors.length, 'médecins');
-      
-      if (this.availableDoctors.length === 0) {
-        console.error('❌ TOUJOURS AUCUN MÉDECIN après rechargement !');
-        console.log('Utilisateurs totaux:', this.users.length);
-        console.log('Utilisateurs:', this.users.map(u => ({ nom: u.nom, role: u.role })));
-      }
-    }, 1000);
-  }
-  
   this.showAssignPatientModal = true;
 }
 
