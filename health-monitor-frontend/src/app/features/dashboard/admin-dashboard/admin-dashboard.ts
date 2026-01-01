@@ -215,6 +215,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     }
 
     this.admin = user;
+    this.filterRole = 'tous';  // FORCER À 'tous'
+    console.log('🔧 filterRole forcé à:', this.filterRole);
     this.initProfileForm();
 
     // Thème
