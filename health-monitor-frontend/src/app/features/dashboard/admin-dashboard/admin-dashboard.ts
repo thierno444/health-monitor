@@ -782,16 +782,18 @@ importCSV(): void {
 
   // ========== PROFIL ADMIN ==========
 
-  initProfileForm(): void {
+ initProfileForm(): void {
   if (this.admin) {
     this.profileForm = {
       prenom: this.admin.prenom,
       nom: this.admin.nom,
       email: this.admin.email,
       telephone: this.admin.telephone || '',
-      genre: this.admin.genre || 'homme',
-      dateDeNaissance: this.admin.dateDeNaissance || ''
+      genre: this.admin.genre || '',
+      dateDeNaissance: this.admin.dateDeNaissance ? this.admin.dateDeNaissance.split('T')[0] : ''  // ← FIX FORMAT DATE
     };
+    
+    console.log('📝 Formulaire admin initialisé:', this.profileForm);  // ← AJOUTE CE LOG
   }
 }
 
@@ -805,9 +807,11 @@ importCSV(): void {
     nom: this.profileForm.nom,
     email: this.profileForm.email,
     telephone: this.profileForm.telephone,
-    genre: this.profileForm.genre,  // ← AJOUT
-    dateDeNaissance: this.profileForm.dateDeNaissance  // ← AJOUT
+    genre: this.profileForm.genre,   
+    dateDeNaissance: this.profileForm.dateDeNaissance   
   };
+
+    console.log('📝 Données envoyées admin:', profileData);  
 
   this.authService.updateProfile(this.admin.id, profileData).subscribe({
       next: (response) => {

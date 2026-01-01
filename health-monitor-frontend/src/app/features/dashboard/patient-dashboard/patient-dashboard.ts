@@ -951,9 +951,11 @@ initForms(): void {
       nom: this.user.nom || '',
       email: this.user.email || '',
       telephone: this.user.telephone || '',
-      genre: this.user.genre || 'homme',
-      dateDeNaissance: this.user.dateDeNaissance || ''
+      genre: this.user.genre || '',
+      dateDeNaissance: this.user.dateDeNaissance ? this.user.dateDeNaissance.split('T')[0] : ''  
      };
+    
+    console.log('📝 Formulaire initialisé:', this.profileForm);   
   }
 }
  

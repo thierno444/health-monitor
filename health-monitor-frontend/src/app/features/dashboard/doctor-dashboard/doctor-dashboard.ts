@@ -640,16 +640,18 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
 
   // ========== GESTION PROFIL ==========
   
-  initProfileForm(): void {
+initProfileForm(): void {
   if (this.user) {
     this.profileForm = {
       prenom: this.user.prenom,
       nom: this.user.nom,
       email: this.user.email,
       telephone: this.user.telephone || '',
-      genre: this.user.genre || 'homme',
-      dateDeNaissance: this.user.dateDeNaissance || ''
+      genre: this.user.genre || '',
+      dateDeNaissance: this.user.dateDeNaissance ? this.user.dateDeNaissance.split('T')[0] : ''  // ← FIX FORMAT DATE
     };
+    
+    console.log('📝 Formulaire médecin initialisé:', this.profileForm);  // ← AJOUTE CE LOG
   }
 }
 
