@@ -298,25 +298,41 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   // ========== UTILISATEURS ==========
 
   loadUsers(): void {
-    this.loadingUsers = true;
-    const role = this.filterRole === 'tous' ? undefined : this.filterRole;
-    
-    this.adminService.getUsers(role, this.searchQuery, this.includeArchived).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.users = response.users;
-          this.filteredUsers = this.users;
-          console.log('👥', this.users.length, 'utilisateurs chargés');
+  this.loadingUsers = true;
+  const role = this.filterRole === 'tous' ? undefined : this.filterRole;
+  
+  console.log('🔍 Chargement utilisateurs - Filtre rôle:', role || 'TOUS');
+  
+  this.adminService.getUsers(role, this.searchQuery, this.includeArchived).subscribe({
+    next: (response) => {
+      if (response.success) {
+        this.users = response.users;
+        this.filteredUsers = this.users;
+        
+        console.log('👥', this.users.length, 'utilisateurs chargés');
+        
+        // ← AJOUTE CE LOG POUR DÉBUGGER
+        const stats = {
+          total: this.users.length,
+          patients: this.users.filter(u => u.role === 'patient').length,
+          medecins: this.users.filter(u => u.role === 'medecin').length,
+          admins: this.users.filter(u => u.role === 'admin').length
+        };
+        console.log('📊 Statistiques chargées:', stats);
+        
+        if (stats.medecins === 0) {
+          console.warn('⚠️ AUCUN MÉDECIN CHARGÉ ! Vérifier le backend.');
         }
-        this.loadingUsers = false;
-      },
-      error: (err) => {
-        console.error('Erreur users:', err);
-        this.toastService.error('Erreur', 'Impossible de charger les utilisateurs');
-        this.loadingUsers = false;
       }
-    });
-  }
+      this.loadingUsers = false;
+    },
+    error: (err) => {
+      console.error('Erreur users:', err);
+      this.toastService.error('Erreur', 'Impossible de charger les utilisateurs');
+      this.loadingUsers = false;
+    }
+  });
+}
 
   applyFilters(): void {
     this.currentPage = 1;

@@ -13,6 +13,7 @@ export interface Note {
   type: 'observation' | 'diagnostic' | 'prescription' | 'conseil' | 'suivi' | 'autre';
   priorite: 'basse' | 'normale' | 'haute' | 'urgente';
   visible: boolean;
+  lue: boolean;  // ← AJOUTE CE CHAMP
   prive: boolean;
   tags: string[];
   pieceJointes: string[];

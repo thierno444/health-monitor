@@ -158,22 +158,25 @@ router.get('/users', verifierToken, verifierAdmin, async (req, res) => {
   try {
     const { role, search, includeArchived } = req.query;
 
-    console.log('👥 Liste utilisateurs, filtres:', { role, search, includeArchived });
+    console.log('🔍 Liste utilisateurs - Filtres:', { role, search, includeArchived });
 
     let query = {};
 
-    // Filtre par rôle
-    if (role && role !== 'tous') {
+    // Filtre par rôle SEULEMENT si spécifié et différent de "tous"
+    if (role && role !== 'tous' && role !== '') {
       query.role = role;
+      console.log('  → Filtre rôle appliqué:', role);
+    } else {
+      console.log('  → Aucun filtre rôle (tous les utilisateurs)');
     }
 
-    // Filtre archives
+    // Filtre archives (par défaut: masquer les archivés)
     if (includeArchived !== 'true') {
       query.estArchive = false;
     }
 
     // Recherche
-    if (search) {
+    if (search && search.trim() !== '') {
       query.$or = [
         { prenom: { $regex: search, $options: 'i' } },
         { nom: { $regex: search, $options: 'i' } },
@@ -186,6 +189,19 @@ router.get('/users', verifierToken, verifierAdmin, async (req, res) => {
       .sort({ createdAt: -1 });
 
     console.log(`✅ ${users.length} utilisateurs trouvés`);
+
+    // ← AJOUTE CE LOG DÉTAILLÉ
+    const stats = {
+      total: users.length,
+      patients: users.filter(u => u.role === 'patient').length,
+      medecins: users.filter(u => u.role === 'medecin').length,
+      admins: users.filter(u => u.role === 'admin').length
+    };
+    console.log('📊 Statistiques chargées:', stats);
+
+    if (stats.medecins === 0) {
+      console.warn('⚠️ AUCUN MÉDECIN TROUVÉ dans les résultats !');
+    }
 
     res.json({
       success: true,

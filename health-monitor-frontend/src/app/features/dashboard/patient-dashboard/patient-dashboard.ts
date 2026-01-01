@@ -98,16 +98,6 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
   notesParPage = 6;
   pageNoteActuelle = 1;
   
-  // Récupérer les IDs des notes déjà vues
-  private getNotesVues(): string[] {
-    const stored = localStorage.getItem('notesVuesIds');
-    return stored ? JSON.parse(stored) : [];
-  }
-  
-  // Sauvegarder les IDs des notes vues
-  private setNotesVues(noteIds: string[]): void {
-    localStorage.setItem('notesVuesIds', JSON.stringify(noteIds));
-  }
 
   // Getter pour notes paginées
   get notesPaginees(): Note[] {
@@ -144,9 +134,9 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   // Nombre de notes non lues
+ // Nombre de notes non lues (depuis la DB, pas localStorage)
   get nombreNotesNonLues(): number {
-    const notesVuesIds = this.getNotesVues();
-    return this.mesNotes.filter(note => !notesVuesIds.includes(note._id)).length;
+    return this.mesNotes.filter(note => !note.lue).length;
   }
 
   // Pour utiliser Math dans le template
@@ -1110,30 +1100,29 @@ uploadPhoto(event: any): void {
 // ========== NOTES MÉDICALES ==========
 
   loadMesNotes(): void {
-    this.loadingNotes = true;
-    this.noteService.getMesNotes().subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.mesNotes = response.notes;
-          console.log('📝', this.mesNotes.length, 'notes reçues');
-          
-          // Vérifier s'il y a des notes non lues
-          const notesVuesIds = this.getNotesVues();
-          const notesNonLues = this.mesNotes.filter(note => !notesVuesIds.includes(note._id));
-          
-          this.notesVues = notesNonLues.length === 0;
-          
-          console.log('🔔', notesNonLues.length, 'notes non lues');
-        }
-        this.loadingNotes = false;
-      },
-      error: (err) => {
-        console.error('Erreur chargement notes:', err);
-        this.toastService.error('Erreur', 'Impossible de charger vos notes médicales');
-        this.loadingNotes = false;
+  this.loadingNotes = true;
+  this.noteService.getMesNotes().subscribe({
+    next: (response) => {
+      if (response.success) {
+        this.mesNotes = response.notes;
+        console.log('📝', this.mesNotes.length, 'notes reçues');
+        
+        // ← SUPPRIMER COMPLÈTEMENT le système localStorage
+        // On compte DIRECTEMENT les notes avec lue: false
+        const notesNonLues = this.mesNotes.filter(note => !note.lue);
+        console.log('🔔', notesNonLues.length, 'notes NON LUES (depuis DB)');
+        
+        this.notesVues = notesNonLues.length === 0;
       }
-    });
-  }
+      this.loadingNotes = false;
+    },
+    error: (err) => {
+      console.error('Erreur chargement notes:', err);
+      this.toastService.error('Erreur', 'Impossible de charger vos notes médicales');
+      this.loadingNotes = false;
+    }
+  });
+}
 
   openNoteDetail(note: Note): void {
     this.selectedNote = note;
