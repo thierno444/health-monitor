@@ -886,11 +886,22 @@ importCSV(): void {
   };
 
   showChangePassword = false;
+
   // Modals confirmation
   showDeleteConfirmModal = false;
   userToDelete: User | null = null;
   showBulkDeleteConfirmModal = false;
   changingPassword = false;
+
+  // Modals archivage
+  showArchiveModal = false;
+  showUnarchiveModal = false;
+  userToArchive: User | null = null;
+  userToUnarchive: User | null = null;
+  archiveForm = {
+    raison: '',
+    commentaire: ''
+  };
 
   openChangePasswordModal(): void {
     this.changePasswordForm = {
@@ -1826,6 +1837,97 @@ openUnassignFromTableModal(assignment: Assignment): void {
         this.closeUnassignFromTableModal();
       }
     });
+  }
+
+  // ========== ARCHIVAGE ==========
+
+  openArchiveModal(user: User): void {
+    this.userToArchive = user;
+    this.archiveForm = {
+      raison: '',
+      commentaire: ''
+    };
+    this.showArchiveModal = true;
+  }
+
+  closeArchiveModal(): void {
+    this.showArchiveModal = false;
+    this.userToArchive = null;
+  }
+
+  archiveUser(): void {
+    if (!this.userToArchive) return;
+
+    if (!this.archiveForm.raison) {
+      this.toastService.warning('⚠️ Raison requise', 'Veuillez sélectionner une raison');
+      return;
+    }
+
+    this.adminService.archiveUser(
+      this.userToArchive._id,
+      this.archiveForm.raison,
+      this.archiveForm.commentaire
+    ).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastService.success('✅ Archivé', `${this.userToArchive!.prenom} ${this.userToArchive!.nom} a été archivé`);
+          this.closeArchiveModal();
+          this.loadUsers();
+          this.loadStats();
+        }
+      },
+      error: (err) => {
+        console.error('Erreur archivage:', err);
+        this.toastService.error('❌ Erreur', err.error?.message || 'Impossible d\'archiver');
+      }
+    });
+  }
+
+  openUnarchiveModal(user: User): void {
+    this.userToUnarchive = user;
+    this.showUnarchiveModal = true;
+  }
+
+  closeUnarchiveModal(): void {
+    this.showUnarchiveModal = false;
+    this.userToUnarchive = null;
+  }
+
+  unarchiveUser(): void {
+    if (!this.userToUnarchive) return;
+
+    this.adminService.unarchiveUser(
+      this.userToUnarchive._id,
+      'Réactivation par admin'
+    ).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastService.success('✅ Désarchivé', `${this.userToUnarchive!.prenom} ${this.userToUnarchive!.nom} a été réactivé`);
+          this.closeUnarchiveModal();
+          this.loadUsers();
+          this.loadStats();
+        }
+      },
+      error: (err) => {
+        console.error('Erreur désarchivage:', err);
+        this.toastService.error('❌ Erreur', err.error?.message || 'Impossible de désarchiver');
+      }
+    });
+  }
+
+  getRaisonLabel(raison: string): string {
+    const raisons: any = {
+      gueri: 'Guéri',
+      transfere: 'Transféré',
+      decede: 'Décédé',
+      traitement_termine: 'Traitement terminé',
+      inactif: 'Compte inactif',
+      demission: 'Démission',
+      test: 'Compte test',
+      rgpd: 'Conformité RGPD',
+      autre: 'Autre'
+    };
+    return raisons[raison] || raison;
   }
 
 }

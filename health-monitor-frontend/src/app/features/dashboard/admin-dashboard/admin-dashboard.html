@@ -530,6 +530,31 @@
                                       </svg>
                                     </button>
 
+                                    <!-- ← AJOUT BOUTONS ARCHIVAGE -->
+                                    <!-- Bouton Archiver (si pas archivé) -->
+                                    <button
+                                      *ngIf="!user.estArchive"
+                                      (click)="openArchiveModal(user)"
+                                      class="p-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-600 rounded-lg transition-all"
+                                      title="Archiver"
+                                    >
+                                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                                      </svg>
+                                    </button>
+
+                                    <!-- Bouton Désarchiver (si archivé) -->
+                                    <button
+                                      *ngIf="user.estArchive"
+                                      (click)="openUnarchiveModal(user)"
+                                      class="p-2 bg-green-500/20 hover:bg-green-500/30 text-green-600 rounded-lg transition-all"
+                                      title="Désarchiver"
+                                    >
+                                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                      </svg>
+                                    </button>
+
                                     <!-- Bouton Supprimer (désactivé seulement pour soi-même) -->
                                     <button
                                     (click)="deleteUser(user)"
@@ -1407,7 +1432,7 @@
 
           <!-- Genre & Date de naissance -->
         <div>
-          <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">👤 Genre</label>
+          <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Genre</label>
           <select
             [(ngModel)]="profileForm.genre"
             name="genre"
@@ -1420,7 +1445,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">🎂 Date de naissance</label>
+          <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Date de naissance</label>
           <input 
             type="date" 
             [(ngModel)]="profileForm.dateDeNaissance"
@@ -2873,6 +2898,124 @@
             class="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white rounded-xl font-bold transition-all shadow-lg"
           >
             🔓 Désassigner
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL ARCHIVAGE ========== -->
+    <div
+      *ngIf="showArchiveModal && userToArchive"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+      (click)="closeArchiveModal()"
+    >
+      <div
+        class="glass rounded-2xl max-w-md w-full border-2 border-purple-500/30"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Header -->
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Archiver l'utilisateur</h3>
+        </div>
+
+        <!-- Contenu -->
+        <div class="p-6">
+          <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <p class="font-semibold text-gray-900 dark:text-white">
+              {{ userToArchive.prenom }} {{ userToArchive.nom }}
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ userToArchive.email }}</p>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-bold text-gray-900 dark:text-white mb-2">Raison *</label>
+              <select
+                [(ngModel)]="archiveForm.raison"
+                class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+              >
+                <option value="">Sélectionner...</option>
+                <option value="gueri">Guéri</option>
+                <option value="transfere">Transféré</option>
+                <option value="decede">Décédé</option>
+                <option value="traitement_termine">Traitement terminé</option>
+                <option value="inactif">Compte inactif</option>
+                <option value="demission">Démission (médecin)</option>
+                <option value="test">Compte test</option>
+                <option value="rgpd">Conformité RGPD</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-gray-900 dark:text-white mb-2">Commentaire</label>
+              <textarea
+                [(ngModel)]="archiveForm.commentaire"
+                rows="3"
+                placeholder="Notes complémentaires..."
+                class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+          <button
+            (click)="closeArchiveModal()"
+            class="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl font-bold"
+          >
+            Annuler
+          </button>
+          <button
+            (click)="archiveUser()"
+            class="flex-1 px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-bold"
+          >
+            Archiver
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL DÉSARCHIVAGE ========== -->
+    <div
+      *ngIf="showUnarchiveModal && userToUnarchive"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+      (click)="closeUnarchiveModal()"
+    >
+      <div
+        class="glass rounded-2xl max-w-md w-full border-2 border-green-500/30"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Header -->
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Désarchiver l'utilisateur</h3>
+        </div>
+
+        <!-- Contenu -->
+        <div class="p-6">
+          <p class="mb-4">Voulez-vous réactiver cet utilisateur ?</p>
+          <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+            <p class="font-semibold text-gray-900 dark:text-white">
+              {{ userToUnarchive.prenom }} {{ userToUnarchive.nom }}
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ userToUnarchive.email }}</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+          <button
+            (click)="closeUnarchiveModal()"
+            class="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl font-bold"
+          >
+            Annuler
+          </button>
+          <button
+            (click)="unarchiveUser()"
+            class="flex-1 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold"
+          >
+            Désarchiver
           </button>
         </div>
       </div>

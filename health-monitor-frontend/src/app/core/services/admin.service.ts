@@ -261,4 +261,41 @@ export class AdminService {
 
     return this.http.get(`${this.apiUrl}/assignments`, { params });
   }
+
+  // ========== ARCHIVAGE ==========
+  
+  // Archiver un utilisateur
+  archiveUser(userId: string, raison: string, commentaire: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/archivage/${userId}/archiver`, {
+      raison,
+      commentaire
+    });
+  }
+
+  // Désarchiver un utilisateur
+  unarchiveUser(userId: string, raison: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/archivage/${userId}/desarchiver`, {
+      raison
+    });
+  }
+
+  // Archivage en masse
+  bulkArchiveUsers(utilisateurIds: string[], raison: string, commentaire: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/archivage/masse/archiver`, {
+      utilisateurIds,
+      raison,
+      commentaire
+    });
+  }
+
+  // Supprimer définitivement (après archivage)
+  deleteUserPermanently(userId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/archivage/${userId}/supprimer`);
+  }
+
+  // Statistiques archivage
+  getArchiveStats(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/archivage/statistiques`);
+  }
+  
 }
