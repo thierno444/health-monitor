@@ -1924,8 +1924,13 @@ async archiveUser(): Promise<void> {
 
     if (!response.ok) throw new Error(data.message);
 
+      console.log('📦 Réponse archivage:', data);  
+
+
     // Si export demandé, télécharger le CSV
     if (this.archiveForm.exportData && data.exportData) {
+        console.log('📥 Téléchargement CSV...');  
+
       this.downloadCSV(
         data.exportData,
         `archive_${this.userToArchive.email}_${Date.now()}.csv`
@@ -2328,6 +2333,8 @@ downloadCSV(csvData: string, filename: string): void {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  // Nettoyer l'URL
+  URL.revokeObjectURL(url);
 }
 
 // ========== SUPPRESSION RGPD ==========
