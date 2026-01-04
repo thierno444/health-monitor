@@ -1460,6 +1460,11 @@ openDeleteDeviceModal(device: Device): void {
       user_create: '➕ Création utilisateur',
       user_update: '✏️ Modification utilisateur',
       user_delete: '🗑️ Suppression utilisateur',
+      user_archive: '📦 Archivage utilisateur',
+      user_unarchive: '🔄 Désarchivage utilisateur',
+      user_bulk_archive: '📦 Archivage en masse',
+      user_permanent_delete: '🗑️ Suppression définitive',
+      user_rgpd_delete: '⚠️ Suppression RGPD',
       device_create: '📟 Création dispositif',
       device_assign: '📌 Assignation dispositif',
       device_delete: '🗑️ Suppression dispositif',
@@ -1479,6 +1484,11 @@ openDeleteDeviceModal(device: Device): void {
       user_create: 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400',
       user_update: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400',
       user_delete: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400',
+      user_archive: 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400',
+      user_unarchive: 'bg-cyan-100 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-400',
+      user_bulk_archive: 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400',
+      user_permanent_delete: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400',
+      user_rgpd_delete: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400',
       device_create: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400',
       device_assign: 'bg-indigo-100 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400',
       device_delete: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400',
@@ -1887,7 +1897,7 @@ openUnassignFromTableModal(assignment: Assignment): void {
   }
 
 
-  async archiveUser(): Promise<void> {
+async archiveUser(): Promise<void> {
   if (!this.userToArchive || !this.archiveForm.raison) {
     Swal.fire('Erreur', 'Veuillez remplir tous les champs obligatoires', 'error');
     return;
@@ -1895,8 +1905,10 @@ openUnassignFromTableModal(assignment: Assignment): void {
 
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${this.apiUrl}/admin/users/${this.userToArchive._id}/archive`, {
-      method: 'PATCH',
+    
+    // ✅ BONNE URL : /api/archivage/:userId/archiver
+    const response = await fetch(`${this.apiUrl}/archivage/${this.userToArchive._id}/archiver`, {
+      method: 'PUT', // ← PUT au lieu de PATCH
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -2412,6 +2424,22 @@ openArchiveDetailsModal(user: any): void {
 closeArchiveDetailsModal(): void {
   this.showArchiveDetailsModal = false;
   this.selectedArchiveDetails = null;
+}
+
+// Méthode pour désarchiver depuis le modal de détails
+openUnarchiveFromDetails(): void {
+  if (!this.selectedArchiveDetails) return;
+  
+  // Sauvegarder l'utilisateur
+  const user = this.selectedArchiveDetails;
+  
+  // Fermer le modal de détails
+  this.closeArchiveDetailsModal();
+  
+  // Attendre un peu puis ouvrir le modal de désarchivage
+  setTimeout(() => {
+    this.openUnarchiveModal(user);
+  }, 100);
 }
 
 }
