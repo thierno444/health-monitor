@@ -95,7 +95,7 @@ router.get('/charts', verifierToken, verifierAdmin, async (req, res) => {
     // 3. Activité globale - Logs admin des 30 derniers jours
     let activiteGlobale = [];
     try {
-      const Log = require('../models/Log');
+      
       activiteGlobale = await Log.aggregate([
         { $match: { createdAt: { $gte: dateDebut } } },
         {
@@ -1527,9 +1527,3 @@ router.delete('/users/:id/rgpd-delete', verifierToken, async (req, res) => {
     res.status(500).json({ success: false, message: 'Erreur suppression RGPD' });
   }
 });
-
-// AJOUTER CES IMPORTS EN HAUT DU FICHIER SI PAS DÉJÀ PRÉSENTS
-const Log = require('../models/Log');
-const User = require('../models/User');
-
-module.exports = router;
