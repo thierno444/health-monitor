@@ -8,10 +8,8 @@ const { Readable } = require('stream');
 const Device = require('../models/Device');
 const { createLog } = require('../utils/logger');
 const Log = require('../models/Log');
-const csvParser = require('papaparse');
 const Assignment = require('../models/Assignment');
 const Notification = require('../models/Notification');
-
 
 
 // Middleware admin
