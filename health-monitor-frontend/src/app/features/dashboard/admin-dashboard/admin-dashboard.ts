@@ -5,11 +5,13 @@ import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { Subscription } from 'rxjs';
 import { AdminService, AdminStats, User, Device, Log, LogStats,Assignment, AssignmentStats } from '../../../core/services/admin.service';
+import { environment } from '../../../../environments/environment';
 import { NotificationsDropdownComponent } from '../../../shared/components/notifications-dropdown/notifications-dropdown';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { ToastService } from '../../../core/services/toast.service';
+
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -20,7 +22,7 @@ import { ToastService } from '../../../core/services/toast.service';
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
 
-  apiUrl = 'http://localhost:3000/api'; // ← AJOUTER CETTE LIGNE
+   apiUrl = environment.apiUrl;
 
   // Utilisateur admin
   admin: any = null;
