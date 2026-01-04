@@ -140,34 +140,47 @@ const SchemaUtilisateur = new mongoose.Schema({
   },
 
   // Système d'archivage (pour patients et utilisateurs)
+  // Système d'archivage AMÉLIORÉ
   estArchive: {
     type: Boolean,
     default: false,
-    index: true // Index pour recherche rapide
+    index: true
   },
   
   dateArchivage: {
     type: Date,
-    required: false
+    default: null
   },
   
-  raisonArchivage: {
-    type: String,
-    enum: [
-      'gueri',
-      'transfere',
-      'decede',
-      'traitement_termine',
-      'inactif',
-      'demission',
-      'autre'
-    ],
-    required: false
+  archivage: {
+    raison: {
+      type: String,
+      enum: [
+        'gueri',
+        'transfere',
+        'decede',
+        'traitement_termine',
+        'inactif',
+        'demission',
+        'test',
+        'rgpd',
+        'autre'
+      ]
+    },
+    commentaire: {
+      type: String,
+      maxlength: 500
+    },
+    dateArchivage: Date,
+    archivePar: String, // Email de l'admin
+    dateDesarchivage: Date,
+    desarchivePar: String,
+    raisonDesarchivage: String
   },
   
-  commentaireArchivage: {
-    type: String,
-    maxlength: 500,
+  // Pour suppression RGPD (6 mois après archivage)
+  suppressionPrevue: {
+    type: Date,
     required: false
   },
   
@@ -177,11 +190,6 @@ const SchemaUtilisateur = new mongoose.Schema({
     required: false
   },
   
-  // Pour suppression RGPD
-  suppressionPrevue: {
-    type: Date,
-    required: false
-  },
   
   // Snapshot des données avant archivage (pour admin)
   dataArchivee: {

@@ -1,10 +1,11 @@
 const Utilisateur = require('../models/User');
 const Mesure = require('../models/Measurement');
 const LogArchivage = require('../models/LogArchivage');
+const Log = require('../models/Log');
 
 class ArchivageService {
   
-  // Archiver un utilisateur (patient ou autre)
+  // ========== ARCHIVER UN UTILISATEUR ==========
   async archiverUtilisateur(cibleId, archivePar, raison, commentaire = '') {
     try {
       const utilisateur = await Utilisateur.findById(cibleId);
@@ -17,7 +18,13 @@ class ArchivageService {
         throw new Error('Utilisateur déjà archivé');
       }
       
-      // Snapshot des données (pour admin)
+      // Récupérer l'admin
+      const admin = await Utilisateur.findById(archivePar);
+      if (!admin) {
+        throw new Error('Admin non trouvé');
+      }
+      
+      // Snapshot des données
       const snapshot = {
         prenom: utilisateur.prenom,
         nom: utilisateur.nom,
@@ -27,22 +34,24 @@ class ArchivageService {
         nombreMesures: await Mesure.countDocuments({ idUtilisateur: cibleId })
       };
       
+      // Date de suppression RGPD (6 mois)
+      const dateSuppression = new Date();
+      dateSuppression.setMonth(dateSuppression.getMonth() + 6);
+      
       // Mettre à jour l'utilisateur
       utilisateur.estArchive = true;
       utilisateur.dateArchivage = new Date();
-      utilisateur.raisonArchivage = raison;
-      utilisateur.commentaireArchivage = commentaire;
-      utilisateur.archivePar = archivePar;
-      utilisateur.dataArchivee = snapshot;
-      
-      // Calculer date de suppression RGPD (6 mois)
-      const dateSuppression = new Date();
-      dateSuppression.setMonth(dateSuppression.getMonth() + 6);
       utilisateur.suppressionPrevue = dateSuppression;
+      utilisateur.archivage = {
+        raison,
+        commentaire,
+        dateArchivage: new Date(),
+        archivePar: admin.email
+      };
       
       await utilisateur.save();
       
-      // Logger l'action
+      // Logger l'action dans LogArchivage
       await LogArchivage.create({
         utilisateurId: archivePar,
         cibleId: cibleId,
@@ -57,11 +66,24 @@ class ArchivageService {
         }
       });
       
-      console.log(`✅ Utilisateur ${utilisateur.email} archivé par ${archivePar}`);
+      // Logger dans Log admin
+      await Log.create({
+        type: 'user_archive',
+        adminId: archivePar,
+        adminEmail: admin.email,
+        targetType: 'user',
+        targetId: cibleId,
+        targetName: `${utilisateur.prenom} ${utilisateur.nom}`,
+        action: `Archivage utilisateur - Raison: ${raison}`,
+        details: { raison, commentaire },
+        status: 'success'
+      });
+      
+      console.log(`✅ Utilisateur ${utilisateur.email} archivé par ${admin.email}`);
       
       return {
         success: true,
-        utilisateur: snapshot,
+        utilisateur,
         suppressionPrevue: dateSuppression
       };
       
@@ -71,7 +93,7 @@ class ArchivageService {
     }
   }
   
-  // Désarchiver un utilisateur
+  // ========== DÉSARCHIVER UN UTILISATEUR ==========
   async desarchiverUtilisateur(cibleId, archivePar, raison = '') {
     try {
       const utilisateur = await Utilisateur.findById(cibleId);
@@ -84,16 +106,22 @@ class ArchivageService {
         throw new Error('Utilisateur non archivé');
       }
       
-      // Réactiver
+      const admin = await Utilisateur.findById(archivePar);
+      
+      // Conserver l'historique mais désarchiver
       utilisateur.estArchive = false;
       utilisateur.dateArchivage = null;
-      utilisateur.raisonArchivage = null;
-      utilisateur.commentaireArchivage = null;
       utilisateur.suppressionPrevue = null;
+      
+      if (utilisateur.archivage) {
+        utilisateur.archivage.dateDesarchivage = new Date();
+        utilisateur.archivage.desarchivePar = admin.email;
+        utilisateur.archivage.raisonDesarchivage = raison;
+      }
       
       await utilisateur.save();
       
-      // Logger
+      // Logger dans LogArchivage
       await LogArchivage.create({
         utilisateurId: archivePar,
         cibleId: cibleId,
@@ -107,7 +135,20 @@ class ArchivageService {
         }
       });
       
-      console.log(`✅ Utilisateur ${utilisateur.email} désarchivé par ${archivePar}`);
+      // Logger dans Log admin
+      await Log.create({
+        type: 'user_unarchive',
+        adminId: archivePar,
+        adminEmail: admin.email,
+        targetType: 'user',
+        targetId: cibleId,
+        targetName: `${utilisateur.prenom} ${utilisateur.nom}`,
+        action: `Désarchivage utilisateur - Raison: ${raison}`,
+        details: { raison },
+        status: 'success'
+      });
+      
+      console.log(`✅ Utilisateur ${utilisateur.email} désarchivé par ${admin.email}`);
       
       return { success: true, utilisateur };
       
@@ -117,26 +158,81 @@ class ArchivageService {
     }
   }
   
-  // Archivage en masse (admin)
+  // ========== ARCHIVAGE EN MASSE ==========
   async archiverEnMasse(utilisateurIds, archivePar, raison, commentaire = '') {
+    const admin = await Utilisateur.findById(archivePar);
+    const dateSuppression = new Date();
+    dateSuppression.setMonth(dateSuppression.getMonth() + 6);
+    
     const resultats = {
       reussis: [],
-      echecs: []
+      echecs: [],
+      count: 0
     };
     
     for (const id of utilisateurIds) {
       try {
-        const result = await this.archiverUtilisateur(id, archivePar, raison, commentaire);
-        resultats.reussis.push({ id, ...result });
+        const utilisateur = await Utilisateur.findById(id);
+        
+        if (!utilisateur || utilisateur.estArchive) {
+          resultats.echecs.push({ id, error: 'Non trouvé ou déjà archivé' });
+          continue;
+        }
+        
+        utilisateur.estArchive = true;
+        utilisateur.dateArchivage = new Date();
+        utilisateur.suppressionPrevue = dateSuppression;
+        utilisateur.archivage = {
+          raison,
+          commentaire,
+          dateArchivage: new Date(),
+          archivePar: admin.email
+        };
+        
+        await utilisateur.save();
+        
+        // Logger individuellement
+        await LogArchivage.create({
+          utilisateurId: archivePar,
+          cibleId: id,
+          action: 'archivage',
+          raison,
+          commentaire,
+          metadata: {
+            role: utilisateur.role,
+            email: utilisateur.email,
+            nom: utilisateur.nom,
+            prenom: utilisateur.prenom
+          }
+        });
+        
+        resultats.reussis.push({ id, email: utilisateur.email });
+        resultats.count++;
+        
       } catch (error) {
         resultats.echecs.push({ id, error: error.message });
       }
     }
     
-    return resultats;
+    // Log global
+    await Log.create({
+      type: 'user_bulk_archive',
+      adminId: archivePar,
+      adminEmail: admin.email,
+      action: `Archivage en masse de ${resultats.count} utilisateurs`,
+      details: { count: resultats.count, raison, commentaire },
+      status: 'success'
+    });
+    
+    return {
+      success: true,
+      archived: resultats.count,
+      message: `${resultats.count} utilisateur(s) archivé(s)`,
+      details: resultats
+    };
   }
   
-  // Supprimer définitivement (RGPD)
+  // ========== SUPPRESSION DÉFINITIVE (RGPD) ==========
   async supprimerDefinitivement(cibleId, archivePar) {
     try {
       const utilisateur = await Utilisateur.findById(cibleId);
@@ -150,22 +246,40 @@ class ArchivageService {
       }
       
       // Vérifier délai RGPD (6 mois)
-      const maintenant = new Date();
-      if (utilisateur.suppressionPrevue && utilisateur.suppressionPrevue > maintenant) {
-        throw new Error(`Suppression possible à partir du ${utilisateur.suppressionPrevue.toLocaleDateString()}`);
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      if (utilisateur.dateArchivage && utilisateur.dateArchivage > sixMonthsAgo) {
+        throw new Error('Délai de 6 mois non respecté (RGPD)');
       }
       
-      // Logger avant suppression
+      const admin = await Utilisateur.findById(archivePar);
+      
+      // Logger AVANT suppression
       await LogArchivage.create({
         utilisateurId: archivePar,
         cibleId: cibleId,
         action: 'suppression',
-        metadata: utilisateur.dataArchivee || {
+        metadata: {
           role: utilisateur.role,
           email: utilisateur.email,
           nom: utilisateur.nom,
           prenom: utilisateur.prenom
         }
+      });
+      
+      await Log.create({
+        type: 'user_permanent_delete',
+        adminId: archivePar,
+        adminEmail: admin.email,
+        targetType: 'user',
+        targetName: `${utilisateur.prenom} ${utilisateur.nom}`,
+        action: 'Suppression définitive utilisateur',
+        details: { 
+          raison: utilisateur.archivage?.raison,
+          dateArchivage: utilisateur.dateArchivage 
+        },
+        status: 'success'
       });
       
       // Supprimer les mesures
@@ -176,7 +290,10 @@ class ArchivageService {
       
       console.log(`🗑️ Utilisateur ${cibleId} supprimé définitivement`);
       
-      return { success: true, message: 'Utilisateur supprimé définitivement' };
+      return { 
+        success: true, 
+        message: 'Utilisateur supprimé définitivement' 
+      };
       
     } catch (error) {
       console.error('❌ Erreur suppression:', error);
@@ -184,28 +301,55 @@ class ArchivageService {
     }
   }
   
-  // Statistiques d'archivage
+  // ========== STATISTIQUES ==========
   async getStatistiques() {
-    const stats = {
-      total: await Utilisateur.countDocuments(),
-      actifs: await Utilisateur.countDocuments({ estArchive: false }),
-      archives: await Utilisateur.countDocuments({ estArchive: true }),
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    
+    const [total, ceMois, cetteAnnee, parRaison, parRole] = await Promise.all([
+      Utilisateur.countDocuments({ estArchive: true }),
+      
+      Utilisateur.countDocuments({ 
+        estArchive: true,
+        dateArchivage: { $gte: startOfMonth }
+      }),
+      
+      Utilisateur.countDocuments({ 
+        estArchive: true,
+        dateArchivage: { $gte: startOfYear }
+      }),
+      
+      Utilisateur.aggregate([
+        { $match: { estArchive: true } },
+        { $group: { 
+          _id: '$archivage.raison', 
+          count: { $sum: 1 } 
+        }},
+        { $sort: { count: -1 } }
+      ]),
+      
+      Utilisateur.aggregate([
+        { $match: { estArchive: true } },
+        { $group: { 
+          _id: '$role', 
+          count: { $sum: 1 } 
+        }},
+        { $sort: { count: -1 } }
+      ])
+    ]);
+    
+    return {
+      total,
+      ceMois,
+      cetteAnnee,
+      parRaison,
+      parRole,
       aSupprimer: await Utilisateur.countDocuments({
         estArchive: true,
         suppressionPrevue: { $lte: new Date() }
-      }),
-      parRole: {
-        patients: await Utilisateur.countDocuments({ role: 'patient', estArchive: false }),
-        medecins: await Utilisateur.countDocuments({ role: 'medecin', estArchive: false }),
-        admins: await Utilisateur.countDocuments({ role: 'admin', estArchive: false })
-      },
-      archivesParRaison: await Utilisateur.aggregate([
-        { $match: { estArchive: true } },
-        { $group: { _id: '$raisonArchivage', count: { $sum: 1 } } }
-      ])
+      })
     };
-    
-    return stats;
   }
 }
 

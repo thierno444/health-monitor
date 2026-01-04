@@ -102,4 +102,36 @@ router.get('/statistiques', verifierToken, async (req, res) => {
   }
 });
 
+// Ajouter APRÈS la route /statistiques
+
+// ========== ARCHIVER AVEC EXPORT ==========
+router.patch('/:userId/archiver-export', verifierToken, verifierMedecinOuAdmin, async (req, res) => {
+  try {
+    const { raison, commentaire } = req.body;
+    
+    const result = await archivageService.archiverUtilisateur(
+      req.params.userId,
+      req.utilisateur.id,
+      raison,
+      commentaire
+    );
+    
+    // Générer CSV
+    const user = result.utilisateur;
+    const csv = [
+      ['Prénom', 'Nom', 'Email', 'Téléphone', 'Rôle', 'Date archivage', 'Raison'],
+      [user.prenom, user.nom, user.email, user.telephone || '', user.role, 
+       new Date(user.dateArchivage).toLocaleDateString('fr-FR'), raison]
+    ].map(row => row.join(';')).join('\n');
+    
+    res.json({
+      ...result,
+      exportData: csv
+    });
+    
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router;

@@ -1313,4 +1313,223 @@ router.get('/assignations/export-csv', verifierToken, verifierAdmin, async (req,
   }
 }); 
 
+// ========== ARCHIVAGE MULTIPLE ==========
+router.post('/users/bulk-archive', verifierToken, async (req, res) => {
+  try {
+    if (req.utilisateur.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Accès admin requis' });
+    }
+
+    const { userIds, raison, commentaire, exportData } = req.body;
+
+    if (!raison || !userIds || userIds.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Raison et IDs requis' 
+      });
+    }
+
+    const suppressionDate = new Date();
+    suppressionDate.setMonth(suppressionDate.getMonth() + 6);
+
+    const utilisateurs = await User.find({ 
+      _id: { $in: userIds },
+      estArchive: false 
+    });
+
+    let archived = 0;
+    const archiveData = [];
+
+    for (const utilisateur of utilisateurs) {
+      utilisateur.estArchive = true;
+      utilisateur.dateArchivage = new Date();
+      utilisateur.suppressionPrevue = suppressionDate;
+      utilisateur.archivage = {
+        raison,
+        commentaire,
+        dateArchivage: new Date(),
+        archivePar: req.utilisateur.email
+      };
+      
+      await utilisateur.save();
+      archiveData.push(utilisateur);
+      archived++;
+    }
+
+    // Log
+    await Log.create({
+      type: 'user_bulk_archive',
+      adminId: req.utilisateur.id,
+      adminEmail: req.utilisateur.email,
+      action: `Archivage en masse de ${archived} utilisateurs`,
+      details: { count: archived, raison, userIds },
+      status: 'success'
+    });
+
+    // Export CSV
+    let csvData = null;
+    if (exportData) {
+      const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Rôle', 'Date archivage', 'Raison'];
+      const rows = archiveData.map(u => [
+        u.prenom, u.nom, u.email, u.telephone || '', u.role,
+        new Date(u.dateArchivage).toLocaleDateString('fr-FR'), raison
+      ]);
+      csvData = [headers, ...rows].map(row => row.join(';')).join('\n');
+    }
+
+    res.json({
+      success: true,
+      message: `${archived} utilisateur(s) archivé(s)`,
+      archived,
+      csvData
+    });
+
+  } catch (error) {
+    console.error('Erreur archivage masse:', error);
+    res.status(500).json({ success: false, message: 'Erreur archivage masse' });
+  }
+});
+
+// ========== STATISTIQUES ARCHIVAGE ==========
+router.get('/users/archive-stats', verifierToken, async (req, res) => {
+  try {
+    if (req.utilisateur.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Accès admin requis' });
+    }
+
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    const [total, ceMois, cetteAnnee, parRaison, parRole] = await Promise.all([
+      User.countDocuments({ estArchive: true }),
+      User.countDocuments({ 
+        estArchive: true,
+        dateArchivage: { $gte: startOfMonth }
+      }),
+      User.countDocuments({ 
+        estArchive: true,
+        dateArchivage: { $gte: startOfYear }
+      }),
+      User.aggregate([
+        { $match: { estArchive: true } },
+        { $group: { _id: '$archivage.raison', count: { $sum: 1 } }},
+        { $sort: { count: -1 } }
+      ]),
+      User.aggregate([
+        { $match: { estArchive: true } },
+        { $group: { _id: '$role', count: { $sum: 1 } }},
+        { $sort: { count: -1 } }
+      ])
+    ]);
+
+    res.json({
+      total,
+      ceMois,
+      cetteAnnee,
+      parRaison,
+      parRole
+    });
+
+  } catch (error) {
+    console.error('Erreur stats archivage:', error);
+    res.status(500).json({ success: false, message: 'Erreur stats' });
+  }
+});
+
+// ========== EXPORT CSV ==========
+router.get('/users/export-csv', verifierToken, async (req, res) => {
+  try {
+    if (req.utilisateur.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Accès admin requis' });
+    }
+
+    const { includeArchived, onlyArchived } = req.query;
+
+    let query = {};
+    if (onlyArchived === 'true') {
+      query.estArchive = true;
+    } else if (includeArchived === 'false') {
+      query.estArchive = false;
+    }
+
+    const users = await User.find(query).select('-motDePasse');
+
+    const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Rôle', 'Dispositif', 'Archivé', 'Date archivage'];
+    const rows = users.map(u => [
+      u.prenom, u.nom, u.email, u.telephone || '', u.role,
+      u.idDispositif || '',
+      u.estArchive ? 'Oui' : 'Non',
+      u.dateArchivage ? new Date(u.dateArchivage).toLocaleDateString('fr-FR') : ''
+    ]);
+
+    const csv = [headers, ...rows].map(row => row.join(';')).join('\n');
+    const filename = `users_export_${Date.now()}.csv`;
+
+    res.json({
+      success: true,
+      csv,
+      filename,
+      count: users.length
+    });
+
+  } catch (error) {
+    console.error('Erreur export CSV:', error);
+    res.status(500).json({ success: false, message: 'Erreur export' });
+  }
+});
+
+// ========== SUPPRESSION RGPD ==========
+router.delete('/users/:id/rgpd-delete', verifierToken, async (req, res) => {
+  try {
+    if (req.utilisateur.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Accès admin requis' });
+    }
+
+    const { id } = req.params;
+
+    const utilisateur = await User.findById(id);
+    if (!utilisateur) {
+      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé' });
+    }
+
+    // Export RGPD avant suppression
+    const exportData = [
+      ['Prénom', 'Nom', 'Email', 'Téléphone', 'Rôle', 'Dispositif', 'Date suppression RGPD'],
+      [utilisateur.prenom, utilisateur.nom, utilisateur.email, 
+       utilisateur.telephone || '', utilisateur.role, 
+       utilisateur.idDispositif || '', new Date().toLocaleString('fr-FR')]
+    ].map(row => row.join(';')).join('\n');
+
+    // Log conformité RGPD
+    await Log.create({
+      type: 'user_rgpd_delete',
+      adminId: req.utilisateur.id,
+      adminEmail: req.utilisateur.email,
+      targetType: 'user',
+      targetName: `${utilisateur.prenom} ${utilisateur.nom}`,
+      action: `Suppression RGPD - Email: ${utilisateur.email}`,
+      details: { raison: 'Conformité RGPD - Droit à l\'oubli' },
+      status: 'success'
+    });
+
+    // Supprimer définitivement
+    await User.findByIdAndDelete(id);
+
+    res.json({
+      success: true,
+      message: 'Suppression RGPD effectuée',
+      exportData
+    });
+
+  } catch (error) {
+    console.error('Erreur suppression RGPD:', error);
+    res.status(500).json({ success: false, message: 'Erreur suppression RGPD' });
+  }
+});
+
+// AJOUTER CES IMPORTS EN HAUT DU FICHIER SI PAS DÉJÀ PRÉSENTS
+const Log = require('../models/Log');
+const User = require('../models/User');
+
 module.exports = router;
