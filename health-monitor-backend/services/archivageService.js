@@ -84,7 +84,8 @@ class ArchivageService {
       return {
         success: true,
         utilisateur,
-        suppressionPrevue: dateSuppression
+        suppressionPrevue: dateSuppression,
+        exportData
       };
       
     } catch (error) {
@@ -92,6 +93,23 @@ class ArchivageService {
       throw error;
     }
   }
+
+  generateUserCSV(users) {
+  const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Rôle', 'Dispositif', 'Date archivage', 'Raison'];
+  
+  const rows = users.map(u => [
+    u.prenom,
+    u.nom,
+    u.email,
+    u.telephone || '',
+    u.role,
+    u.idDispositif || '',
+    u.dateArchivage ? new Date(u.dateArchivage).toLocaleDateString('fr-FR') : '',
+    u.archivage?.raison || ''
+  ]);
+  
+  return [headers, ...rows].map(row => row.join(';')).join('\n');
+}
   
   // ========== DÉSARCHIVER UN UTILISATEUR ==========
   async desarchiverUtilisateur(cibleId, archivePar, raison = '') {
@@ -352,5 +370,7 @@ class ArchivageService {
     };
   }
 }
+
+
 
 module.exports = new ArchivageService();

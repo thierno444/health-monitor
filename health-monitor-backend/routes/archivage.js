@@ -16,7 +16,7 @@ const verifierMedecinOuAdmin = (req, res, next) => {
 // Archiver un utilisateur (médecin ou admin)
 router.put('/:userId/archiver', verifierToken, verifierMedecinOuAdmin, async (req, res) => {
   try {
-    const { raison, commentaire } = req.body;
+    const { raison, commentaire, exportData } = req.body;  
     
     const result = await archivageService.archiverUtilisateur(
       req.params.userId,
@@ -25,7 +25,9 @@ router.put('/:userId/archiver', verifierToken, verifierMedecinOuAdmin, async (re
       commentaire
     );
     
+    // Si exportData demandé, on l'a déjà dans result.exportData
     res.json(result);
+    
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
