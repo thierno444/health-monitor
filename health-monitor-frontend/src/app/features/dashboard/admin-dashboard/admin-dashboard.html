@@ -360,6 +360,7 @@
                         >
                             ➕ Nouveau
                         </button>
+                        
 
                         <button
                             (click)="openImportModal()"
@@ -374,6 +375,28 @@
                             class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             🗑️ Supprimer ({{ selectedUsers.length }})
+                        </button>
+
+                        <button
+                            (click)="openBulkArchiveModal()"
+                            [disabled]="selectedUsers.length === 0"
+                            class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            📦 Archiver ({{ selectedUsers.length }})
+                        </button>
+
+                        <button
+                            (click)="exportUsersCSV()"
+                            class="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl"
+                        >
+                            📥 Exporter CSV
+                        </button>
+
+                        <button
+                            (click)="openArchiveStatsModal()"
+                            class="px-6 py-3 bg-gradient-to-r from-gray-500 to-slate-600 hover:from-gray-600 hover:to-slate-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl"
+                        >
+                            📊 Stats Archivage
                         </button>
                     </div>
                 </div>
@@ -552,6 +575,30 @@
                                     >
                                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                      </svg>
+                                    </button>
+
+                                    <!-- Bouton RGPD Delete (si archivé) -->
+                                    <button
+                                      *ngIf="user.estArchive"
+                                      (click)="openRgpdDeleteModal(user)"
+                                      class="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-600 rounded-lg transition-all"
+                                      title="Suppression RGPD"
+                                    >
+                                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                      </svg>
+                                    </button>
+
+                                    <!-- Bouton Détails Archivage (si archivé) -->
+                                    <button
+                                      *ngIf="user.estArchive"
+                                      (click)="openArchiveDetailsModal(user)"
+                                      class="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-600 rounded-lg transition-all"
+                                      title="Détails archivage"
+                                    >
+                                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                       </svg>
                                     </button>
 
@@ -2928,6 +2975,7 @@
           </div>
 
           <div class="space-y-4">
+            <!-- Raison -->
             <div>
               <label class="block text-sm font-bold text-gray-900 dark:text-white mb-2">Raison *</label>
               <select
@@ -2947,6 +2995,7 @@
               </select>
             </div>
 
+            <!-- Commentaire -->
             <div>
               <label class="block text-sm font-bold text-gray-900 dark:text-white mb-2">Commentaire</label>
               <textarea
@@ -2956,6 +3005,19 @@
                 class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
               ></textarea>
             </div>
+
+            <!-- NOUVEAU : Option d'export -->
+            <label class="flex items-center space-x-3 cursor-pointer p-3 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-all">
+              <input
+                type="checkbox"
+                [(ngModel)]="archiveForm.exportData"
+                class="w-5 h-5 text-green-600 rounded focus:ring-2 focus:ring-green-500"
+              >
+              <div>
+                <p class="text-sm font-bold text-gray-900 dark:text-white">Exporter les données avant archivage</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">CSV contenant toutes les informations</p>
+              </div>
+            </label>
           </div>
         </div>
 
@@ -3013,6 +3075,274 @@
           </button>
           <button
             (click)="unarchiveUser()"
+            class="flex-1 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold"
+          >
+            Désarchiver
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL ARCHIVAGE MULTIPLE ========== -->
+    <div
+      *ngIf="showBulkArchiveModal"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+      (click)="closeBulkArchiveModal()"
+    >
+      <div
+        class="glass rounded-3xl p-8 max-w-md w-full border-2 border-purple-500/30"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="text-center mb-6">
+          <div class="mx-auto w-20 h-20 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-12 h-12 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+            Archivage Multiple
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            Archiver {{ selectedUsers.length }} utilisateur(s)
+          </p>
+        </div>
+
+        <div class="space-y-4 mb-6">
+          <div>
+            <label class="block text-sm font-bold text-gray-900 dark:text-white mb-2">Raison *</label>
+            <select
+              [(ngModel)]="bulkArchiveForm.raison"
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+            >
+              <option value="">Sélectionner...</option>
+              <option value="gueri">Guéri</option>
+              <option value="transfere">Transféré</option>
+              <option value="decede">Décédé</option>
+              <option value="traitement_termine">Traitement terminé</option>
+              <option value="inactif">Compte inactif</option>
+              <option value="demission">Démission</option>
+              <option value="test">Compte test</option>
+              <option value="rgpd">Conformité RGPD</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-gray-900 dark:text-white mb-2">Commentaire</label>
+            <textarea
+              [(ngModel)]="bulkArchiveForm.commentaire"
+              rows="3"
+              placeholder="Notes communes pour tous..."
+              class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+            ></textarea>
+          </div>
+
+          <label class="flex items-center space-x-3 cursor-pointer p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+            <input
+              type="checkbox"
+              [(ngModel)]="bulkArchiveForm.exportData"
+              class="w-5 h-5 text-green-600 rounded"
+            >
+            <span class="text-sm font-bold text-gray-900 dark:text-white">Exporter les données</span>
+          </label>
+        </div>
+
+        <div class="flex space-x-3">
+          <button
+            (click)="closeBulkArchiveModal()"
+            class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 rounded-xl font-bold"
+          >
+            Annuler
+          </button>
+          <button
+            (click)="confirmBulkArchive()"
+            [disabled]="!bulkArchiveForm.raison"
+            class="flex-1 px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-bold disabled:opacity-50"
+          >
+            Archiver
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL STATISTIQUES ARCHIVAGE ========== -->
+    <div
+      *ngIf="showArchiveStatsModal"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+      (click)="closeArchiveStatsModal()"
+    >
+      <div
+        class="glass rounded-3xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto border-2 border-indigo-500/30"
+        (click)="$event.stopPropagation()"
+      >
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">📊 Statistiques d'archivage</h3>
+
+        <div *ngIf="archiveStats" class="space-y-6">
+          <!-- Stats globales -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="glass rounded-xl p-4 border-2 border-blue-500/30">
+              <p class="text-sm text-gray-600 dark:text-gray-400">Total archivés</p>
+              <p class="text-3xl font-bold text-blue-600">{{ archiveStats.total }}</p>
+            </div>
+            <div class="glass rounded-xl p-4 border-2 border-green-500/30">
+              <p class="text-sm text-gray-600 dark:text-gray-400">Ce mois</p>
+              <p class="text-3xl font-bold text-green-600">{{ archiveStats.ceMois }}</p>
+            </div>
+            <div class="glass rounded-xl p-4 border-2 border-purple-500/30">
+              <p class="text-sm text-gray-600 dark:text-gray-400">Cette année</p>
+              <p class="text-3xl font-bold text-purple-600">{{ archiveStats.cetteAnnee }}</p>
+            </div>
+          </div>
+
+          <!-- Par raison -->
+          <div class="glass rounded-xl p-6">
+            <h4 class="font-bold text-gray-900 dark:text-white mb-4">Par raison</h4>
+            <div class="space-y-2">
+              <div *ngFor="let item of archiveStats.parRaison" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span class="font-medium capitalize">{{ item._id || 'Non spécifié' }}</span>
+                <span class="text-xl font-bold text-indigo-600">{{ item.count }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Par rôle -->
+          <div class="glass rounded-xl p-6">
+            <h4 class="font-bold text-gray-900 dark:text-white mb-4">Par rôle</h4>
+            <div class="space-y-2">
+              <div *ngFor="let item of archiveStats.parRole" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span class="font-medium">{{ getRoleLabel(item._id) }}</span>
+                <span class="text-xl font-bold text-purple-600">{{ item.count }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          (click)="closeArchiveStatsModal()"
+          class="mt-6 w-full px-6 py-3 bg-gray-200 dark:bg-gray-700 rounded-xl font-bold"
+        >
+          Fermer
+        </button>
+      </div>
+    </div>
+
+    <!-- ========== MODAL SUPPRESSION RGPD ========== -->
+    <div
+      *ngIf="showRgpdDeleteModal && userToRgpdDelete"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+      (click)="closeRgpdDeleteModal()"
+    >
+      <div
+        class="glass rounded-3xl p-8 max-w-md w-full border-2 border-red-500/30"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="text-center mb-6">
+          <div class="mx-auto w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-red-600 mb-2">⚠️ Suppression RGPD</h3>
+          <p class="text-gray-600 dark:text-gray-400">Action irréversible et complète</p>
+        </div>
+
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4">
+          <p class="font-bold text-gray-900 dark:text-white">
+            {{ userToRgpdDelete.prenom }} {{ userToRgpdDelete.nom }}
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-400">{{ userToRgpdDelete.email }}</p>
+        </div>
+
+        <div class="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-500/30 rounded-xl p-4 mb-6">
+          <p class="text-sm text-yellow-800 dark:text-yellow-200 font-medium mb-2">
+            🔥 Cette action va :
+          </p>
+          <ul class="text-xs text-yellow-700 dark:text-yellow-300 space-y-1 ml-4 list-disc">
+            <li>Supprimer DÉFINITIVEMENT toutes les données</li>
+            <li>Anonymiser l'historique (RGPD)</li>
+            <li>Créer un log de conformité</li>
+            <li>Export automatique avant suppression</li>
+          </ul>
+        </div>
+
+        <div class="flex space-x-3">
+          <button
+            (click)="closeRgpdDeleteModal()"
+            class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 rounded-xl font-bold"
+          >
+            Annuler
+          </button>
+          <button
+            (click)="confirmRgpdDelete()"
+            class="flex-1 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold"
+          >
+            Supprimer RGPD
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MODAL DÉTAILS ARCHIVAGE ========== -->
+    <div
+      *ngIf="showArchiveDetailsModal && selectedArchiveDetails"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+      (click)="closeArchiveDetailsModal()"
+    >
+      <div
+        class="glass rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-blue-500/30"
+        (click)="$event.stopPropagation()"
+      >
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">📋 Détails de l'archivage</h3>
+
+        <div class="space-y-4">
+          <div class="glass rounded-xl p-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Utilisateur</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-white">
+              {{ selectedArchiveDetails.prenom }} {{ selectedArchiveDetails.nom }}
+            </p>
+            <p class="text-sm text-gray-500">{{ selectedArchiveDetails.email }}</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass rounded-xl p-4">
+              <p class="text-sm text-gray-600 dark:text-gray-400">Date d'archivage</p>
+              <p class="font-bold text-gray-900 dark:text-white">
+                {{ selectedArchiveDetails.archivage?.dateArchivage | date:'medium' }}
+              </p>
+            </div>
+
+            <div class="glass rounded-xl p-4">
+              <p class="text-sm text-gray-600 dark:text-gray-400">Raison</p>
+              <p class="font-bold text-gray-900 dark:text-white capitalize">
+                {{ selectedArchiveDetails.archivage?.raison || 'Non spécifiée' }}
+              </p>
+            </div>
+          </div>
+
+          <div *ngIf="selectedArchiveDetails.archivage?.commentaire" class="glass rounded-xl p-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Commentaire</p>
+            <p class="text-gray-900 dark:text-white">
+              {{ selectedArchiveDetails.archivage.commentaire }}
+            </p>
+          </div>
+
+          <div class="glass rounded-xl p-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Archivé par</p>
+            <p class="font-bold text-gray-900 dark:text-white">
+              {{ selectedArchiveDetails.archivage?.archivePar || 'Système' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex space-x-3 mt-6">
+          <button
+            (click)="closeArchiveDetailsModal()"
+            class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 rounded-xl font-bold"
+          >
+            Fermer
+          </button>
+          <button
+            (click)="openUnarchiveModal(selectedArchiveDetails)"
             class="flex-1 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold"
           >
             Désarchiver

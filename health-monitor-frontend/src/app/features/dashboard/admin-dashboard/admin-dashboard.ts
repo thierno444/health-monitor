@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 import { Subscription } from 'rxjs';
 import { AdminService, AdminStats, User, Device, Log, LogStats,Assignment, AssignmentStats } from '../../../core/services/admin.service';
 import { NotificationsDropdownComponent } from '../../../shared/components/notifications-dropdown/notifications-dropdown';
@@ -18,6 +19,9 @@ import { ToastService } from '../../../core/services/toast.service';
   styleUrls: ['./admin-dashboard.scss']
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
+
+  apiUrl = 'http://localhost:3000/api'; // ← AJOUTER CETTE LIGNE
+
   // Utilisateur admin
   admin: any = null;
   darkMode = false;
@@ -896,12 +900,36 @@ importCSV(): void {
   // Modals archivage
   showArchiveModal = false;
   showUnarchiveModal = false;
+  showBulkArchiveModal = false;
+  showDeletePermanentlyModal = false;
+  showArchiveStatsModal = false;
+  showRgpdDeleteModal = false;
+  showArchiveDetailsModal = false;
   userToArchive: User | null = null;
   userToUnarchive: User | null = null;
+  userToDeletePermanently: User | null = null;
+
+  // Formulaires
+  bulkArchiveForm = {
+    raison: '',
+    commentaire: '',
+    exportData: false
+  };
+
   archiveForm = {
     raison: '',
-    commentaire: ''
+    commentaire: '',
+    exportData: true  // ← EXPORT PAR DÉFAUT
   };
+
+  // Stats et données
+  archiveStats: any = null;
+  selectedArchiveDetails: any = null;
+  userToRgpdDelete: any = null;
+
+  loadingArchiveStats = false;
+
+  
 
   openChangePasswordModal(): void {
     this.changePasswordForm = {
@@ -1845,7 +1873,8 @@ openUnassignFromTableModal(assignment: Assignment): void {
     this.userToArchive = user;
     this.archiveForm = {
       raison: '',
-      commentaire: ''
+      commentaire: '',
+      exportData: true
     };
     this.showArchiveModal = true;
   }
@@ -1855,33 +1884,55 @@ openUnassignFromTableModal(assignment: Assignment): void {
     this.userToArchive = null;
   }
 
-  archiveUser(): void {
-    if (!this.userToArchive) return;
 
-    if (!this.archiveForm.raison) {
-      this.toastService.warning('⚠️ Raison requise', 'Veuillez sélectionner une raison');
-      return;
+  async archiveUser(): Promise<void> {
+  if (!this.userToArchive || !this.archiveForm.raison) {
+    Swal.fire('Erreur', 'Veuillez remplir tous les champs obligatoires', 'error');
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${this.apiUrl}/admin/users/${this.userToArchive._id}/archive`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        raison: this.archiveForm.raison,
+        commentaire: this.archiveForm.commentaire,
+        exportData: this.archiveForm.exportData
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.message);
+
+    // Si export demandé, télécharger le CSV
+    if (this.archiveForm.exportData && data.exportData) {
+      this.downloadCSV(
+        data.exportData,
+        `archive_${this.userToArchive.email}_${Date.now()}.csv`
+      );
     }
 
-    this.adminService.archiveUser(
-      this.userToArchive._id,
-      this.archiveForm.raison,
-      this.archiveForm.commentaire
-    ).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.toastService.success('✅ Archivé', `${this.userToArchive!.prenom} ${this.userToArchive!.nom} a été archivé`);
-          this.closeArchiveModal();
-          this.loadUsers();
-          this.loadStats();
-        }
-      },
-      error: (err) => {
-        console.error('Erreur archivage:', err);
-        this.toastService.error('❌ Erreur', err.error?.message || 'Impossible d\'archiver');
-      }
+    await Swal.fire({
+      title: 'Archivé !',
+      text: 'L\'utilisateur a été archivé avec succès',
+      icon: 'success',
+      timer: 2000
     });
+
+    this.closeArchiveModal();
+    this.loadUsers();
+
+  } catch (error: any) {
+    console.error('Erreur archivage:', error);
+    Swal.fire('Erreur', error.message || 'Erreur lors de l\'archivage', 'error');
   }
+}
 
   openUnarchiveModal(user: User): void {
     this.userToUnarchive = user;
@@ -1915,6 +1966,191 @@ openUnassignFromTableModal(assignment: Assignment): void {
     });
   }
 
+  // ========== ARCHIVAGE EN MASSE ==========
+
+  openBulkArchiveModal(): void {
+    if (this.selectedUsers.length === 0) {
+      this.toastService.warning('⚠️ Aucune sélection', 'Sélectionnez au moins un utilisateur');
+      return;
+    }
+
+    this.archiveForm = {
+      raison: '',
+      commentaire: '',
+      exportData: true
+    };
+    this.showBulkArchiveModal = true;
+  }
+
+ closeBulkArchiveModal(): void {
+  this.showBulkArchiveModal = false;
+  this.bulkArchiveForm = { raison: '', commentaire: '', exportData: false };
+}
+
+  bulkArchive(): void {
+    if (!this.archiveForm.raison) {
+      this.toastService.warning('⚠️ Raison requise', 'Veuillez sélectionner une raison');
+      return;
+    }
+
+    // Export des données si demandé
+    if (this.archiveForm.exportData) {
+      this.exportBulkData();
+    }
+
+    this.adminService.bulkArchiveUsers(
+      this.selectedUsers,
+      this.archiveForm.raison,
+      this.archiveForm.commentaire
+    ).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastService.success(
+            '✅ Archivage réussi', 
+            `${response.archived || this.selectedUsers.length} utilisateur(s) archivé(s)${this.archiveForm.exportData ? ' (données exportées)' : ''}`
+          );
+          this.selectedUsers = [];
+          this.closeBulkArchiveModal();
+          this.loadUsers();
+          this.loadStats();
+        }
+      },
+      error: (err) => {
+        console.error('Erreur archivage masse:', err);
+        this.toastService.error('❌ Erreur', err.error?.message || 'Impossible d\'archiver');
+      }
+    });
+  }
+
+  // ========== SUPPRESSION DÉFINITIVE ==========
+
+  openDeletePermanentlyModal(user: User): void {
+    // Vérifier que l'utilisateur est archivé depuis > 6 mois
+    const archiveDate = user.dateArchivage ? new Date(user.dateArchivage) : null;
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    if (!user.estArchive) {
+      this.toastService.error('❌ Interdit', 'L\'utilisateur doit être archivé avant suppression');
+      return;
+    }
+
+    if (archiveDate && archiveDate > sixMonthsAgo) {
+      this.toastService.warning(
+        '⚠️ Délai non respecté', 
+        'La suppression définitive nécessite 6 mois d\'archivage (RGPD)'
+      );
+      return;
+    }
+
+    this.userToDeletePermanently = user;
+    this.showDeletePermanentlyModal = true;
+  }
+
+  closeDeletePermanentlyModal(): void {
+    this.showDeletePermanentlyModal = false;
+    this.userToDeletePermanently = null;
+  }
+
+  deletePermanently(): void {
+    if (!this.userToDeletePermanently) return;
+
+    this.adminService.deleteUserPermanently(this.userToDeletePermanently._id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastService.success(
+            '✅ Suppression définitive', 
+            `${this.userToDeletePermanently!.prenom} ${this.userToDeletePermanently!.nom} a été supprimé définitivement`
+          );
+          this.closeDeletePermanentlyModal();
+          this.loadUsers();
+          this.loadStats();
+        }
+      },
+      error: (err) => {
+        console.error('Erreur suppression définitive:', err);
+        this.toastService.error('❌ Erreur', err.error?.message || 'Impossible de supprimer');
+      }
+    });
+  }
+
+  // ========== EXPORT DONNÉES ==========
+
+  exportUserData(user: User): void {
+    console.log('📥 Export données utilisateur:', user.prenom, user.nom);
+    
+    // Créer CSV
+    const csv = this.generateUserCSV([user]);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `export-${user.prenom}-${user.nom}-${Date.now()}.csv`;
+    link.click();
+    
+    this.toastService.success('✅ Export', 'Données exportées en CSV');
+  }
+
+  exportBulkData(): void {
+    const usersToExport = this.users.filter(u => this.selectedUsers.includes(u._id));
+    
+    const csv = this.generateUserCSV(usersToExport);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `export-masse-${Date.now()}.csv`;
+    link.click();
+    
+    this.toastService.success('✅ Export', `Données de ${usersToExport.length} utilisateur(s) exportées`);
+  }
+
+  generateUserCSV(users: User[]): string {
+    const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Rôle', 'Dispositif', 'Date création', 'Archivé'];
+    const rows = users.map(u => [
+      u.prenom,
+      u.nom,
+      u.email,
+      u.telephone || '',
+      u.role,
+      u.idDispositif || '',
+      new Date(u.createdAt).toLocaleDateString('fr-FR'),
+      u.estArchive ? 'Oui' : 'Non'
+    ]);
+    
+    return [headers, ...rows].map(row => row.join(';')).join('\n');
+  }
+
+  // ========== STATISTIQUES ARCHIVAGE ==========
+
+  openArchiveStatsModal(): void {
+    this.loadArchiveStats();
+    this.showArchiveStatsModal = true;
+  }
+
+  closeArchiveStatsModal(): void {
+    this.showArchiveStatsModal = false;
+    this.archiveStats = null;
+
+  }
+
+  loadArchiveStats(): void {
+    this.loadingArchiveStats = true;
+    this.adminService.getArchiveStats().subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.archiveStats = response.statistiques;
+          console.log('📊 Stats archivage:', this.archiveStats);
+        }
+        this.loadingArchiveStats = false;
+      },
+      error: (err) => {
+        console.error('Erreur stats archivage:', err);
+        this.loadingArchiveStats = false;
+      }
+    });
+  }
+
+  // ========== HELPERS ==========
+
   getRaisonLabel(raison: string): string {
     const raisons: any = {
       gueri: 'Guéri',
@@ -1929,5 +2165,251 @@ openUnassignFromTableModal(assignment: Assignment): void {
     };
     return raisons[raison] || raison;
   }
+
+  canDeletePermanently(user: User): boolean {
+    if (!user.estArchive || !user.dateArchivage) return false;
+    
+    const archiveDate = new Date(user.dateArchivage);
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    return archiveDate <= sixMonthsAgo;
+  }
+
+  // ========== ARCHIVAGE MULTIPLE ==========
+
+async confirmBulkArchive(): Promise<void> {
+  if (!this.bulkArchiveForm.raison) {
+    Swal.fire('Erreur', 'Veuillez sélectionner une raison', 'error');
+    return;
+  }
+
+  try {
+    const result = await Swal.fire({
+      title: 'Confirmer l\'archivage multiple ?',
+      text: `${this.selectedUsers.length} utilisateur(s) seront archivés`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#8B5CF6',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Oui, archiver',
+      cancelButtonText: 'Annuler'
+    });
+
+    if (!result.isConfirmed) return;
+
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${this.apiUrl}/admin/users/bulk-archive`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        userIds: this.selectedUsers,
+        raison: this.bulkArchiveForm.raison,
+        commentaire: this.bulkArchiveForm.commentaire,
+        exportData: this.bulkArchiveForm.exportData
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.message);
+
+    // Si export demandé, télécharger le CSV
+    if (this.bulkArchiveForm.exportData && data.csvData) {
+      this.downloadCSV(data.csvData, 'archivage_multiple_export.csv');
+    }
+
+    await Swal.fire({
+      title: 'Succès !',
+      text: `${data.archived} utilisateur(s) archivé(s)`,
+      icon: 'success',
+      timer: 2000
+    });
+
+    this.closeBulkArchiveModal();
+    this.selectedUsers = [];
+    this.loadUsers();
+
+  } catch (error: any) {
+    console.error('Erreur archivage multiple:', error);
+    Swal.fire('Erreur', error.message || 'Erreur lors de l\'archivage', 'error');
+  }
+}
+
+
+// ========== EXPORT CSV ==========
+
+async exportUsersCSV(): Promise<void> {
+  try {
+    const result = await Swal.fire({
+      title: 'Exporter les utilisateurs',
+      html: `
+        <div class="text-left">
+          <label class="flex items-center space-x-2 mb-2">
+            <input type="checkbox" id="includeArchived" checked class="w-4 h-4">
+            <span>Inclure les utilisateurs archivés</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" id="onlyArchived" class="w-4 h-4">
+            <span>Uniquement les archivés</span>
+          </label>
+        </div>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#10B981',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: '📥 Exporter',
+      cancelButtonText: 'Annuler',
+      preConfirm: () => {
+        return {
+          includeArchived: (document.getElementById('includeArchived') as HTMLInputElement).checked,
+          onlyArchived: (document.getElementById('onlyArchived') as HTMLInputElement).checked
+        };
+      }
+    });
+
+    if (!result.isConfirmed) return;
+
+    const token = localStorage.getItem('token');
+    const params = new URLSearchParams({
+      includeArchived: result.value.includeArchived.toString(),
+      onlyArchived: result.value.onlyArchived.toString()
+    });
+
+    const response = await fetch(`${this.apiUrl}/admin/users/export-csv?${params}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!response.ok) throw new Error('Erreur lors de l\'export');
+
+    const data = await response.json();
+    this.downloadCSV(data.csv, data.filename);
+
+    await Swal.fire({
+      title: 'Export réussi !',
+      text: `${data.count} utilisateur(s) exporté(s)`,
+      icon: 'success',
+      timer: 2000
+    });
+
+  } catch (error: any) {
+    console.error('Erreur export CSV:', error);
+    Swal.fire('Erreur', 'Impossible d\'exporter les données', 'error');
+  }
+}
+
+downloadCSV(csvData: string, filename: string): void {
+  const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// ========== SUPPRESSION RGPD ==========
+
+openRgpdDeleteModal(user: any): void {
+  this.userToRgpdDelete = user;
+  this.showRgpdDeleteModal = true;
+}
+
+closeRgpdDeleteModal(): void {
+  this.showRgpdDeleteModal = false;
+  this.userToRgpdDelete = null;
+}
+
+async confirmRgpdDelete(): Promise<void> {
+  if (!this.userToRgpdDelete) return;
+
+  try {
+    const result = await Swal.fire({
+      title: '⚠️ SUPPRESSION RGPD',
+      html: `
+        <div class="text-left space-y-3">
+          <p class="font-bold text-red-600">Cette action est IRRÉVERSIBLE !</p>
+          <p>Utilisateur : <strong>${this.userToRgpdDelete.prenom} ${this.userToRgpdDelete.nom}</strong></p>
+          <div class="bg-yellow-50 border-2 border-yellow-500 rounded p-3 text-sm">
+            <p class="font-bold mb-2">🔥 Conséquences :</p>
+            <ul class="list-disc ml-5 space-y-1">
+              <li>Suppression définitive de TOUTES les données</li>
+              <li>Anonymisation de l'historique (conformité RGPD)</li>
+              <li>Export automatique avant suppression</li>
+              <li>Log de conformité créé</li>
+            </ul>
+          </div>
+          <p class="text-sm text-gray-600 mt-3">Tapez <strong>SUPPRIMER</strong> pour confirmer :</p>
+          <input type="text" id="confirmText" class="w-full px-3 py-2 border rounded" placeholder="SUPPRIMER">
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#EF4444',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: '🔥 Supprimer définitivement',
+      cancelButtonText: 'Annuler',
+      preConfirm: () => {
+        const input = (document.getElementById('confirmText') as HTMLInputElement).value;
+        if (input !== 'SUPPRIMER') {
+          Swal.showValidationMessage('Vous devez taper "SUPPRIMER" pour confirmer');
+          return false;
+        }
+        return true;
+      }
+    });
+
+    if (!result.isConfirmed) return;
+
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${this.apiUrl}/admin/users/${this.userToRgpdDelete._id}/rgpd-delete`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.message);
+
+    // Télécharger l'export RGPD
+    if (data.exportData) {
+      this.downloadCSV(data.exportData, `rgpd_export_${this.userToRgpdDelete.email}_${Date.now()}.csv`);
+    }
+
+    await Swal.fire({
+      title: 'Suppression RGPD effectuée',
+      text: 'Les données ont été supprimées conformément au RGPD',
+      icon: 'success',
+      timer: 3000
+    });
+
+    this.closeRgpdDeleteModal();
+    this.loadUsers();
+
+  } catch (error: any) {
+    console.error('Erreur suppression RGPD:', error);
+    Swal.fire('Erreur', error.message || 'Erreur lors de la suppression RGPD', 'error');
+  }
+}
+
+// ========== DÉTAILS ARCHIVAGE ==========
+
+openArchiveDetailsModal(user: any): void {
+  this.selectedArchiveDetails = user;
+  this.showArchiveDetailsModal = true;
+}
+
+closeArchiveDetailsModal(): void {
+  this.showArchiveDetailsModal = false;
+  this.selectedArchiveDetails = null;
+}
 
 }

@@ -28,6 +28,15 @@ export interface User {
   photoProfil?: string;
   estActif: boolean;
   estArchive?: boolean;
+  dateArchivage?: Date;
+  archivage?: {
+    raison: string;
+    commentaire?: string;
+    dateArchivage: Date;
+    archivePar: string;
+  };
+  genre?: string;
+  dateDeNaissance?: string; 
   createdAt: Date;
 }
 
@@ -297,5 +306,5 @@ export class AdminService {
   getArchiveStats(): Observable<any> {
     return this.http.get(`${this.apiUrl}/archivage/statistiques`);
   }
-  
+
 }

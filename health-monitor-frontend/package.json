@@ -2,14 +2,14 @@
   "name": "health-monitor-frontend",
   "version": "0.0.0",
   "scripts": {
-  "ng": "ng",
-  "start": "ng serve",
-  "build": "ng build",
-  "build:dev": "ng build --configuration development",
-  "build:prod": "ng build --configuration production && node replace-urls.js",
-  "watch": "ng build --watch --configuration development",
-  "test": "ng test",
-  "vercel-build": "ng build --configuration production && node replace-urls.js"
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "build:dev": "ng build --configuration development",
+    "build:prod": "ng build --configuration production && node replace-urls.js",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "vercel-build": "ng build --configuration production && node replace-urls.js"
   },
   "private": true,
   "dependencies": {
@@ -23,6 +23,7 @@
     "date-fns": "^4.1.0",
     "rxjs": "~7.8.0",
     "socket.io-client": "^4.8.1",
+    "sweetalert2": "^11.26.17",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },
