@@ -79,13 +79,16 @@ class ArchivageService {
         status: 'success'
       });
       
+      // ✅ GÉNÉRER LE CSV (AJOUTÉ ICI)
+      const exportData = this.generateUserCSV([utilisateur]);
+      
       console.log(`✅ Utilisateur ${utilisateur.email} archivé par ${admin.email}`);
       
       return {
         success: true,
         utilisateur,
         suppressionPrevue: dateSuppression,
-        exportData
+        exportData  // ← Maintenant défini
       };
       
     } catch (error) {
@@ -93,23 +96,6 @@ class ArchivageService {
       throw error;
     }
   }
-
-  generateUserCSV(users) {
-  const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Rôle', 'Dispositif', 'Date archivage', 'Raison'];
-  
-  const rows = users.map(u => [
-    u.prenom,
-    u.nom,
-    u.email,
-    u.telephone || '',
-    u.role,
-    u.idDispositif || '',
-    u.dateArchivage ? new Date(u.dateArchivage).toLocaleDateString('fr-FR') : '',
-    u.archivage?.raison || ''
-  ]);
-  
-  return [headers, ...rows].map(row => row.join(';')).join('\n');
-}
   
   // ========== DÉSARCHIVER UN UTILISATEUR ==========
   async desarchiverUtilisateur(cibleId, archivePar, raison = '') {
@@ -369,8 +355,24 @@ class ArchivageService {
       })
     };
   }
+  
+  // ========== HELPER : Générer CSV ==========
+  generateUserCSV(users) {
+    const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Rôle', 'Dispositif', 'Date archivage', 'Raison'];
+    
+    const rows = users.map(u => [
+      u.prenom,
+      u.nom,
+      u.email,
+      u.telephone || '',
+      u.role,
+      u.idDispositif || '',
+      u.dateArchivage ? new Date(u.dateArchivage).toLocaleDateString('fr-FR') : '',
+      u.archivage?.raison || ''
+    ]);
+    
+    return [headers, ...rows].map(row => row.join(';')).join('\n');
+  }
 }
-
-
 
 module.exports = new ArchivageService();
