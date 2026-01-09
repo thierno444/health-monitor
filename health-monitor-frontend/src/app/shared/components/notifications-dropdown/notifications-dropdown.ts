@@ -49,19 +49,28 @@ export class NotificationsDropdownComponent implements OnInit {
   }
 
   calculateDropdownPosition() {
-    if (!this.notificationButton) {
-      return;
-    }
+  if (!this.notificationButton) return;
 
-    const buttonRect = this.notificationButton.nativeElement.getBoundingClientRect();
-    if (this.isMobile) {
-      this.dropdownTopPosition = 0;
-      this.dropdownLeftPosition = 0;
+  const buttonRect = this.notificationButton.nativeElement.getBoundingClientRect();
+  if (this.isMobile) {
+    this.dropdownTopPosition = 0;
+    this.dropdownLeftPosition = 0;
+  } else {
+    // Positionne le dropdown sous le bouton, en vérifiant qu'il ne dépasse pas de l'écran
+    this.dropdownTopPosition = buttonRect.bottom + window.scrollY + 8;
+    const dropdownWidth = 360; // Largeur du dropdown
+    const rightEdge = buttonRect.right + dropdownWidth;
+    const viewportWidth = window.innerWidth;
+
+    // Si le dropdown dépasse de l'écran à droite, on le décale vers la gauche
+    if (rightEdge > viewportWidth) {
+      this.dropdownLeftPosition = viewportWidth - dropdownWidth - 20; // 20px de marge à droite
     } else {
-      this.dropdownTopPosition = buttonRect.bottom + window.scrollY + 8;
-      this.dropdownLeftPosition = window.innerWidth - 360; // Positionne le dropdown à droite
+      this.dropdownLeftPosition = buttonRect.left;
     }
   }
+}
+
 
   toggleDropdown(): void {
     this.showDropdown = !this.showDropdown;

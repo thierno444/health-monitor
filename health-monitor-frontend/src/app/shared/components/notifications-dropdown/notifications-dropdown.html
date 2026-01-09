@@ -15,21 +15,21 @@
 
   <!-- Dropdown des notifications -->
   <div
-    *ngIf="showDropdown"
-    class="fixed inset-0 z-[1000] flex items-start justify-end sm:items-start sm:justify-end sm:pt-16"
-    (click)="closeDropdown($event)"
-  >
-    <!-- Overlay pour fermer le dropdown (mobile uniquement) -->
-    <div *ngIf="isMobile" (click)="showDropdown = false" class="fixed inset-0 bg-black/30 z-[999]"></div>
-
-    <!-- Conteneur du dropdown -->
-    <div
-      class="glass sm:rounded-2xl sm:shadow-2xl sm:border-2 sm:border-purple-500/30 w-full sm:w-80 md:w-96 max-w-full sm:max-w-sm h-auto max-h-[80vh] overflow-y-auto z-[1000] sm:my-2 mx-2 sm:mx-4"
-      [style.top.px]="dropdownTopPosition"
-      [style.left.px]="dropdownLeftPosition"
-      [style.position]="isMobile ? 'fixed' : 'absolute'"
-      (click)="$event.stopPropagation()"
+      *ngIf="showDropdown"
+      class="fixed inset-0 z-[1000] flex items-start justify-end sm:items-start sm:justify-start sm:pt-16"
+      (click)="closeDropdown($event)"
     >
+      <!-- Overlay pour fermer le dropdown (mobile uniquement) -->
+      <div *ngIf="isMobile" (click)="showDropdown = false" class="fixed inset-0 bg-black/30 z-[999]"></div>
+
+      <!-- Conteneur du dropdown -->
+      <div
+        class="glass sm:rounded-2xl sm:shadow-2xl sm:border-2 sm:border-purple-500/30 w-full sm:w-[360px] h-auto max-h-[80vh] overflow-y-auto z-[1000] sm:my-2 mx-2 sm:mx-0"
+        [style.top.px]="dropdownTopPosition"
+        [style.left.px]="dropdownLeftPosition"
+        [style.position]="isMobile ? 'fixed' : 'absolute'"
+        (click)="$event.stopPropagation()"
+      >
       <!-- Header -->
       <div class="bg-gradient-to-r from-purple-500 to-pink-500 p-3 sm:p-4 rounded-t-xl">
         <h3 class="text-lg font-bold text-white">🔔 Notifications</h3>
