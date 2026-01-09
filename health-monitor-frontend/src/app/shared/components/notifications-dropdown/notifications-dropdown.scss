@@ -1,3 +1,12 @@
 :host {
   display: block;
+  position: relative; /* Assure un bon positionnement relatif pour le dropdown */
+}
+
+/* Style pour le dropdown sur mobile */
+@media (max-width: 640px) {
+  ::ng-deep .glass {
+    margin: 0.5rem;
+    border-radius: 1rem;
+  }
 }
