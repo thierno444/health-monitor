@@ -1,46 +1,94 @@
-// Glass effect navbar
+/* Glass effect navbar */
 .glass-nav {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-  
+
   @media (prefers-color-scheme: dark) {
-    background: rgba(17, 24, 39, 0.7);
+    background: rgba(17, 24, 39, 0.95); /* Plus opaque pour éviter le blanc */
     border: 1px solid rgba(139, 92, 246, 0.3);
     box-shadow: 0 8px 32px 0 rgba(139, 92, 246, 0.2);
   }
 }
 
-// Glass tabs
+/* Glass tabs - Adapté pour mobile */
 .glass-tabs {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  
+
   @media (prefers-color-scheme: dark) {
-    background: rgba(31, 41, 55, 0.8);
+    background: rgba(31, 41, 55, 0.95); /* Plus opaque */
     border: 1px solid rgba(139, 92, 246, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 1rem;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    display: flex;
   }
 }
 
-// Glass cards
+/* Glass cards */
 .glass {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease; 
-  
+  transition: all 0.3s ease;
+
   @media (prefers-color-scheme: dark) {
-    background: rgba(17, 24, 39, 0.8);
+    background: rgba(17, 24, 39, 0.9); /* Plus opaque */
     border: 1px solid rgba(139, 92, 246, 0.2);
   }
-    
+
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
   }
 }
+
+/* Correction du mode sombre */
+:root {
+  --dark-bg: rgba(17, 24, 39, 0.95);
+}
+
+.dark {
+  --dark-bg: rgba(17, 24, 39, 0.95);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  /* Navbar */
+  .glass-nav {
+    padding: 1rem;
+  }
+
+  /* Tabs */
+  .glass-tabs {
+    button {
+      white-space: nowrap;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  /* Tables */
+  table {
+    font-size: 0.875rem;
+    display: block;
+    overflow-x: auto;
+  }
+
+  th, td {
+    padding: 0.5rem !important;
+    white-space: nowrap;
+  }
+}
+
 
 // Animation pulse pour notifications
 @keyframes pulse-glow {
@@ -94,18 +142,24 @@
   animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-// Responsive
+
+.theme-transition {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Masquer la barre de scroll pour les tabs */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Style pour les tabs sur mobile */
 @media (max-width: 768px) {
-  table {
-    font-size: 0.875rem;
-  }
-  
-  th, td {
-    padding: 0.5rem !important;
-  }
-  
   .glass-tabs {
     overflow-x: auto;
-    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.5rem;
+    gap: 0.5rem;
   }
 }
+
+

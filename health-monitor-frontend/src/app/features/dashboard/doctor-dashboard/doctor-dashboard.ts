@@ -545,9 +545,19 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+
+
   toggleTheme(): void {
-    this.themeService.toggleTheme();
-  }
+  this.themeService.toggleTheme();
+  // Forcer le rechargement des styles
+  setTimeout(() => {
+    document.body.classList.add('theme-transition');
+    setTimeout(() => {
+      document.body.classList.remove('theme-transition');
+    }, 300);
+  }, 50);
+}
+
 
   logout(): void {
     this.authService.logout();
