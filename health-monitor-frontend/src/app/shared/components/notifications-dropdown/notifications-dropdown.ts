@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, HostListener, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificationService, Notification } from '../../../core/services/notification.service';
 import { Router } from '@angular/router';
@@ -11,28 +11,69 @@ import { Router } from '@angular/router';
   styleUrls: ['./notifications-dropdown.scss']
 })
 export class NotificationsDropdownComponent implements OnInit {
+  @ViewChild('notificationButton', { static: false }) notificationButton!: ElementRef;
   showDropdown = false;
   notifications: Notification[] = [];
   unreadCount = 0;
   loading = false;
+  dropdownTopPosition: number = 0;
+  dropdownLeftPosition: number = 0;
+  isMobile: boolean = false;
 
   constructor(
     private notificationService: NotificationService,
-    private router: Router
+    private router: Router,
+    private renderer: Renderer2
   ) {}
 
   ngOnInit(): void {
+    this.checkIfMobile();
     this.loadNotifications();
     this.notificationService.unreadCount$.subscribe(count => {
       this.unreadCount = count;
     });
   }
 
+  ngAfterViewInit() {
+    this.calculateDropdownPosition();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.checkIfMobile();
+    this.calculateDropdownPosition();
+  }
+
+  checkIfMobile() {
+    this.isMobile = window.innerWidth < 768;
+  }
+
+  calculateDropdownPosition() {
+    if (!this.notificationButton) {
+      return;
+    }
+
+    const buttonRect = this.notificationButton.nativeElement.getBoundingClientRect();
+    if (this.isMobile) {
+      this.dropdownTopPosition = 0;
+      this.dropdownLeftPosition = 0;
+    } else {
+      this.dropdownTopPosition = buttonRect.bottom + window.scrollY + 8;
+      this.dropdownLeftPosition = window.innerWidth - 360; // Positionne le dropdown à droite
+    }
+  }
+
   toggleDropdown(): void {
     this.showDropdown = !this.showDropdown;
     if (this.showDropdown) {
       this.loadNotifications();
+      setTimeout(() => this.calculateDropdownPosition(), 0);
     }
+  }
+
+  closeDropdown(event: Event) {
+    if ((event.target as HTMLElement).classList.contains('glass')) return;
+    this.showDropdown = false;
   }
 
   loadNotifications(): void {
@@ -66,17 +107,11 @@ export class NotificationsDropdownComponent implements OnInit {
     }
 
     if (notification.lien) {
-      // Fermer le dropdown
       this.showDropdown = false;
-      
+
       try {
-        // Si le lien commence par http, ouvrir dans un nouvel onglet
         if (notification.lien.startsWith('http')) {
           window.open(notification.lien, '_blank');
-        } else {
-          // Navigation interne - vérifier que la route existe
-          console.log('Navigation vers:', notification.lien);
-           
         }
       } catch (error) {
         console.error('Erreur navigation notification:', error);
