@@ -22,6 +22,8 @@ import { ToastService } from '../../../core/services/toast.service';
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
 
+  today: string = new Date().toISOString().split('T')[0];
+
    apiUrl = environment.apiUrl;
 
   // Utilisateur admin
@@ -191,6 +193,16 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   genre: '',
   dateDeNaissance: ''
   };
+
+  // ========== VALIDATION PROFIL ==========
+profileFormErrors = {
+  prenom: '',
+  nom: '',
+  email: '',
+  telephone: '',
+  genre: '',
+  dateDeNaissance: ''
+};
 
   savingProfile = false;
 
@@ -796,15 +808,124 @@ importCSV(): void {
       email: this.admin.email,
       telephone: this.admin.telephone || '',
       genre: this.admin.genre || '',
-      dateDeNaissance: this.admin.dateDeNaissance ? this.admin.dateDeNaissance.split('T')[0] : ''  // ← FIX FORMAT DATE
+      dateDeNaissance: this.admin.dateDeNaissance ? this.admin.dateDeNaissance.split('T')[0] : ''
     };
     
-    console.log('📝 Formulaire admin initialisé:', this.profileForm);  // ← AJOUTE CE LOG
+    // Réinitialiser les erreurs
+    this.profileFormErrors = {
+      prenom: '',
+      nom: '',
+      email: '',
+      telephone: '',
+      genre: '',
+      dateDeNaissance: ''
+    };
+    
+    console.log('📝 Formulaire admin initialisé:', this.profileForm);
   }
 }
 
-  saveProfile(): void {
+// ========== VALIDATION FORMULAIRE PROFIL ==========
+
+validateProfileField(field: string): void {
+  switch (field) {
+    case 'prenom':
+      if (!this.profileForm.prenom.trim()) {
+        this.profileFormErrors.prenom = '⚠️ Le prénom est requis';
+      } else if (this.profileForm.prenom.length < 2) {
+        this.profileFormErrors.prenom = '⚠️ Minimum 2 caractères';
+      } else if (this.profileForm.prenom.length > 50) {
+        this.profileFormErrors.prenom = '⚠️ Maximum 50 caractères';
+      } else {
+        this.profileFormErrors.prenom = '';
+      }
+      break;
+
+    case 'nom':
+      if (!this.profileForm.nom.trim()) {
+        this.profileFormErrors.nom = '⚠️ Le nom est requis';
+      } else if (this.profileForm.nom.length < 2) {
+        this.profileFormErrors.nom = '⚠️ Minimum 2 caractères';
+      } else if (this.profileForm.nom.length > 50) {
+        this.profileFormErrors.nom = '⚠️ Maximum 50 caractères';
+      } else {
+        this.profileFormErrors.nom = '';
+      }
+      break;
+
+    case 'email':
+      if (!this.profileForm.email.trim()) {
+        this.profileFormErrors.email = '⚠️ L\'email est requis';
+      } else if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(this.profileForm.email)) {
+        this.profileFormErrors.email = '⚠️ Format email invalide';
+      } else {
+        this.profileFormErrors.email = '';
+      }
+      break;
+
+    case 'telephone':
+      if (this.profileForm.telephone && !/^(\+?221|0)?[0-9]{9}$/.test(this.profileForm.telephone.replace(/\s/g, ''))) {
+        this.profileFormErrors.telephone = '⚠️ Format: +221XXXXXXXXX ou 0XXXXXXXXX';
+      } else {
+        this.profileFormErrors.telephone = '';
+      }
+      break;
+
+    case 'genre':
+      if (!this.profileForm.genre.trim()) {
+        this.profileFormErrors.genre = '⚠️ Le genre est requis';
+      } else if (!['homme', 'femme', 'autre'].includes(this.profileForm.genre)) {
+        this.profileFormErrors.genre = '⚠️ Genre invalide';
+      } else {
+        this.profileFormErrors.genre = '';
+      }
+      break;
+
+    case 'dateDeNaissance':
+      if (this.profileForm.dateDeNaissance) {
+        const birthDate = new Date(this.profileForm.dateDeNaissance);
+        const today = new Date();
+        
+        if (birthDate > today) {
+          this.profileFormErrors.dateDeNaissance = '⚠️ Date future invalide';
+        } else if (today.getFullYear() - birthDate.getFullYear() < 13) {
+          this.profileFormErrors.dateDeNaissance = '⚠️ Âge minimum 13 ans';
+        } else if (today.getFullYear() - birthDate.getFullYear() > 120) {
+          this.profileFormErrors.dateDeNaissance = '⚠️ Âge maximum 120 ans';
+        } else {
+          this.profileFormErrors.dateDeNaissance = '';
+        }
+      } else {
+        this.profileFormErrors.dateDeNaissance = '';
+      }
+      break;
+  }
+}
+
+validateProfileForm(): boolean {
+  this.validateProfileField('prenom');
+  this.validateProfileField('nom');
+  this.validateProfileField('email');
+  this.validateProfileField('telephone');
+  this.validateProfileField('genre');
+  this.validateProfileField('dateDeNaissance');
+
+  return !this.profileFormErrors.prenom &&
+         !this.profileFormErrors.nom &&
+         !this.profileFormErrors.email &&
+         !this.profileFormErrors.telephone &&
+         !this.profileFormErrors.genre &&
+         !this.profileFormErrors.dateDeNaissance;
+}
+
+saveProfile(): void {
   if (!this.admin?.id) return;
+  
+  // Valider le formulaire avant envoi
+  if (!this.validateProfileForm()) {
+    this.toastService.warning('⚠️ Formulaire invalide', 'Corrigez les erreurs avant de sauvegarder');
+    return;
+  }
   
   this.savingProfile = true;
 
@@ -817,19 +938,31 @@ importCSV(): void {
     dateDeNaissance: this.profileForm.dateDeNaissance   
   };
 
-    console.log('📝 Données envoyées admin:', profileData);  
+  console.log('📝 Données envoyées admin:', profileData);  
 
   this.authService.updateProfile(this.admin.id, profileData).subscribe({
       next: (response) => {
         if (response.success) {
-          this.toastService.success('Profil mis à jour', 'Vos informations ont été enregistrées');
+          this.toastService.success('✅ Profil mis à jour', 'Vos informations ont été enregistrées');
           this.admin = response.utilisateur;
         }
         this.savingProfile = false;
       },
       error: (err) => {
         console.error('Erreur profil:', err);
-        this.toastService.error('Erreur', 'Impossible de mettre à jour');
+        
+        let errorMessage = 'Impossible de mettre à jour le profil';
+        
+        if (err.error?.error) {
+          const errorText = err.error.error;
+          
+          if (errorText.includes('email') && errorText.includes('dup key')) {
+            errorMessage = '❌ Cet email est déjà utilisé';
+            this.profileFormErrors.email = '⚠️ Email déjà pris';
+          }
+        }
+        
+        this.toastService.error('Erreur', errorMessage);
         this.savingProfile = false;
       }
     });
