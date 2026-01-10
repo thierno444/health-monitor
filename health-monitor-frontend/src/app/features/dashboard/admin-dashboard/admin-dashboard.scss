@@ -364,22 +364,124 @@ input[type="checkbox"] {
 
 // ========== RESPONSIVE ==========
 @media (max-width: 768px) {
+  body, html {
+    overflow-x: hidden;
+  }
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Header */
+  header {
+    padding: 0.5rem 0;
+    .flex {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .flex.items-center.space-x-3 {
+      width: 100%;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      .text-right {
+        text-align: left !important;
+        margin-top: 0.5rem;
+      }
+    }
+    button[title="Déconnexion"] {
+      width: 100%;
+      margin-top: 0.75rem;
+    }
+  }
+
+  /* Tabs navigation */
   .glass-tabs {
     overflow-x: auto;
-    
+    -webkit-overflow-scrolling: touch;
+    padding: 0.5rem 0;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    .flex {
+      display: inline-flex;
+      flex-wrap: nowrap;
+      gap: 0.5rem;
+      padding-bottom: 0.75rem;
+    }
     button {
+      flex: 0 0 auto;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      svg {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+      span {
+        display: none; /* Masquer le texte si trop petit */
+      }
+    }
+  }
+
+  /* Tables */
+  table {
+    font-size: 0.75rem;
+    th, td {
+      padding: 0.5rem;
       white-space: nowrap;
     }
   }
-  
-  table {
-    font-size: 0.875rem;
-    
-    th, td {
-      padding: 0.75rem 0.5rem;
+
+  /* Cards */
+  .stat-card {
+    padding: 1rem;
+  }
+
+  /* Modals */
+  .modal-content {
+    width: 95%;
+    max-width: none;
+    padding: 1rem;
+  }
+
+  /* Pagination */
+  .pagination {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Filtres */
+  .glass-tabs {
+    button {
+      padding: 0.5rem;
+      svg {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+    }
+  }
+
+  /* Formulaires */
+  input, select, textarea {
+    padding: 0.75rem;
+  }
+
+  /* Grilles */
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Actions */
+  .flex.flex-wrap.gap-3 {
+    flex-direction: column;
+    button {
+      width: 100%;
+      margin-bottom: 0.5rem;
     }
   }
 }
+
 
 // ========== PRINT STYLES ==========
 @media print {
