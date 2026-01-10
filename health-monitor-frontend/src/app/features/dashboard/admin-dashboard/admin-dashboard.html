@@ -22,19 +22,20 @@
       </div>
 
       <!-- Actions -->
-      <div class="flex flex-wrap gap-2 justify-center md:justify-end">
+      <div class="flex flex-wrap items-center gap-2 justify-center md:justify-end">
         <!-- Notifications -->
-        <app-notifications-dropdown class="flex-shrink-0"></app-notifications-dropdown>
+        <app-notifications-dropdown class="flex-shrink-0 w-8 h-8 md:w-auto md:h-auto"></app-notifications-dropdown>
 
         <!-- Toggle Dark/Light -->
         <button
           (click)="toggleTheme()"
-          class="p-2 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 dark:from-indigo-500 dark:to-purple-600 hover:scale-110 transition-all shadow-lg flex-shrink-0"
+          class="p-1.5 md:p-2 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 dark:from-indigo-500 dark:to-purple-600 hover:scale-110 transition-all shadow-lg flex-shrink-0"
+          aria-label="Changer le thème"
         >
-          <svg *ngIf="!darkMode" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg *ngIf="!darkMode" class="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
           </svg>
-          <svg *ngIf="darkMode" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg *ngIf="darkMode" class="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
           </svg>
         </button>
@@ -42,15 +43,20 @@
         <!-- Photo profil -->
         <img
           [src]="admin?.photoProfil || 'https://ui-avatars.com/api/?name=Admin'"
-          class="w-9 h-9 rounded-full border-2 border-white dark:border-gray-800 shadow-lg flex-shrink-0"
+          class="w-7 h-7 md:w-9 md:h-9 rounded-full border-2 border-white dark:border-gray-800 shadow-lg flex-shrink-0"
+          alt="Photo de profil"
         />
 
-        <!-- Déconnexion -->
+        <!-- Déconnexion - Texte masqué sur mobile, icône seulement -->
         <button
           (click)="logout()"
-          class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-lg transition-all font-medium text-sm border border-red-500/20 flex-shrink-0"
+          class="p-1.5 md:px-3 md:py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-lg transition-all font-medium text-sm border border-red-500/20 flex-shrink-0 flex items-center"
+          title="Déconnexion"
         >
-          Déconnexion
+          <svg class="w-4 h-4 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
+          <span class="hidden md:inline">Déconnexion</span>
         </button>
       </div>
     </div>
@@ -59,21 +65,22 @@
 
 
 
-    <!-- Tabs navigation -->
-    <div class="sticky top-[73px] z-30 bg-gradient-to-br from-indigo-50/95 via-purple-50/95 to-pink-50/95 dark:from-gray-900/95 dark:via-purple-900/20 dark:to-indigo-900/20 backdrop-blur-xl border-b border-purple-500/20">
-        <div class="container mx-auto px-6 py-4">
-            <div class="glass-tabs rounded-2xl p-2 inline-flex space-x-2 shadow-xl backdrop-blur-xl bg-white/60 dark:bg-gray-800/60">
+<!-- Tabs navigation -->
+<div class="sticky top-[73px] z-30 bg-gradient-to-br from-indigo-50/95 via-purple-50/95 to-pink-50/95 dark:from-gray-900/95 dark:via-purple-900/20 dark:to-indigo-900/20 backdrop-blur-xl border-b border-purple-500/20">
+    <div class="container mx-auto px-4 md:px-6 py-3 md:py-4">
+        <div class="glass-tabs rounded-2xl p-1.5 md:p-2 shadow-xl backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 w-full overflow-x-auto">
+            <div class="flex space-x-1 md:space-x-2 min-w-max md:min-w-0 md:justify-center">
 
                 <!-- Vue d'ensemble -->
                 <button
                     (click)="switchTab('overview')"
                     [class]="activeTab === 'overview' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
-                    class="relative px-8 py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-3 group"
+                    class="relative px-4 py-3 md:px-8 md:py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-2 md:space-x-3 group flex-shrink-0"
                 >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
                     </svg>
-                    <span>Vue d'ensemble</span>
+                    <span class="text-sm md:text-base">Vue d'ensemble</span>
                     <div *ngIf="activeTab === 'overview'" class="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur-xl opacity-50 -z-10"></div>
                 </button>
 
@@ -81,12 +88,12 @@
                 <button
                     (click)="switchTab('users')"
                     [class]="activeTab === 'users' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
-                    class="relative px-8 py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-3 group"
+                    class="relative px-4 py-3 md:px-8 md:py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-2 md:space-x-3 group flex-shrink-0"
                 >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
-                    <span>Utilisateurs</span>
+                    <span class="text-sm md:text-base">Utilisateurs</span>
                     <div *ngIf="activeTab === 'users'" class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur-xl opacity-50 -z-10"></div>
                 </button>
 
@@ -94,58 +101,58 @@
                 <button
                     (click)="switchTab('devices')"
                     [class]="activeTab === 'devices' ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
-                    class="relative px-8 py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-3 group"
+                    class="relative px-4 py-3 md:px-8 md:py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-2 md:space-x-3 group flex-shrink-0"
                 >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                     </svg>
-                    <span>Dispositifs</span>
+                    <span class="text-sm md:text-base">Dispositifs</span>
                     <div *ngIf="activeTab === 'devices'" class="absolute inset-0 bg-gradient-to-r from-green-500 to-teal-500 rounded-xl blur-xl opacity-50 -z-10"></div>
                 </button>
 
                 <!-- Logs -->
                 <button
-                (click)="switchTab('logs')"
-                [class]="activeTab === 'logs' ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
-                class="relative px-8 py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-3 group"
+                    (click)="switchTab('logs')"
+                    [class]="activeTab === 'logs' ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
+                    class="relative px-4 py-3 md:px-8 md:py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-2 md:space-x-3 group flex-shrink-0"
                 >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                <span>Logs</span>
-                <div *ngIf="activeTab === 'logs'" class="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-xl opacity-50 -z-10"></div>
+                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span class="text-sm md:text-base">Logs</span>
+                    <div *ngIf="activeTab === 'logs'" class="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-xl opacity-50 -z-10"></div>
                 </button>
 
                 <!-- Assignations -->
                 <button
-                  (click)="switchTab('assignments')"
-                  [class]="activeTab === 'assignments' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
-                  class="relative px-8 py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-3 group"
+                    (click)="switchTab('assignments')"
+                    [class]="activeTab === 'assignments' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
+                    class="relative px-4 py-3 md:px-8 md:py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-2 md:space-x-3 group flex-shrink-0"
                 >
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                  </svg>
-                  <span>Assignations</span>
-                  <div *ngIf="activeTab === 'assignments'" class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur-xl opacity-50 -z-10"></div>
+                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <span class="text-sm md:text-base">Assignations</span>
+                    <div *ngIf="activeTab === 'assignments'" class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur-xl opacity-50 -z-10"></div>
                 </button>
-
 
                 <!-- Profil -->
                 <button
                     (click)="switchTab('profile')"
                     [class]="activeTab === 'profile' ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg scale-105' : 'hover:bg-white/50 dark:hover:bg-gray-700/50'"
-                    class="relative px-8 py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-3 group"
+                    class="relative px-4 py-3 md:px-8 md:py-4 rounded-xl font-bold transition-all duration-300 flex items-center space-x-2 md:space-x-3 group flex-shrink-0"
                 >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
-                    <span>Mon Profil</span>
+                    <span class="text-sm md:text-base">Profil</span>
                     <div *ngIf="activeTab === 'profile'" class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl blur-xl opacity-50 -z-10"></div>
                 </button>
 
             </div>
         </div>
     </div>
+</div>
 
     <!-- Contenu principal -->
     <div class="container mx-auto px-4 pb-12">
