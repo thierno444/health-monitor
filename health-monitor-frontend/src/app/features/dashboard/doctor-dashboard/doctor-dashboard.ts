@@ -547,11 +547,18 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
 
 
 
-  toggleTheme(): void {
+toggleTheme(): void {
   this.themeService.toggleTheme();
-  // Forcer le rechargement des styles
+  
+  // Forcer le rechargement des styles avec une petite attente
   setTimeout(() => {
+    // Vérifier si le mode sombre est appliqué
+    const isDark = document.documentElement.classList.contains('dark');
+    console.log('🎨 Mode sombre activé:', isDark);
+    
+    // Forcer une reprise de transition pour tous les éléments
     document.body.classList.add('theme-transition');
+    
     setTimeout(() => {
       document.body.classList.remove('theme-transition');
     }, 300);
