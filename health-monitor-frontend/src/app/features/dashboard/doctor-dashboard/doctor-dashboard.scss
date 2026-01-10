@@ -300,3 +300,61 @@
     border: 2px solid #fff;
   }
 }
+
+
+// ========== ORGANISATION HEADER RESPONSIVE ==========
+
+@media (max-width: 768px) {
+  /* Header spécifique - organisation sur 2 lignes si nécessaire */
+  .glass-nav {
+    .flex.items-center.gap-2 {
+      flex-wrap: nowrap;
+      overflow-x: visible;
+      justify-content: space-between;
+      width: 100%;
+      
+      /* Groupe 1: Notifications + Thème */
+      > div:first-child {
+        display: flex;
+        gap: 0.5rem;
+        order: 1;
+      }
+      
+      /* Groupe 2: Profil + Déconnexion */
+      > div:last-child {
+        display: flex;
+        gap: 0.5rem;
+        order: 2;
+      }
+    }
+  }
+}
+
+/* Pour très petits écrans (moins de 360px) */
+@media (max-width: 360px) {
+  .glass-nav {
+    .flex.items-center.gap-2 {
+      /* Passer en colonne si vraiment trop étroit */
+      flex-direction: column;
+      gap: 0.75rem;
+      
+      > div {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      > div:last-child {
+        margin-top: 0.25rem;
+      }
+    }
+    
+    /* Réduire encore plus la taille des boutons */
+    button.p-1\.5 {
+      padding: 0.375rem;
+    }
+    
+    .flex.items-center.space-x-2 {
+      padding: 0.25rem;
+    }
+  }
+}
