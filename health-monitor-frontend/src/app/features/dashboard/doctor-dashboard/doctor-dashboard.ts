@@ -24,6 +24,27 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./doctor-dashboard.scss']
 })
 export class DoctorDashboardComponent implements OnInit, OnDestroy {
+
+  // ========== VALIDATION PROFIL ==========
+  profileFormErrors = {
+    prenom: '',
+    nom: '',
+    email: '',
+    telephone: '',
+    genre: '',
+    dateDeNaissance: ''
+  };
+
+  passwordFormErrors = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  };
+
+  // Pour la date maximale
+  today: string = new Date().toISOString().split('T')[0];
+
+
   // Utilisateur connecté
   user: User | null = null;
   
@@ -665,15 +686,172 @@ initProfileForm(): void {
       email: this.user.email,
       telephone: this.user.telephone || '',
       genre: this.user.genre || '',
-      dateDeNaissance: this.user.dateDeNaissance ? this.user.dateDeNaissance.split('T')[0] : ''  // ← FIX FORMAT DATE
+      dateDeNaissance: this.user.dateDeNaissance ? this.user.dateDeNaissance.split('T')[0] : ''
     };
     
-    console.log('📝 Formulaire médecin initialisé:', this.profileForm);  // ← AJOUTE CE LOG
+    // Réinitialiser les erreurs
+    this.profileFormErrors = {
+      prenom: '',
+      nom: '',
+      email: '',
+      telephone: '',
+      genre: '',
+      dateDeNaissance: ''
+    };
+    
+    console.log('📝 Formulaire médecin initialisé:', this.profileForm);
   }
 }
 
-  saveProfile(): void {
+// ========== VALIDATION FORMULAIRE PROFIL ==========
+
+validateProfileField(field: string): void {
+  switch (field) {
+    case 'prenom':
+      if (!this.profileForm.prenom.trim()) {
+        this.profileFormErrors.prenom = '⚠️ Le prénom est requis';
+      } else if (this.profileForm.prenom.length < 2) {
+        this.profileFormErrors.prenom = '⚠️ Minimum 2 caractères';
+      } else if (this.profileForm.prenom.length > 50) {
+        this.profileFormErrors.prenom = '⚠️ Maximum 50 caractères';
+      } else {
+        this.profileFormErrors.prenom = '';
+      }
+      break;
+
+    case 'nom':
+      if (!this.profileForm.nom.trim()) {
+        this.profileFormErrors.nom = '⚠️ Le nom est requis';
+      } else if (this.profileForm.nom.length < 2) {
+        this.profileFormErrors.nom = '⚠️ Minimum 2 caractères';
+      } else if (this.profileForm.nom.length > 50) {
+        this.profileFormErrors.nom = '⚠️ Maximum 50 caractères';
+      } else {
+        this.profileFormErrors.nom = '';
+      }
+      break;
+
+    case 'email':
+      if (!this.profileForm.email.trim()) {
+        this.profileFormErrors.email = '⚠️ L\'email est requis';
+      } else if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(this.profileForm.email)) {
+        this.profileFormErrors.email = '⚠️ Format email invalide';
+      } else {
+        this.profileFormErrors.email = '';
+      }
+      break;
+
+    case 'telephone':
+      if (this.profileForm.telephone && !/^(\+?221|0)?[0-9]{9}$/.test(this.profileForm.telephone.replace(/\s/g, ''))) {
+        this.profileFormErrors.telephone = '⚠️ Format: +221XXXXXXXXX ou 0XXXXXXXXX';
+      } else {
+        this.profileFormErrors.telephone = '';
+      }
+      break;
+
+    case 'genre':
+      if (!this.profileForm.genre.trim()) {
+        this.profileFormErrors.genre = '⚠️ Le genre est requis';
+      } else if (!['homme', 'femme', 'autre'].includes(this.profileForm.genre)) {
+        this.profileFormErrors.genre = '⚠️ Genre invalide';
+      } else {
+        this.profileFormErrors.genre = '';
+      }
+      break;
+
+    case 'dateDeNaissance':
+      if (this.profileForm.dateDeNaissance) {
+        const birthDate = new Date(this.profileForm.dateDeNaissance);
+        const today = new Date();
+        
+        if (birthDate > today) {
+          this.profileFormErrors.dateDeNaissance = '⚠️ Date future invalide';
+        } else if (today.getFullYear() - birthDate.getFullYear() < 13) {
+          this.profileFormErrors.dateDeNaissance = '⚠️ Âge minimum 13 ans';
+        } else if (today.getFullYear() - birthDate.getFullYear() > 120) {
+          this.profileFormErrors.dateDeNaissance = '⚠️ Âge maximum 120 ans';
+        } else {
+          this.profileFormErrors.dateDeNaissance = '';
+        }
+      } else {
+        this.profileFormErrors.dateDeNaissance = '';
+      }
+      break;
+  }
+}
+
+validateProfileForm(): boolean {
+  this.validateProfileField('prenom');
+  this.validateProfileField('nom');
+  this.validateProfileField('email');
+  this.validateProfileField('telephone');
+  this.validateProfileField('genre');
+  this.validateProfileField('dateDeNaissance');
+
+  return !this.profileFormErrors.prenom &&
+         !this.profileFormErrors.nom &&
+         !this.profileFormErrors.email &&
+         !this.profileFormErrors.telephone &&
+         !this.profileFormErrors.genre &&
+         !this.profileFormErrors.dateDeNaissance;
+}
+
+// ========== VALIDATION MOT DE PASSE ==========
+
+validatePasswordField(field: string): void {
+  switch (field) {
+    case 'currentPassword':
+      if (!this.passwordForm.currentPassword) {
+        this.passwordFormErrors.currentPassword = '⚠️ Mot de passe actuel requis';
+      } else {
+        this.passwordFormErrors.currentPassword = '';
+      }
+      break;
+
+    case 'newPassword':
+      if (!this.passwordForm.newPassword) {
+        this.passwordFormErrors.newPassword = '⚠️ Nouveau mot de passe requis';
+      } else if (this.passwordForm.newPassword.length < 6) {
+        this.passwordFormErrors.newPassword = '⚠️ Minimum 6 caractères';
+      } else {
+        this.passwordFormErrors.newPassword = '';
+      }
+      // Revalider la confirmation si elle existe
+      if (this.passwordForm.confirmPassword) {
+        this.validatePasswordField('confirmPassword');
+      }
+      break;
+
+    case 'confirmPassword':
+      if (!this.passwordForm.confirmPassword) {
+        this.passwordFormErrors.confirmPassword = '⚠️ Confirmation requise';
+      } else if (this.passwordForm.confirmPassword !== this.passwordForm.newPassword) {
+        this.passwordFormErrors.confirmPassword = '⚠️ Les mots de passe ne correspondent pas';
+      } else {
+        this.passwordFormErrors.confirmPassword = '';
+      }
+      break;
+  }
+}
+
+validatePasswordForm(): boolean {
+  this.validatePasswordField('currentPassword');
+  this.validatePasswordField('newPassword');
+  this.validatePasswordField('confirmPassword');
+
+  return !this.passwordFormErrors.currentPassword &&
+         !this.passwordFormErrors.newPassword &&
+         !this.passwordFormErrors.confirmPassword;
+}
+
+saveProfile(): void {
   if (!this.user?.id) return;
+  
+  // Valider le formulaire avant envoi
+  if (!this.validateProfileForm()) {
+    this.toastService.warning('⚠️ Formulaire invalide', 'Corrigez les erreurs avant de sauvegarder');
+    return;
+  }
   
   this.savingProfile = true;
   
@@ -688,74 +866,86 @@ initProfileForm(): void {
     dateDeNaissance: this.profileForm.dateDeNaissance  
   };
     
-    this.authService.updateProfile(this.user.id, profileData).subscribe({
-      next: (response) => {
-        console.log('✅ Réponse backend:', response);
+  this.authService.updateProfile(this.user.id, profileData).subscribe({
+    next: (response) => {
+      console.log('✅ Réponse backend:', response);
+      
+      if (response.success && response.utilisateur && this.user) { 
+        this.user.prenom = response.utilisateur.prenom;
+        this.user.nom = response.utilisateur.nom;
+        this.user.email = response.utilisateur.email;
+        this.user.telephone = response.utilisateur.telephone;
+
+        if (response.utilisateur.photoProfil) {
+          this.user.photoProfil = response.utilisateur.photoProfil;
+        }
         
-        if (response.success && response.utilisateur && this.user) { 
-          this.user.prenom = response.utilisateur.prenom;
-          this.user.nom = response.utilisateur.nom;
-          this.user.email = response.utilisateur.email;
-          this.user.telephone = response.utilisateur.telephone;
-
-          
-          
-          if (response.utilisateur.photoProfil) {
-            this.user.photoProfil = response.utilisateur.photoProfil;
-          }
-          
-          this.authService.loadUserProfile();
-          
-          this.savingProfile = false;
-          this.toastService.success('Profil mis à jour !', 'Vos informations ont été modifiées');
-        }
-      },
-      error: (err) => {
-        console.error('Erreur maj profil:', err);
+        this.authService.loadUserProfile();
+        
         this.savingProfile = false;
-        this.toastService.error('Erreur', 'Impossible de mettre à jour le profil');
+        this.toastService.success('✅ Profil mis à jour', 'Vos informations ont été modifiées');
       }
-    });
-  }
-
-  changePassword(): void {
-    if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
-      this.toastService.error('Erreur', 'Les mots de passe ne correspondent pas');
-      return;
-    }
-    
-    if (this.passwordForm.newPassword.length < 6) {
-      this.toastService.error('Erreur', 'Le mot de passe doit contenir au moins 6 caractères');
-      return;
-    }
-    
-    if (!this.user?.id) return;
-    
-    this.changingPassword = true;
-    
-    this.authService.changePassword(
-      this.user.id, 
-      this.passwordForm.currentPassword, 
-      this.passwordForm.newPassword
-    ).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.passwordForm = {
-            currentPassword: '',
-            newPassword: '',
-            confirmPassword: ''
-          };
-          this.changingPassword = false;
-          this.toastService.success('Mot de passe modifié !', 'Vous pouvez maintenant vous connecter avec le nouveau');
+    },
+    error: (err) => {
+      console.error('Erreur maj profil:', err);
+      
+      let errorMessage = 'Impossible de mettre à jour le profil';
+      
+      if (err.error?.error) {
+        const errorText = err.error.error;
+        
+        if (errorText.includes('email') && errorText.includes('dup key')) {
+          errorMessage = '❌ Cet email est déjà utilisé';
+          this.profileFormErrors.email = '⚠️ Email déjà pris';
         }
-      },
-      error: (err) => {
-        console.error('Erreur changement mdp:', err);
-        this.changingPassword = false;
-        this.toastService.error('Erreur', err.error?.message || 'Mot de passe actuel incorrect');
       }
-    });
+      
+      this.toastService.error('❌ Erreur', errorMessage);
+      this.savingProfile = false;
+    }
+  });
+}
+
+ changePassword(): void {
+  // Valider le formulaire avant envoi
+  if (!this.validatePasswordForm()) {
+    this.toastService.warning('⚠️ Formulaire invalide', 'Corrigez les erreurs avant de modifier');
+    return;
   }
+  
+  if (!this.user?.id) return;
+  
+  this.changingPassword = true;
+  
+  this.authService.changePassword(
+    this.user.id, 
+    this.passwordForm.currentPassword, 
+    this.passwordForm.newPassword
+  ).subscribe({
+    next: (response) => {
+      if (response.success) {
+        this.passwordForm = {
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        };
+        // Réinitialiser les erreurs
+        this.passwordFormErrors = {
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        };
+        this.changingPassword = false;
+        this.toastService.success('✅ Mot de passe modifié', 'Vous pouvez maintenant vous connecter avec le nouveau');
+      }
+    },
+    error: (err) => {
+      console.error('Erreur changement mdp:', err);
+      this.changingPassword = false;
+      this.toastService.error('❌ Erreur', err.error?.message || 'Mot de passe actuel incorrect');
+    }
+  });
+}
 
 uploadPhoto(event: any): void {
     const file = event.target.files[0];
