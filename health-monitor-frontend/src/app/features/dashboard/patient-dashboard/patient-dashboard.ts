@@ -178,6 +178,21 @@ today: string = new Date().toISOString().split('T')[0];
   currentTab: string = 'overview';
   sidebarOpen: boolean = true;
   darkMode: boolean = false;
+
+  // ========== FILTRAGE HISTORIQUE ==========
+filterDateFrom: string = '';
+filterDateTo: string = '';
+filterStatus: 'all' | 'NORMAL' | 'ATTENTION' | 'DANGER' = 'all';
+filterBpmMin: number | null = null;
+filterBpmMax: number | null = null;
+filterSpo2Min: number | null = null;
+filterSpo2Max: number | null = null;
+showFilters: boolean = false;
+
+// Pour la date maximale d'aujourd'hui
+get todayDate(): string {
+  return new Date().toISOString().split('T')[0];
+}
   
   private subscriptions: Subscription[] = [];
 
@@ -1218,7 +1233,7 @@ changePassword(): void {
     this.toastService.warning('⚠️ Formulaire invalide', 'Corrigez les erreurs avant de modifier');
     return;
   }
-  
+
   if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
     this.toastService.error('Erreur', 'Les mots de passe ne correspondent pas');
     return;
@@ -1445,6 +1460,123 @@ uploadPhoto(event: any): void {
       }
     });
   }
+
+
+  // ========== MÉTHODES DE FILTRAGE ==========
+
+// Appliquer tous les filtres
+get filteredMeasurements(): any[] {
+  if (!this.measurements) return [];
+  
+  let filtered = [...this.measurements];
+  
+  // Filtre par date
+  if (this.filterDateFrom) {
+    const fromDate = new Date(this.filterDateFrom);
+    filtered = filtered.filter(m => 
+      new Date(m.horodatageMesure) >= fromDate
+    );
+  }
+  
+  if (this.filterDateTo) {
+    const toDate = new Date(this.filterDateTo);
+    toDate.setHours(23, 59, 59, 999); // Fin de journée
+    filtered = filtered.filter(m => 
+      new Date(m.horodatageMesure) <= toDate
+    );
+  }
+  
+  // Filtre par statut
+  if (this.filterStatus !== 'all') {
+    filtered = filtered.filter(m => 
+      m.statut === this.filterStatus
+    );
+  }
+  
+  // Filtre BPM
+  if (this.filterBpmMin !== null) {
+    filtered = filtered.filter(m => m.bpm >= this.filterBpmMin!);
+  }
+  
+  if (this.filterBpmMax !== null) {
+    filtered = filtered.filter(m => m.bpm <= this.filterBpmMax!);
+  }
+  
+  // Filtre SpO2
+  if (this.filterSpo2Min !== null) {
+    filtered = filtered.filter(m => m.spo2 >= this.filterSpo2Min!);
+  }
+  
+  if (this.filterSpo2Max !== null) {
+    filtered = filtered.filter(m => m.spo2 <= this.filterSpo2Max!);
+  }
+  
+  return filtered;
+}
+
+// Pagination avec filtres
+// get paginatedMeasurements(): any[] {
+//   const start = (this.currentPage - 1) * this.itemsPerPage;
+//   const end = start + this.itemsPerPage;
+//   return this.filteredMeasurements.slice(start, end);
+// }
+
+// get totalPages(): number {
+//   return Math.ceil(this.filteredMeasurements.length / this.itemsPerPage);
+// }
+
+// get pages(): number[] {
+//   return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+// }
+
+// Réinitialiser les filtres
+resetFilters(): void {
+  this.filterDateFrom = '';
+  this.filterDateTo = '';
+  this.filterStatus = 'all';
+  this.filterBpmMin = null;
+  this.filterBpmMax = null;
+  this.filterSpo2Min = null;
+  this.filterSpo2Max = null;
+  this.currentPage = 1;
+}
+
+// Toggle affichage filtres
+toggleFilters(): void {
+  this.showFilters = !this.showFilters;
+}
+
+// Exporter les données filtrées
+exportFilteredData(): void {
+  if (this.filteredMeasurements.length === 0) {
+    this.toastService.warning('Aucune donnée', 'Aucune mesure à exporter après filtrage');
+    return;
+  }
+  
+  this.exportingCSV = true;
+  
+  // Préparer les données
+  const data = this.filteredMeasurements.map(m => ({
+    Date: new Date(m.horodatageMesure).toLocaleString('fr-FR'),
+    BPM: m.bpm,
+    SpO2: `${m.spo2}%`,
+    Statut: m.statut,
+    Température: m.temperature ? `${m.temperature}°C` : 'N/A'
+  }));
+  
+  // Convertir en CSV
+  const headers = Object.keys(data[0]).join(';');
+  const rows = data.map(item => Object.values(item).join(';')).join('\n');
+  const csvContent = `${headers}\n${rows}`;
+  
+  // Télécharger
+  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const filename = `historique-filtre-${new Date().toISOString().split('T')[0]}.csv`;
+  this.exportService.downloadFile(blob, filename);
+  
+  this.exportingCSV = false;
+  this.toastService.success('Export réussi', `${this.filteredMeasurements.length} mesures exportées`);
+}
 
 
  ngOnDestroy(): void {

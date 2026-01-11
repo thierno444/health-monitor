@@ -456,73 +456,334 @@
       </div>
 
       <!-- ONGLET HISTORIQUE -->
-      <div *ngIf="!loading && currentTab === 'history'" class="animate-fade-in">
-        <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700 backdrop-blur-xl">
-          <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Historique complet</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead>
-                <tr class="border-b border-gray-200 dark:border-gray-700">
-                  <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Date</th>
-                  <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">BPM</th>
-                  <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">SpO2</th>
-                  <th class="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let m of paginatedMeasurements" class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <td class="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">{{ m.horodatageMesure | date:'short' }}</td>
-                  <td class="py-3 px-4 text-sm font-bold {{ getStatusColor(getBpmStatus(m.bpm)) }}">{{ m.bpm }}</td>
-                  <td class="py-3 px-4 text-sm font-bold {{ getStatusColor(getSpo2Status(m.spo2)) }}">{{ m.spo2 }}%</td>
-                  <td class="py-3 px-4">
-                    <span class="px-3 py-1 rounded-full text-xs font-bold {{ getStatusColor(m.statut) }} {{ getStatusBg(m.statut) }} border border-current">
-                      {{ m.statut }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+      <!-- ONGLET HISTORIQUE -->
+    <div *ngIf="!loading && currentTab === 'history'" class="animate-fade-in">
+      <div class="glass dark:bg-gray-800/80 rounded-3xl p-6 border border-white/20 dark:border-gray-700 backdrop-blur-xl">
+        
+        <!-- En-tête avec bouton filtres -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div>
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white">Historique complet</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {{ filteredMeasurements.length }} mesure(s) trouvée(s)
+              <span *ngIf="filterDateFrom || filterDateTo || filterStatus !== 'all'" class="text-blue-600 dark:text-blue-400">
+                (avec filtres)
+              </span>
+            </p>
           </div>
+          
+          <div class="flex items-center gap-3">
+            <!-- Bouton filtres -->
+            <button 
+              (click)="toggleFilters()"
+              class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+              </svg>
+              {{ showFilters ? 'Masquer filtres' : 'Afficher filtres' }}
+            </button>
+            
+            <!-- Export CSV -->
+            <button 
+              (click)="exportFilteredData()"
+              [disabled]="exportingCSV || filteredMeasurements.length === 0"
+              class="px-4 py-2 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              {{ exportingCSV ? 'Export...' : 'Exporter CSV' }}
+            </button>
+          </div>
+        </div>
 
-          <!-- Pagination -->
-          <div *ngIf="measurements.length > itemsPerPage" class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <div class="text-sm text-gray-600 dark:text-gray-400">
-              Page {{ currentPage }} sur {{ totalPages }} - Total: {{ measurements.length }} mesures
+        <!-- Section filtres (toggle) -->
+        <div *ngIf="showFilters" class="mb-6 p-5 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-xl border border-blue-200 dark:border-gray-700 animate-slide-down">
+          <h4 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+            </svg>
+            Filtrer les mesures
+          </h4>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- Date de début -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Du</label>
+              <input 
+                type="date" 
+                [(ngModel)]="filterDateFrom"
+                [max]="filterDateTo || todayDate"
+                class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+              />
             </div>
             
-            <div class="flex items-center space-x-2">
-              <button 
-                (click)="previousPage()" 
-                [disabled]="currentPage === 1"
-                class="px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            <!-- Date de fin -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Au</label>
+              <input 
+                type="date" 
+                [(ngModel)]="filterDateTo"
+                [min]="filterDateFrom"
+                [max]="todayDate"
+                class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+              />
+            </div>
+            
+            <!-- Statut -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Statut</label>
+              <select
+                [(ngModel)]="filterStatus"
+                class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
               >
-                ← Précédent
+                <option value="all">Tous les statuts</option>
+                <option value="NORMAL">Normal ✅</option>
+                <option value="ATTENTION">Attention ⚠️</option>
+                <option value="DANGER">Danger 🚨</option>
+              </select>
+            </div>
+            
+            <!-- Boutons actions -->
+            <div class="flex items-end gap-2">
+              <button 
+                (click)="resetFilters()"
+                class="px-4 py-2 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-lg font-bold shadow transition-all flex-1"
+              >
+                Réinitialiser
               </button>
+            </div>
+          </div>
+          
+          <!-- Filtres avancés (BPM et SpO2) -->
+          <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Filtres avancés</h5>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               
+              <!-- BPM Min/Max -->
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">BPM</label>
+                <div class="flex items-center gap-2">
+                  <input 
+                    type="number" 
+                    placeholder="Min"
+                    [(ngModel)]="filterBpmMin"
+                    min="30"
+                    max="200"
+                    class="w-1/2 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+                  />
+                  <span class="text-gray-500">à</span>
+                  <input 
+                    type="number" 
+                    placeholder="Max"
+                    [(ngModel)]="filterBpmMax"
+                    min="30"
+                    max="200"
+                    class="w-1/2 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+                  />
+                </div>
+              </div>
+              
+              <!-- SpO2 Min/Max -->
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">SpO2 (%)</label>
+                <div class="flex items-center gap-2">
+                  <input 
+                    type="number" 
+                    placeholder="Min"
+                    [(ngModel)]="filterSpo2Min"
+                    min="70"
+                    max="100"
+                    class="w-1/2 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+                  />
+                  <span class="text-gray-500">à</span>
+                  <input 
+                    type="number" 
+                    placeholder="Max"
+                    [(ngModel)]="filterSpo2Max"
+                    min="70"
+                    max="100"
+                    class="w-1/2 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Résumé des filtres actifs -->
+          <div *ngIf="filterDateFrom || filterDateTo || filterStatus !== 'all' || filterBpmMin !== null || filterBpmMax !== null || filterSpo2Min !== null || filterSpo2Max !== null" 
+              class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <p class="text-sm text-blue-800 dark:text-blue-300 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Filtres actifs : 
+              <span class="font-medium ml-1">
+                {{ filterDateFrom ? 'Du ' + (filterDateFrom | date:'dd/MM/yyyy') + ' ' : '' }}
+                {{ filterDateTo ? 'au ' + (filterDateTo | date:'dd/MM/yyyy') + ' ' : '' }}
+                {{ filterStatus !== 'all' ? 'Statut: ' + filterStatus + ' ' : '' }}
+                {{ filterBpmMin !== null ? 'BPM ≥ ' + filterBpmMin + ' ' : '' }}
+                {{ filterBpmMax !== null ? 'BPM ≤ ' + filterBpmMax + ' ' : '' }}
+                {{ filterSpo2Min !== null ? 'SpO2 ≥ ' + filterSpo2Min + '% ' : '' }}
+                {{ filterSpo2Max !== null ? 'SpO2 ≤ ' + filterSpo2Max + '% ' : '' }}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Tableau des mesures -->
+        <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900">
+                <th class="text-left py-4 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Date et heure
+                  </div>
+                </th>
+                <th class="text-left py-4 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                    </svg>
+                    BPM
+                  </div>
+                </th>
+                <th class="text-left py-4 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                    SpO2
+                  </div>
+                </th>
+                <th class="text-left py-4 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Statut
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Message si aucune mesure -->
+              <tr *ngIf="filteredMeasurements.length === 0">
+                <td colspan="4" class="py-8 px-4 text-center text-gray-500 dark:text-gray-400">
+                  <div class="flex flex-col items-center justify-center">
+                    <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p class="text-lg font-medium mb-2">Aucune mesure trouvée</p>
+                    <p class="text-sm">Essayez de modifier vos filtres ou vérifiez vos données.</p>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Liste des mesures -->
+              <tr *ngFor="let m of paginatedMeasurements" 
+                  class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200">
+                <td class="py-4 px-4 text-sm text-gray-700 dark:text-gray-300 font-medium">
+                  {{ m.horodatageMesure | date:'dd/MM/yyyy HH:mm' }}
+                </td>
+                <td class="py-4 px-4 text-sm font-bold {{ getStatusColor(getBpmStatus(m.bpm)) }}">
+                  <div class="flex items-center gap-2">
+                    {{ m.bpm }}
+                    <span class="text-xs font-normal opacity-75">BPM</span>
+                  </div>
+                </td>
+                <td class="py-4 px-4 text-sm font-bold {{ getStatusColor(getSpo2Status(m.spo2)) }}">
+                  <div class="flex items-center gap-2">
+                    {{ m.spo2 }}
+                    <span class="text-xs font-normal opacity-75">%</span>
+                  </div>
+                </td>
+                <td class="py-4 px-4">
+                  <span class="px-3 py-1.5 rounded-full text-xs font-bold {{ getStatusColor(m.statut) }} {{ getStatusBg(m.statut) }} border border-current/30 shadow-sm">
+                    {{ m.statut }} {{ getStatusIcon(m.statut) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="filteredMeasurements.length > itemsPerPage" 
+            class="flex flex-col sm:flex-row items-center justify-between mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 gap-4">
+          
+          <div class="text-sm text-gray-600 dark:text-gray-400">
+            <span class="font-medium">{{ filteredMeasurements.length }}</span> mesure(s) trouvée(s) • 
+            Page <span class="font-medium">{{ currentPage }}</span> sur <span class="font-medium">{{ totalPages }}</span>
+          </div>
+          
+          <div class="flex items-center space-x-2">
+            <button 
+              (click)="previousPage()" 
+              [disabled]="currentPage === 1"
+              class="px-4 py-2.5 rounded-xl bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow flex items-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+              Précédent
+            </button>
+            
+            <!-- Pages -->
+            <div class="flex items-center space-x-1">
               <button 
                 *ngFor="let page of pages"
                 (click)="goToPage(page)"
-                [class.bg-blue-600]="page === currentPage"
-                [class.text-white]="page === currentPage"
-                [class.bg-white]="page !== currentPage"
-                [class.dark:bg-gray-700]="page !== currentPage"
-                [class.text-gray-700]="page !== currentPage"
-                [class.dark:text-gray-300]="page !== currentPage"
-                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-blue-50 dark:hover:bg-gray-600 transition-all font-medium"
-                >
+                [class]="page === currentPage ? 
+                  'px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold shadow-md' : 
+                  'px-3.5 py-2.5 rounded-xl bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all shadow-sm hover:shadow'"
+              >
                 {{ page }}
               </button>
-              <button 
-            (click)="nextPage()" 
-            [disabled]="currentPage === totalPages"
-            class="px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            Suivant →
-          </button>
+            </div>
+            
+            <button 
+              (click)="nextPage()" 
+              [disabled]="currentPage === totalPages"
+              class="px-4 py-2.5 rounded-xl bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow flex items-center gap-2"
+            >
+              Suivant
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Message si aucun résultat après filtrage -->
+        <div *ngIf="filteredMeasurements.length === 0 && measurements.length > 0" 
+            class="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl border border-yellow-200 dark:border-yellow-700">
+          <div class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div>
+              <p class="font-medium text-yellow-800 dark:text-yellow-300">Aucune mesure ne correspond à vos filtres</p>
+              <p class="text-sm text-yellow-700/80 dark:text-yellow-400/80 mt-1">
+                {{ measurements.length }} mesure(s) totale(s) disponibles. Essayez d'élargir vos critères de recherche.
+              </p>
+            </div>
+            <button 
+              (click)="resetFilters()"
+              class="ml-auto px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-lg font-bold shadow transition-all"
+            >
+              Réinitialiser filtres
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
     <!-- ========== ONGLET NOTES MÉDICALES ========== -->
       <div *ngIf="!loading && currentTab === 'notes'" class="space-y-6 animate-fade-in">
