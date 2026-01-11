@@ -82,6 +82,32 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, AfterViewIn
     confirmPassword: ''
   };
 
+  // ========== VALIDATION PROFIL ==========
+profileFormErrors = {
+  prenom: '',
+  nom: '',
+  email: '',
+  telephone: '',
+  genre: '',
+  dateDeNaissance: ''
+};
+
+passwordFormErrors = {
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+};
+
+// Pour la validation en temps réel des mots de passe
+private passwordFieldTouched: { [key: string]: boolean } = {
+  currentPassword: false,
+  newPassword: false,
+  confirmPassword: false
+};
+
+// Pour la date maximale
+today: string = new Date().toISOString().split('T')[0];
+
   // Notes
   mesNotes: Note[] = [];
   loadingNotes = false;
@@ -958,11 +984,182 @@ initForms(): void {
     console.log('📝 Formulaire initialisé:', this.profileForm);   
   }
 }
+
+// ========== VALIDATION FORMULAIRE PROFIL ==========
+
+validateProfileField(field: string): void {
+  switch (field) {
+    case 'prenom':
+      if (!this.profileForm.prenom.trim()) {
+        this.profileFormErrors.prenom = '⚠️ Le prénom est requis';
+      } else if (this.profileForm.prenom.length < 2) {
+        this.profileFormErrors.prenom = '⚠️ Minimum 2 caractères';
+      } else if (this.profileForm.prenom.length > 50) {
+        this.profileFormErrors.prenom = '⚠️ Maximum 50 caractères';
+      } else {
+        this.profileFormErrors.prenom = '';
+      }
+      break;
+
+    case 'nom':
+      if (!this.profileForm.nom.trim()) {
+        this.profileFormErrors.nom = '⚠️ Le nom est requis';
+      } else if (this.profileForm.nom.length < 2) {
+        this.profileFormErrors.nom = '⚠️ Minimum 2 caractères';
+      } else if (this.profileForm.nom.length > 50) {
+        this.profileFormErrors.nom = '⚠️ Maximum 50 caractères';
+      } else {
+        this.profileFormErrors.nom = '';
+      }
+      break;
+
+    case 'email':
+      if (!this.profileForm.email.trim()) {
+        this.profileFormErrors.email = '⚠️ L\'email est requis';
+      } else if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(this.profileForm.email)) {
+        this.profileFormErrors.email = '⚠️ Format email invalide';
+      } else {
+        this.profileFormErrors.email = '';
+      }
+      break;
+
+    case 'telephone':
+      if (this.profileForm.telephone && !/^(\+?221|0)?[0-9]{9}$/.test(this.profileForm.telephone.replace(/\s/g, ''))) {
+        this.profileFormErrors.telephone = '⚠️ Format: +221XXXXXXXXX ou 0XXXXXXXXX';
+      } else {
+        this.profileFormErrors.telephone = '';
+      }
+      break;
+
+    case 'genre':
+      if (!this.profileForm.genre.trim()) {
+        this.profileFormErrors.genre = '⚠️ Le genre est requis';
+      } else if (!['homme', 'femme', 'autre'].includes(this.profileForm.genre)) {
+        this.profileFormErrors.genre = '⚠️ Genre invalide';
+      } else {
+        this.profileFormErrors.genre = '';
+      }
+      break;
+
+    case 'dateDeNaissance':
+      if (this.profileForm.dateDeNaissance) {
+        const birthDate = new Date(this.profileForm.dateDeNaissance);
+        const today = new Date();
+        
+        if (birthDate > today) {
+          this.profileFormErrors.dateDeNaissance = '⚠️ Date future invalide';
+        } else if (today.getFullYear() - birthDate.getFullYear() < 13) {
+          this.profileFormErrors.dateDeNaissance = '⚠️ Âge minimum 13 ans';
+        } else if (today.getFullYear() - birthDate.getFullYear() > 120) {
+          this.profileFormErrors.dateDeNaissance = '⚠️ Âge maximum 120 ans';
+        } else {
+          this.profileFormErrors.dateDeNaissance = '';
+        }
+      } else {
+        this.profileFormErrors.dateDeNaissance = '';
+      }
+      break;
+  }
+}
+
+validateProfileForm(): boolean {
+  this.validateProfileField('prenom');
+  this.validateProfileField('nom');
+  this.validateProfileField('email');
+  this.validateProfileField('telephone');
+  this.validateProfileField('genre');
+  this.validateProfileField('dateDeNaissance');
+
+  return !this.profileFormErrors.prenom &&
+         !this.profileFormErrors.nom &&
+         !this.profileFormErrors.email &&
+         !this.profileFormErrors.telephone &&
+         !this.profileFormErrors.genre &&
+         !this.profileFormErrors.dateDeNaissance;
+}
+
+// ========== VALIDATION MOT DE PASSE ==========
+
+validatePasswordField(field: string): void {
+  // Ne valider que si le champ a été touché OU a du contenu
+  const hasContent = !!this.passwordForm[field as keyof typeof this.passwordForm];
+  
+  if (!this.passwordFieldTouched[field] && !hasContent) {
+    return; // Ne pas afficher d'erreur si pas touché et vide
+  }
+  
+  // Marquer comme touché si validation appelée
+  this.passwordFieldTouched[field] = true;
+  
+  switch (field) {
+    case 'currentPassword':
+      if (!this.passwordForm.currentPassword) {
+        this.passwordFormErrors.currentPassword = '⚠️ Mot de passe actuel requis';
+      } else {
+        this.passwordFormErrors.currentPassword = '';
+      }
+      break;
+
+    case 'newPassword':
+      if (!this.passwordForm.newPassword) {
+        this.passwordFormErrors.newPassword = '⚠️ Nouveau mot de passe requis';
+      } else if (this.passwordForm.newPassword.length < 6) {
+        this.passwordFormErrors.newPassword = '⚠️ Minimum 6 caractères';
+      } else {
+        this.passwordFormErrors.newPassword = '';
+      }
+      // Revalider la confirmation si elle existe
+      if (this.passwordForm.confirmPassword) {
+        this.validatePasswordField('confirmPassword');
+      }
+      break;
+
+    case 'confirmPassword':
+      if (!this.passwordForm.confirmPassword) {
+        this.passwordFormErrors.confirmPassword = '⚠️ Confirmation requise';
+      } else if (this.passwordForm.confirmPassword !== this.passwordForm.newPassword) {
+        this.passwordFormErrors.confirmPassword = '⚠️ Les mots de passe ne correspondent pas';
+      } else {
+        this.passwordFormErrors.confirmPassword = '';
+      }
+      break;
+  }
+}
+
+validatePasswordForm(): boolean {
+  this.validatePasswordField('currentPassword');
+  this.validatePasswordField('newPassword');
+  this.validatePasswordField('confirmPassword');
+
+  return !this.passwordFormErrors.currentPassword &&
+         !this.passwordFormErrors.newPassword &&
+         !this.passwordFormErrors.confirmPassword;
+}
+
+onPasswordInput(field: string): void {
+  // Marquer le champ comme "touché" seulement s'il y a du contenu
+  if (this.passwordForm[field as keyof typeof this.passwordForm]) {
+    this.passwordFieldTouched[field] = true;
+    this.validatePasswordField(field);
+  }
+}
+
+hasPasswordErrors(): boolean {
+  return !!this.passwordFormErrors.currentPassword ||
+         !!this.passwordFormErrors.newPassword ||
+         !!this.passwordFormErrors.confirmPassword;
+}
  
 // Sauvegarder profil
 // Sauvegarder profil
 saveProfile(): void {
   if (!this.user?.id) return;
+
+  // Valider le formulaire avant envoi
+  if (!this.validateProfileForm()) {
+    this.toastService.warning('⚠️ Formulaire invalide', 'Corrigez les erreurs avant de sauvegarder');
+    return;
+  }
   
   this.savingProfile = true;
   
@@ -1016,6 +1213,12 @@ saveProfile(): void {
 
 // Changer mot de passe
 changePassword(): void {
+  // Valider le formulaire avant envoi
+  if (!this.validatePasswordForm()) {
+    this.toastService.warning('⚠️ Formulaire invalide', 'Corrigez les erreurs avant de modifier');
+    return;
+  }
+  
   if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
     this.toastService.error('Erreur', 'Les mots de passe ne correspondent pas');
     return;

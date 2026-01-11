@@ -805,41 +805,6 @@ validateProfileForm(): boolean {
 
 // ========== VALIDATION MOT DE PASSE ==========
 
-// validatePasswordField(field: string): void {
-//   switch (field) {
-//     case 'currentPassword':
-//       if (!this.passwordForm.currentPassword) {
-//         this.passwordFormErrors.currentPassword = '⚠️ Mot de passe actuel requis';
-//       } else {
-//         this.passwordFormErrors.currentPassword = '';
-//       }
-//       break;
-
-//     case 'newPassword':
-//       if (!this.passwordForm.newPassword) {
-//         this.passwordFormErrors.newPassword = '⚠️ Nouveau mot de passe requis';
-//       } else if (this.passwordForm.newPassword.length < 6) {
-//         this.passwordFormErrors.newPassword = '⚠️ Minimum 6 caractères';
-//       } else {
-//         this.passwordFormErrors.newPassword = '';
-//       }
-//       // Revalider la confirmation si elle existe
-//       if (this.passwordForm.confirmPassword) {
-//         this.validatePasswordField('confirmPassword');
-//       }
-//       break;
-
-//     case 'confirmPassword':
-//       if (!this.passwordForm.confirmPassword) {
-//         this.passwordFormErrors.confirmPassword = '⚠️ Confirmation requise';
-//       } else if (this.passwordForm.confirmPassword !== this.passwordForm.newPassword) {
-//         this.passwordFormErrors.confirmPassword = '⚠️ Les mots de passe ne correspondent pas';
-//       } else {
-//         this.passwordFormErrors.confirmPassword = '';
-//       }
-//       break;
-//   }
-// }
 
 validatePasswordForm(): boolean {
   this.validatePasswordField('currentPassword');
