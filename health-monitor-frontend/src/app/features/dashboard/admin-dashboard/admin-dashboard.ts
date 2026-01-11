@@ -26,6 +26,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
    apiUrl = environment.apiUrl;
 
+  // Pour gérer l'affichage des erreurs uniquement après interaction
+  private passwordFieldTouched: { [key: string]: boolean } = {
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false
+  };
+
   // Utilisateur admin
   admin: any = null;
   darkMode = false;
@@ -1084,75 +1091,138 @@ saveProfile(): void {
     this.showChangePassword = false;
   }
 
-  validatePassword(field: string): void {
-    switch (field) {
-      case 'currentPassword':
-        if (!this.changePasswordForm.currentPassword) {
-          this.passwordErrors.currentPassword = '⚠️ Mot de passe actuel requis';
-        } else {
-          this.passwordErrors.currentPassword = '';
-        }
-        break;
+  // validatePassword(field: string): void {
+  //   switch (field) {
+  //     case 'currentPassword':
+  //       if (!this.changePasswordForm.currentPassword) {
+  //         this.passwordErrors.currentPassword = '⚠️ Mot de passe actuel requis';
+  //       } else {
+  //         this.passwordErrors.currentPassword = '';
+  //       }
+  //       break;
 
-      case 'newPassword':
-        if (!this.changePasswordForm.newPassword) {
-          this.passwordErrors.newPassword = '⚠️ Nouveau mot de passe requis';
-        } else if (this.changePasswordForm.newPassword.length < 6) {
-          this.passwordErrors.newPassword = '⚠️ Minimum 6 caractères';
-        } else {
-          this.passwordErrors.newPassword = '';
-        }
-        // Revalider la confirmation si elle existe
-        if (this.changePasswordForm.confirmPassword) {
-          this.validatePassword('confirmPassword');
-        }
-        break;
+  //     case 'newPassword':
+  //       if (!this.changePasswordForm.newPassword) {
+  //         this.passwordErrors.newPassword = '⚠️ Nouveau mot de passe requis';
+  //       } else if (this.changePasswordForm.newPassword.length < 6) {
+  //         this.passwordErrors.newPassword = '⚠️ Minimum 6 caractères';
+  //       } else {
+  //         this.passwordErrors.newPassword = '';
+  //       }
+  //       // Revalider la confirmation si elle existe
+  //       if (this.changePasswordForm.confirmPassword) {
+  //         this.validatePassword('confirmPassword');
+  //       }
+  //       break;
 
-      case 'confirmPassword':
-        if (!this.changePasswordForm.confirmPassword) {
-          this.passwordErrors.confirmPassword = '⚠️ Confirmation requise';
-        } else if (this.changePasswordForm.confirmPassword !== this.changePasswordForm.newPassword) {
-          this.passwordErrors.confirmPassword = '⚠️ Les mots de passe ne correspondent pas';
-        } else {
-          this.passwordErrors.confirmPassword = '';
-        }
-        break;
-    }
-  }
+  //     case 'confirmPassword':
+  //       if (!this.changePasswordForm.confirmPassword) {
+  //         this.passwordErrors.confirmPassword = '⚠️ Confirmation requise';
+  //       } else if (this.changePasswordForm.confirmPassword !== this.changePasswordForm.newPassword) {
+  //         this.passwordErrors.confirmPassword = '⚠️ Les mots de passe ne correspondent pas';
+  //       } else {
+  //         this.passwordErrors.confirmPassword = '';
+  //       }
+  //       break;
+  //   }
+  // }
 
   changePassword(): void {
-    this.validatePassword('currentPassword');
-    this.validatePassword('newPassword');
-    this.validatePassword('confirmPassword');
+  // Valider tous les champs avant envoi
+  this.validatePassword('currentPassword');
+  this.validatePassword('newPassword');
+  this.validatePassword('confirmPassword');
 
-    if (this.passwordErrors.currentPassword || 
-        this.passwordErrors.newPassword || 
-        this.passwordErrors.confirmPassword) {
-      this.toastService.warning('⚠️ Formulaire invalide', 'Corrigez les erreurs');
-      return;
-    }
-
-    this.changingPassword = true;
-
-    this.authService.changePassword(
-      this.admin.id,
-      this.changePasswordForm.currentPassword,
-      this.changePasswordForm.newPassword
-    ).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.toastService.success('✅ Mot de passe modifié', 'Votre mot de passe a été changé avec succès');
-          this.closeChangePasswordModal();
-        }
-        this.changingPassword = false;
-      },
-      error: (err) => {
-        console.error('Erreur changement mot de passe:', err);
-        this.toastService.error('❌ Erreur', err.error?.message || 'Impossible de changer le mot de passe');
-        this.changingPassword = false;
-      }
-    });
+  if (this.hasPasswordErrors()) {
+    this.toastService.warning('⚠️ Formulaire invalide', 'Corrigez les erreurs');
+    return;
   }
+
+  this.changingPassword = true;
+
+  this.authService.changePassword(
+    this.admin.id,
+    this.changePasswordForm.currentPassword,
+    this.changePasswordForm.newPassword
+  ).subscribe({
+    next: (response) => {
+      if (response.success) {
+        this.toastService.success('✅ Mot de passe modifié', 'Votre mot de passe a été changé avec succès');
+        this.closeChangePasswordModal();
+      }
+      this.changingPassword = false;
+    },
+    error: (err) => {
+      console.error('Erreur changement mot de passe:', err);
+      this.toastService.error('❌ Erreur', err.error?.message || 'Impossible de changer le mot de passe');
+      this.changingPassword = false;
+    }
+  });
+}
+
+ 
+
+onPasswordInput(field: string): void {
+  // Marquer le champ comme "touché" seulement s'il y a du contenu
+  if (this.changePasswordForm[field as keyof typeof this.changePasswordForm]) {
+    this.passwordFieldTouched[field] = true;
+    this.validatePassword(field);
+  }
+}
+
+validatePassword(field: string): void {
+  // Ne valider que si le champ a été touché OU a du contenu
+  const hasContent = !!this.changePasswordForm[field as keyof typeof this.changePasswordForm];
+  
+  if (!this.passwordFieldTouched[field] && !hasContent) {
+    return; // Ne pas afficher d'erreur si pas touché et vide
+  }
+  
+  // Marquer comme touché si validation appelée
+  this.passwordFieldTouched[field] = true;
+  
+  // Validation existante...
+  switch (field) {
+    case 'currentPassword':
+      if (!this.changePasswordForm.currentPassword) {
+        this.passwordErrors.currentPassword = '⚠️ Mot de passe actuel requis';
+      } else {
+        this.passwordErrors.currentPassword = '';
+      }
+      break;
+
+    case 'newPassword':
+      if (!this.changePasswordForm.newPassword) {
+        this.passwordErrors.newPassword = '⚠️ Nouveau mot de passe requis';
+      } else if (this.changePasswordForm.newPassword.length < 6) {
+        this.passwordErrors.newPassword = '⚠️ Minimum 6 caractères';
+      } else {
+        this.passwordErrors.newPassword = '';
+      }
+      // Revalider la confirmation si elle existe
+      if (this.changePasswordForm.confirmPassword) {
+        this.validatePassword('confirmPassword');
+      }
+      break;
+
+    case 'confirmPassword':
+      if (!this.changePasswordForm.confirmPassword) {
+        this.passwordErrors.confirmPassword = '⚠️ Confirmation requise';
+      } else if (this.changePasswordForm.confirmPassword !== this.changePasswordForm.newPassword) {
+        this.passwordErrors.confirmPassword = '⚠️ Les mots de passe ne correspondent pas';
+      } else {
+        this.passwordErrors.confirmPassword = '';
+      }
+      break;
+  }
+}
+
+// Vérifier s'il y a des erreurs
+hasPasswordErrors(): boolean {
+  return !!this.passwordErrors.currentPassword ||
+         !!this.passwordErrors.newPassword ||
+         !!this.passwordErrors.confirmPassword;
+}
 
   // ========== NAVIGATION ==========
 

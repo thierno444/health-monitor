@@ -1500,15 +1500,15 @@
               Mot de passe actuel <span class="text-red-500">*</span>
             </label>
             <input
-              type="password"
-              [(ngModel)]="passwordForm.currentPassword"
-              name="currentPassword"
-              (blur)="validatePasswordField('currentPassword')"
-              (input)="validatePasswordField('currentPassword')"
-              [class]="passwordFormErrors.currentPassword ? 
-                'w-full px-4 py-3 rounded-xl border-2 border-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all' : 
-                'w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all'"
-              required
+                type="password"
+                [(ngModel)]="passwordForm.currentPassword"
+                name="currentPassword"
+                (blur)="validatePasswordField('currentPassword')"
+                (input)="onPasswordInput('currentPassword')"
+                [class]="passwordFormErrors.currentPassword ? 
+                    'w-full px-4 py-3 rounded-xl border-2 border-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all' : 
+                    'w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all'"
+                required
             >
             <div *ngIf="passwordFormErrors.currentPassword" 
                 class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1 mt-2 animate-pulse">
@@ -1520,6 +1520,7 @@
           </div>
 
           <!-- Nouveau mot de passe -->
+          <!-- Nouveau mot de passe -->
           <div>
             <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
               Nouveau mot de passe <span class="text-red-500">*</span>
@@ -1529,7 +1530,7 @@
               [(ngModel)]="passwordForm.newPassword"
               name="newPassword"
               (blur)="validatePasswordField('newPassword')"
-              (input)="validatePasswordField('newPassword')"
+              (input)="onPasswordInput('newPassword')"
               [class]="passwordFormErrors.newPassword ? 
                 'w-full px-4 py-3 rounded-xl border-2 border-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all' : 
                 'w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all'"
@@ -1556,7 +1557,7 @@
               [(ngModel)]="passwordForm.confirmPassword"
               name="confirmPassword"
               (blur)="validatePasswordField('confirmPassword')"
-              (input)="validatePasswordField('confirmPassword')"
+              (input)="onPasswordInput('confirmPassword')"
               [class]="passwordFormErrors.confirmPassword ? 
                 'w-full px-4 py-3 rounded-xl border-2 border-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all' : 
                 'w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all'"
@@ -1572,10 +1573,11 @@
           </div>
 
           <!-- Bouton -->
+          <!-- Bouton -->
           <button
             type="submit"
-            [disabled]="changingPassword || !validatePasswordForm()"
-            [class]="changingPassword || !validatePasswordForm() ? 
+            [disabled]="changingPassword || hasPasswordErrors()"
+            [class]="changingPassword || hasPasswordErrors() ? 
               'px-8 py-4 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-xl font-bold shadow-lg cursor-not-allowed opacity-70' : 
               'px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:scale-105'"
           >
@@ -1595,7 +1597,7 @@
           </button>
 
           <!-- Message d'état du formulaire -->
-          <div *ngIf="!validatePasswordForm()" class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+          <div *ngIf="hasPasswordErrors()" class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
             <p class="text-sm text-yellow-800 dark:text-yellow-300 flex items-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>

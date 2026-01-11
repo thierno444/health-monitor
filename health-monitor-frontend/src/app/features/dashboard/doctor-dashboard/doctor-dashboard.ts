@@ -41,6 +41,13 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     confirmPassword: ''
   };
 
+  // Ajoutez cette propriété
+  private passwordFieldTouched: { [key: string]: boolean } = {
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false
+  };
+
   // Pour la date maximale
   today: string = new Date().toISOString().split('T')[0];
 
@@ -798,41 +805,41 @@ validateProfileForm(): boolean {
 
 // ========== VALIDATION MOT DE PASSE ==========
 
-validatePasswordField(field: string): void {
-  switch (field) {
-    case 'currentPassword':
-      if (!this.passwordForm.currentPassword) {
-        this.passwordFormErrors.currentPassword = '⚠️ Mot de passe actuel requis';
-      } else {
-        this.passwordFormErrors.currentPassword = '';
-      }
-      break;
+// validatePasswordField(field: string): void {
+//   switch (field) {
+//     case 'currentPassword':
+//       if (!this.passwordForm.currentPassword) {
+//         this.passwordFormErrors.currentPassword = '⚠️ Mot de passe actuel requis';
+//       } else {
+//         this.passwordFormErrors.currentPassword = '';
+//       }
+//       break;
 
-    case 'newPassword':
-      if (!this.passwordForm.newPassword) {
-        this.passwordFormErrors.newPassword = '⚠️ Nouveau mot de passe requis';
-      } else if (this.passwordForm.newPassword.length < 6) {
-        this.passwordFormErrors.newPassword = '⚠️ Minimum 6 caractères';
-      } else {
-        this.passwordFormErrors.newPassword = '';
-      }
-      // Revalider la confirmation si elle existe
-      if (this.passwordForm.confirmPassword) {
-        this.validatePasswordField('confirmPassword');
-      }
-      break;
+//     case 'newPassword':
+//       if (!this.passwordForm.newPassword) {
+//         this.passwordFormErrors.newPassword = '⚠️ Nouveau mot de passe requis';
+//       } else if (this.passwordForm.newPassword.length < 6) {
+//         this.passwordFormErrors.newPassword = '⚠️ Minimum 6 caractères';
+//       } else {
+//         this.passwordFormErrors.newPassword = '';
+//       }
+//       // Revalider la confirmation si elle existe
+//       if (this.passwordForm.confirmPassword) {
+//         this.validatePasswordField('confirmPassword');
+//       }
+//       break;
 
-    case 'confirmPassword':
-      if (!this.passwordForm.confirmPassword) {
-        this.passwordFormErrors.confirmPassword = '⚠️ Confirmation requise';
-      } else if (this.passwordForm.confirmPassword !== this.passwordForm.newPassword) {
-        this.passwordFormErrors.confirmPassword = '⚠️ Les mots de passe ne correspondent pas';
-      } else {
-        this.passwordFormErrors.confirmPassword = '';
-      }
-      break;
-  }
-}
+//     case 'confirmPassword':
+//       if (!this.passwordForm.confirmPassword) {
+//         this.passwordFormErrors.confirmPassword = '⚠️ Confirmation requise';
+//       } else if (this.passwordForm.confirmPassword !== this.passwordForm.newPassword) {
+//         this.passwordFormErrors.confirmPassword = '⚠️ Les mots de passe ne correspondent pas';
+//       } else {
+//         this.passwordFormErrors.confirmPassword = '';
+//       }
+//       break;
+//   }
+// }
 
 validatePasswordForm(): boolean {
   this.validatePasswordField('currentPassword');
@@ -945,6 +952,72 @@ saveProfile(): void {
       this.toastService.error('❌ Erreur', err.error?.message || 'Mot de passe actuel incorrect');
     }
   });
+}
+
+
+
+// Ajoutez cette méthode
+onPasswordInput(field: string): void {
+  // Marquer le champ comme "touché" seulement s'il y a du contenu
+  if (this.passwordForm[field as keyof typeof this.passwordForm]) {
+    this.passwordFieldTouched[field] = true;
+    this.validatePasswordField(field);
+  }
+}
+
+// Mettez à jour validatePasswordField pour ne valider que si touché
+validatePasswordField(field: string): void {
+  // Ne valider que si le champ a été touché OU a du contenu
+  const hasContent = !!this.passwordForm[field as keyof typeof this.passwordForm];
+  
+  if (!this.passwordFieldTouched[field] && !hasContent) {
+    return; // Ne pas afficher d'erreur si pas touché et vide
+  }
+  
+  // Marquer comme touché si validation appelée
+  this.passwordFieldTouched[field] = true;
+  
+  // Le reste de votre logique de validation...
+  switch (field) {
+    case 'currentPassword':
+      if (!this.passwordForm.currentPassword) {
+        this.passwordFormErrors.currentPassword = '⚠️ Mot de passe actuel requis';
+      } else {
+        this.passwordFormErrors.currentPassword = '';
+      }
+      break;
+
+    case 'newPassword':
+      if (!this.passwordForm.newPassword) {
+        this.passwordFormErrors.newPassword = '⚠️ Nouveau mot de passe requis';
+      } else if (this.passwordForm.newPassword.length < 6) {
+        this.passwordFormErrors.newPassword = '⚠️ Minimum 6 caractères';
+      } else {
+        this.passwordFormErrors.newPassword = '';
+      }
+      // Revalider la confirmation si elle existe
+      if (this.passwordForm.confirmPassword) {
+        this.validatePasswordField('confirmPassword');
+      }
+      break;
+
+    case 'confirmPassword':
+      if (!this.passwordForm.confirmPassword) {
+        this.passwordFormErrors.confirmPassword = '⚠️ Confirmation requise';
+      } else if (this.passwordForm.confirmPassword !== this.passwordForm.newPassword) {
+        this.passwordFormErrors.confirmPassword = '⚠️ Les mots de passe ne correspondent pas';
+      } else {
+        this.passwordFormErrors.confirmPassword = '';
+      }
+      break;
+  }
+}
+
+// Ajoutez cette méthode pour vérifier les erreurs
+hasPasswordErrors(): boolean {
+  return !!this.passwordFormErrors.currentPassword ||
+         !!this.passwordFormErrors.newPassword ||
+         !!this.passwordFormErrors.confirmPassword;
 }
 
 uploadPhoto(event: any): void {
